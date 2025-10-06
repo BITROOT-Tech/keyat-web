@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client'; // FIXED: Use createClient instead of direct import
 
 // Modern Notification Component
 const Notification = ({ type, text, onClose, show }: { 
@@ -37,8 +37,8 @@ const Notification = ({ type, text, onClose, show }: {
 
   return (
     <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-down">
-      <div className={`flex items-center space-x-3 px-6 py-4 rounded-2xl text-white shadow-2xl border ${styles[type]} min-w-80 max-w-md`}>
-        <span className="text-xl">{icons[type]}</span>
+      <div className={`flex items-center space-x-3 px-6 py-4 rounded-2xl text-white shadow-2xl border ${styles[type as keyof typeof styles]} min-w-80 max-w-md`}>
+        <span className="text-xl">{icons[type as keyof typeof icons]}</span>
         <span className="flex-1 font-medium">{text}</span>
         <button 
           onClick={onClose}
@@ -62,6 +62,9 @@ export default function LoginPage() {
     text: '', 
     show: false 
   });
+
+  // FIXED: Create supabase client instance
+  const supabase = createClient();
 
   const showNotification = (type: string, text: string) => {
     setNotification({ type, text, show: true });
@@ -111,7 +114,7 @@ export default function LoginPage() {
           window.location.href = `/dashboard`;
         }, 2000);
       }
-    } catch (error) {
+    } catch (error: unknown) { // FIXED: Added type annotation
       showNotification('error', 'An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -374,7 +377,7 @@ export default function LoginPage() {
             {/* Sign Up Link */}
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '} {/* FIXED: Escaped apostrophe */}
                 <Link 
                   href="/auth/register" 
                   className="font-semibold text-blue-600 hover:text-blue-500 transition-colors hover:underline"
@@ -388,7 +391,7 @@ export default function LoginPage() {
             <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/10 to-green-500/10 rounded-2xl border border-blue-500/20">
               <div className="flex items-center justify-center space-x-2 text-sm">
                 <span className="text-lg">🇧🇼</span>
-                <span className="font-semibold text-gray-700">Botswana's Real Estate Platform</span>
+                <span className="font-semibold text-gray-700">Botswana&apos;s Real Estate Platform</span> {/* FIXED: Escaped apostrophe */}
               </div>
               <div className="flex justify-center space-x-6 mt-2 text-xs text-gray-600">
                 <span>💰 Orange Money</span>
