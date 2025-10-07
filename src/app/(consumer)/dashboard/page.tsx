@@ -1,24 +1,117 @@
-// src\app\(consumer)\dashboard\page.tsx
+// src/app/(consumer)/dashboard/page.tsx - PREMIUM NATIVE EXPERIENCE
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Search, Home, Heart, Bell, User, MapPin, Filter, Plus, Calendar, Truck } from 'lucide-react';
+import { 
+  Search, Home, Heart, Bell, User, MapPin, Filter, 
+  Calendar, ChevronRight, TrendingUp, Building2,
+  Shield, Zap, Star, Clock, Eye, MessageCircle,
+  ArrowRight, Settings, Sparkles, BadgeCheck,
+  Target, BarChart3, Crown
+} from 'lucide-react';
 
 interface UserProfile {
   first_name: string;
   last_name: string;
   user_type: string;
+  avatar_url?: string;
+}
+
+interface SmartMetric {
+  metric: string;
+  value: string;
+  change: number;
+  trend: 'up' | 'down';
+  description: string;
 }
 
 export default function ConsumerDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('discover');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeMetric, setActiveMetric] = useState(0);
   const router = useRouter();
   const supabase = createClient();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Smart market metrics with auto-rotation
+  const [smartMetrics, setSmartMetrics] = useState<SmartMetric[]>([
+    { 
+      metric: 'Rental Yield', 
+      value: '6.8%', 
+      change: 2.1, 
+      trend: 'up',
+      description: 'Above market average' 
+    },
+    { 
+      metric: 'Price Growth', 
+      value: '4.3%', 
+      change: 1.2, 
+      trend: 'up',
+      description: 'Quarterly appreciation' 
+    },
+    { 
+      metric: 'Vacancy Rate', 
+      value: '3.1%', 
+      change: -0.8, 
+      trend: 'down',
+      description: 'Below national average' 
+    },
+    { 
+      metric: 'ROI Potential', 
+      value: '12.4%', 
+      change: 3.2, 
+      trend: 'up',
+      description: 'Premium investments' 
+    }
+  ]);
+
+  // Premium listings with enhanced data
+  const [premiumListings, setPremiumListings] = useState([
+    {
+      id: '1',
+      title: 'The Residences • Block 9',
+      type: 'Luxury Apartment',
+      price: 14500,
+      pricePerSq: 85,
+      location: 'CBD, Gaborone',
+      features: ['3 beds', '2.5 baths', '1,700 sqft'],
+      amenities: ['Pool', 'Gym', '24/7 Security'],
+      premium: true,
+      verified: true,
+      investmentGrade: true,
+      roi: 8.2,
+      views: 142,
+      saved: 23
+    },
+    {
+      id: '2',
+      title: 'Phakalane Estate',
+      type: 'Executive Villa',
+      price: 25000,
+      pricePerSq: 72,
+      location: 'Phakalane Golf Estate',
+      features: ['5 beds', '4 baths', '3,400 sqft'],
+      amenities: ['Golf Course', 'Clubhouse', 'Security'],
+      premium: true,
+      verified: true,
+      investmentGrade: true,
+      roi: 9.1,
+      views: 89,
+      saved: 15
+    }
+  ]);
+
+  // User stats
+  const [userStats, setUserStats] = useState({
+    saved: 12,
+    viewed: 47,
+    tours: 8,
+    contacts: 15,
+    portfolioValue: 2850000
+  });
 
   useEffect(() => {
     const getUser = async () => {
@@ -49,364 +142,427 @@ export default function ConsumerDashboard() {
     };
 
     getUser();
+
+    // Auto-rotate metrics
+    const interval = setInterval(() => {
+      setActiveMetric(prev => (prev + 1) % smartMetrics.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
   }, [router, supabase]);
 
-  // Navigation handlers
-  const handleQuickAction = (action: string) => {
-    switch (action) {
-      case 'Search':
-        router.push('/search');
-        break;
-      case 'Saved':
-        router.push('/profile?saved=true');
-        break;
-      case 'Alerts':
-        // Open notifications
-        break;
-      case 'Near Me':
-        router.push('/search?location=nearby');
-        break;
-      default:
-        break;
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  const handleBottomNav = (tab: string) => {
-    setActiveTab(tab);
-    switch (tab) {
-      case 'discover':
-        // Already on dashboard
-        break;
-      case 'search':
-        router.push('/search');
-        break;
-      case 'add':
-        // Future: Add property feature
-        break;
-      case 'saved':
-        router.push('/profile?saved=true');
-        break;
-      case 'profile':
-        router.push('/profile');
-        break;
-      default:
-        break;
+  // Enhanced quick actions with better functionality
+  const smartActions = [
+    { 
+      icon: Search, 
+      label: 'Smart Search', 
+      description: 'AI-powered matching',
+      gradient: 'from-blue-600 to-cyan-500',
+      action: () => router.push('/search'),
+      premium: true
+    },
+    { 
+      icon: Target, 
+      label: 'Investment Finder', 
+      description: 'High-yield opportunities',
+      gradient: 'from-emerald-600 to-green-500',
+      action: () => router.push('/search?investment=true'),
+      premium: true
+    },
+    { 
+      icon: Building2, 
+      label: 'My Portfolio', 
+      description: 'Track investments',
+      gradient: 'from-violet-600 to-purple-500',
+      action: () => router.push('/portfolio'),
+      premium: false
+    },
+    { 
+      icon: BarChart3, 
+      label: 'Market Intel', 
+      description: 'Live analytics',
+      gradient: 'from-amber-600 to-orange-500',
+      action: () => router.push('/market-insights'),
+      premium: true
     }
-  };
+  ];
+
+  const recentActivity = [
+    {
+      id: 1,
+      type: 'view',
+      title: 'Viewed Luxury Penthouse',
+      description: 'The Capital Towers • Main Mall',
+      time: '2 hours ago',
+      premium: true,
+      action: () => router.push('/property/1')
+    },
+    {
+      id: 2,
+      type: 'save',
+      title: 'Saved Investment Property',
+      description: 'Phakalane Golf Estate',
+      time: '1 day ago',
+      premium: true,
+      action: () => router.push('/property/2')
+    },
+    {
+      id: 3,
+      type: 'tour',
+      title: 'Tour Confirmed',
+      description: 'Tomorrow 2:00 PM • Block 9',
+      time: '3 hours ago',
+      premium: false,
+      action: () => router.push('/booking')
+    }
+  ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-emerald-50/20 flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium text-sm">Loading your dashboard...</p>
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-500/20 rounded-full"></div>
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0"></div>
+          </div>
+          <p className="text-slate-600 font-medium text-sm mt-4">Preparing your dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
-      {/* Mobile Header - Simplified */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40 md:relative">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Logo & Welcome - Mobile */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-emerald-50/20 safe-area-padding">
+      {/* Premium Header */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50 supports-backdrop-blur:bg-white/60">
+        <div className="px-5 pt-6 pb-4">
+          {/* Welcome Section */}
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center md:w-10 md:h-10 md:rounded-xl">
-                <span className="text-white font-bold text-sm md:text-lg">K</span>
-              </div>
-              <div className="md:hidden">
-                <p className="text-sm font-medium text-gray-900">Welcome back</p>
-                <p className="text-xs text-gray-600">{user?.first_name || 'User'}</p>
-              </div>
-            </div>
-
-            {/* Desktop Logo */}
-            <div className="hidden md:block">
-              <span className="text-xl font-bold text-gray-900">Keyat</span>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center space-x-3">
-              <button 
-                onClick={() => router.push('/booking')}
-                className="p-2 text-gray-600 hover:text-blue-600 transition-colors relative"
-              >
-                <Calendar className="h-5 w-5" />
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full border border-white"></span>
-              </button>
-              <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-              </button>
-              <div className="hidden md:flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-1.5">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                  <span className="text-white font-bold text-lg">K</span>
                 </div>
-                <p className="text-sm font-medium text-gray-900">
-                  {user?.first_name || 'User'}
-                </p>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white shadow-sm"></div>
               </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-900">
+                  Welcome back, {user?.first_name || 'User'} 👋
+                </h1>
+                <p className="text-slate-600 text-sm">Ready to find your next investment?</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <button className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center hover:shadow-md transition-all active:scale-95">
+                <Bell className="h-5 w-5 text-slate-600" />
+              </button>
+              <button 
+                onClick={() => router.push('/profile')}
+                className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl shadow-sm flex items-center justify-center hover:shadow-md transition-all active:scale-95"
+              >
+                <User className="h-5 w-5 text-white" />
+              </button>
             </div>
           </div>
 
-          {/* Search Bar - Always Visible */}
-          <div className="mt-3">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && searchQuery.trim()) {
-                    router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-                  }
-                }}
-                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-                placeholder="Search properties, areas..."
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                <Filter 
-                  className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-pointer"
-                  onClick={() => router.push('/search?filters=open')}
-                />
-              </div>
+          {/* Smart Search */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
             </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              className="w-full pl-11 pr-12 py-3 bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/30 transition-all text-slate-900 placeholder-slate-500 shadow-sm"
+              placeholder="Search properties, locations, or investments..."
+            />
+            <button 
+              onClick={handleSearch}
+              className="absolute inset-y-1.5 right-1.5 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-medium hover:shadow-lg transition-all active:scale-95 text-sm flex items-center space-x-1"
+            >
+              <span>Go</span>
+              <Zap className="h-3 w-3" />
+            </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="px-4 py-4 max-w-7xl mx-auto">
-        {/* Welcome Section - Desktop */}
-        <div className="hidden md:block mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            Welcome back{user?.first_name ? `, ${user.first_name}` : ''}! 👋
-          </h1>
-          <p className="text-gray-600 text-sm">
-            Ready to find your perfect property in Botswana?
-          </p>
-        </div>
-
-        {/* Quick Stats - Horizontal Scroll on Mobile */}
-        <div className="mb-6">
-          <div className="flex space-x-3 overflow-x-auto pb-2 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible">
-            {/* Saved Properties */}
-            <div 
-              onClick={() => router.push('/profile?saved=true')}
-              className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 min-w-[140px] flex-shrink-0 md:min-w-0 cursor-pointer hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Saved</p>
-                  <p className="text-lg font-bold text-gray-900">12</p>
-                </div>
-                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                  <Heart className="h-4 w-4 text-red-600" />
-                </div>
+      <main 
+        ref={scrollRef}
+        className="px-5 pb-32 overflow-y-auto native-scroll"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        {/* Smart Metrics Carousel */}
+        <section className="mb-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold text-slate-900">Market Intelligence</h2>
+              <div className="flex items-center space-x-1 text-blue-600">
+                <TrendingUp className="h-4 w-4" />
+                <span className="text-sm font-medium">Live</span>
               </div>
             </div>
-
-            {/* Properties Viewed */}
-            <div 
-              onClick={() => router.push('/profile?activity=viewed')}
-              className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 min-w-[140px] flex-shrink-0 md:min-w-0 cursor-pointer hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Viewed</p>
-                  <p className="text-lg font-bold text-gray-900">24</p>
+            
+            <div className="relative h-20">
+              {smartMetrics.map((metric, index) => (
+                <div
+                  key={metric.metric}
+                  className={`absolute inset-0 transition-all duration-500 ${
+                    index === activeMetric ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="text-2xl font-bold text-slate-900">{metric.value}</span>
+                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-bold ${
+                          metric.trend === 'up' 
+                            ? 'bg-emerald-100 text-emerald-700' 
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          <TrendingUp className={`h-3 w-3 ${metric.trend === 'down' ? 'rotate-180' : ''}`} />
+                          <span>{metric.trend === 'up' ? '+' : ''}{metric.change}%</span>
+                        </div>
+                      </div>
+                      <h3 className="font-semibold text-slate-900 text-sm">{metric.metric}</h3>
+                      <p className="text-slate-600 text-xs">{metric.description}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Home className="h-4 w-4 text-blue-600" />
-                </div>
-              </div>
+              ))}
             </div>
 
-            {/* Bookings */}
-            <div 
-              onClick={() => router.push('/booking')}
-              className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 min-w-[140px] flex-shrink-0 md:min-w-0 cursor-pointer hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Tours</p>
-                  <p className="text-lg font-bold text-gray-900">3</p>
-                </div>
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="h-4 w-4 text-green-600" />
-                </div>
-              </div>
-            </div>
-
-            {/* Moving Services */}
-            <div 
-              onClick={() => router.push('/moving')}
-              className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 min-w-[140px] flex-shrink-0 md:min-w-0 cursor-pointer hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Moving</p>
-                  <p className="text-lg font-bold text-gray-900">1</p>
-                </div>
-                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Truck className="h-4 w-4 text-orange-600" />
-                </div>
-              </div>
+            {/* Indicator Dots */}
+            <div className="flex justify-center space-x-1 mt-3">
+              {smartMetrics.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveMetric(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === activeMetric ? 'bg-blue-600 w-4' : 'bg-slate-300'
+                  }`}
+                />
+              ))}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Quick Actions - Grid Layout */}
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
-          <h2 className="text-base font-bold text-gray-900 mb-3 md:text-lg md:mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-            {[
-              { icon: Search, label: 'Search', color: 'blue', action: 'Search' },
-              { icon: MapPin, label: 'Near Me', color: 'green', action: 'Near Me' },
-              { icon: Heart, label: 'Saved', color: 'purple', action: 'Saved' },
-              { icon: Calendar, label: 'Bookings', color: 'orange', action: 'Bookings' },
-            ].map(({ icon: Icon, label, color, action }) => (
+        {/* Smart Actions Grid */}
+        <section className="mb-6">
+          <div className="grid grid-cols-2 gap-3">
+            {smartActions.map(({ icon: Icon, label, description, gradient, action, premium }) => (
               <button
                 key={label}
-                onClick={() => handleQuickAction(action)}
-                className="flex flex-col items-center p-2 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group md:p-3"
+                onClick={action}
+                className="group bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-200/80 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 active:scale-95 text-left"
               >
-                <div className={`w-8 h-8 bg-${color}-100 rounded-lg flex items-center justify-center mb-1 group-hover:bg-${color}-200 transition-colors md:w-10 md:h-10 md:mb-2`}>
-                  <Icon className={`h-4 w-4 text-${color}-600 md:h-5 md:w-5`} />
+                <div className="flex items-start justify-between mb-2">
+                  <div className={`w-10 h-10 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+                    <Icon className="h-5 w-5 text-white" />
+                  </div>
+                  {premium && (
+                    <Crown className="h-4 w-4 text-amber-500" />
+                  )}
                 </div>
-                <span className="font-medium text-gray-900 text-xs md:text-sm">{label}</span>
+                <h3 className="font-semibold text-slate-900 text-sm mb-1">{label}</h3>
+                <p className="text-slate-500 text-xs leading-relaxed">{description}</p>
               </button>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
+        {/* Premium Listings */}
+        <section className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-gray-900 md:text-lg">Recent Activity</h2>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Premium Opportunities</h2>
+              <p className="text-slate-600 text-sm">Verified high-yield properties</p>
+            </div>
             <button 
-              onClick={() => router.push('/profile?activity=all')}
-              className="text-blue-600 font-medium hover:text-blue-700 text-sm"
+              onClick={() => router.push('/search?premium=true')}
+              className="text-blue-600 font-medium text-sm hover:text-blue-700 transition-colors flex items-center space-x-1"
             >
-              View all
+              <span>View All</span>
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
           
           <div className="space-y-3">
-            <div 
-              onClick={() => router.push('/property/1')}
-              className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
-            >
-              <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                <Home className="h-5 w-5 text-gray-400" />
-              </div>
-              <div className="flex-1">
-                <div className="font-medium text-gray-900 text-sm">Viewed Modern Apartment</div>
-                <div className="text-gray-600 text-xs">Block 9, Gaborone • 2 hours ago</div>
-              </div>
-            </div>
+            {premiumListings.map((property) => (
+              <div
+                key={property.id}
+                onClick={() => router.push(`/property/${property.id}`)}
+                className="group bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-200/80 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 active:scale-95 cursor-pointer"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="font-bold text-slate-900 text-sm leading-tight">{property.title}</h3>
+                      {property.verified && (
+                        <BadgeCheck className="h-4 w-4 text-blue-600" />
+                      )}
+                    </div>
+                    <p className="text-slate-600 text-xs">{property.location}</p>
+                  </div>
+                  {property.investmentGrade && (
+                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                      ROI {property.roi}%
+                    </div>
+                  )}
+                </div>
 
-            <div 
-              onClick={() => router.push('/booking')}
-              className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
-            >
-              <div className="w-12 h-12 bg-green-100 rounded flex items-center justify-center flex-shrink-0">
-                <Calendar className="h-5 w-5 text-green-600" />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-blue-600 font-bold text-lg">
+                    P{property.price.toLocaleString()}
+                    <span className="text-slate-500 text-sm font-normal">/month</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-slate-500 text-xs">
+                    <div className="flex items-center space-x-1">
+                      <Eye className="h-3 w-3" />
+                      <span>{property.views}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Heart className="h-3 w-3" />
+                      <span>{property.saved}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  {property.features.map((feature, index) => (
+                    <span 
+                      key={index}
+                      className="bg-slate-100 text-slate-700 px-2 py-1 rounded-lg text-xs font-medium"
+                    >
+                      {feature}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="flex-1">
-                <div className="font-medium text-gray-900 text-sm">Tour scheduled</div>
-                <div className="text-gray-600 text-xs">Tomorrow at 2:00 PM • Phakalane House</div>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        </section>
 
-        {/* Recommended Properties */}
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+        {/* Recent Activity */}
+        <section className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-gray-900 md:text-lg">Recommended for You</h2>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Your Activity</h2>
+              <p className="text-slate-600 text-sm">Recent interactions</p>
+            </div>
             <button 
-              onClick={() => router.push('/search?recommended=true')}
-              className="text-blue-600 font-medium hover:text-blue-700 text-sm"
+              onClick={() => router.push('/profile?activity=all')}
+              className="text-blue-600 font-medium text-sm hover:text-blue-700 transition-colors flex items-center space-x-1"
             >
-              View all
+              <span>View All</span>
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
           
-          <div className="space-y-4">
-            {/* Property Card 1 */}
-            <div 
-              onClick={() => router.push('/property/1')}
-              className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
-            >
-              <div className="w-20 h-20 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                <Home className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="flex-1">
-                <div className="font-medium text-gray-900 text-sm mb-1">Modern Apartment in Gaborone</div>
-                <div className="text-blue-600 font-semibold text-sm mb-1">P4,500/month</div>
-                <div className="flex items-center space-x-2 text-gray-600 text-xs">
-                  <span>2 beds</span>
-                  <span>•</span>
-                  <span>1 bath</span>
-                  <span>•</span>
-                  <span>Block 9</span>
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 divide-y divide-slate-200/50">
+            {recentActivity.map((activity) => (
+              <div
+                key={activity.id}
+                onClick={activity.action}
+                className="p-4 hover:bg-slate-50/50 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    activity.premium 
+                      ? 'bg-gradient-to-br from-amber-500 to-orange-500' 
+                      : 'bg-slate-100'
+                  }`}>
+                    {activity.type === 'view' && <Eye className="h-5 w-5 text-white" />}
+                    {activity.type === 'save' && <Heart className="h-5 w-5 text-white" />}
+                    {activity.type === 'tour' && <Calendar className="h-5 w-5 text-white" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="font-semibold text-slate-900 text-sm">{activity.title}</h3>
+                      {activity.premium && (
+                        <Sparkles className="h-3 w-3 text-amber-500" />
+                      )}
+                    </div>
+                    <p className="text-slate-600 text-xs">{activity.description}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <Clock className="h-3 w-3 text-slate-400" />
+                      <span className="text-slate-400 text-xs">{activity.time}</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
                 </div>
               </div>
-            </div>
-
-            {/* Property Card 2 */}
-            <div 
-              onClick={() => router.push('/property/2')}
-              className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
-            >
-              <div className="w-20 h-20 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                <Home className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="flex-1">
-                <div className="font-medium text-gray-900 text-sm mb-1">Spacious Family House</div>
-                <div className="text-blue-600 font-semibold text-sm mb-1">P8,000/month</div>
-                <div className="flex items-center space-x-2 text-gray-600 text-xs">
-                  <span>4 beds</span>
-                  <span>•</span>
-                  <span>3 baths</span>
-                  <span>•</span>
-                  <span>Phakalane</span>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        </section>
       </main>
 
-      {/* Bottom Navigation - Mobile Only */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden">
-        <div className="flex justify-around items-center h-14">
-          {[
-            { icon: Home, label: 'Home', id: 'discover' },
-            { icon: Search, label: 'Search', id: 'search' },
-            { icon: Plus, label: 'Add', id: 'add' },
-            { icon: Heart, label: 'Saved', id: 'saved' },
-            { icon: User, label: 'Profile', id: 'profile' },
-          ].map(({ icon: Icon, label, id }) => (
-            <button
-              key={id}
-              onClick={() => handleBottomNav(id)}
-              className={`flex flex-col items-center p-1 transition-colors ${
-                activeTab === id ? 'text-blue-600' : 'text-gray-600'
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              <span className="text-xs mt-0.5">{label}</span>
-            </button>
-          ))}
+      {/* Premium Bottom Navigation */}
+      <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 w-[calc(100%-2.5rem)] max-w-sm">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/20 px-4 py-3">
+          <div className="flex justify-around items-center">
+            {[
+              { icon: Home, label: 'Home', active: true, action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+              { icon: Search, label: 'Search', action: () => router.push('/search') },
+              { icon: Building2, label: 'Portfolio', action: () => router.push('/portfolio') },
+              { icon: Heart, label: 'Saved', action: () => router.push('/profile?saved=true') },
+              { icon: User, label: 'Profile', action: () => router.push('/profile') },
+            ].map(({ icon: Icon, label, active, action }) => (
+              <button
+                key={label}
+                onClick={action}
+                className={`flex flex-col items-center p-2 transition-all duration-300 ${
+                  active 
+                    ? 'text-blue-600 scale-110' 
+                    : 'text-slate-600 hover:text-blue-500'
+                }`}
+              >
+                <div className={`p-2 rounded-xl transition-all duration-300 ${
+                  active ? 'bg-blue-50' : 'hover:bg-slate-50'
+                }`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="text-xs mt-1 font-medium">{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </nav>
+
+      <style jsx global>{`
+        .safe-area-padding {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .native-scroll {
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+        }
+        
+        .native-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        
+        .native-scroll {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        
+        button:active, 
+        [role="button"]:active {
+          transform: scale(0.96);
+        }
+      `}</style>
     </div>
   );
 }
