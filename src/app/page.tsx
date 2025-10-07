@@ -1,16 +1,15 @@
-// src/app/page.tsx - COMPLETE WITH PROPERLY POSITIONED SPLASH SCREEN
+// src/app/page.tsx - COMPLETE PROFESSIONAL VERSION
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
-// 🚀 CLEAN SPLASH SCREEN COMPONENT - FIXED POSITIONING
+// 🚀 CLEAN SPLASH SCREEN - PROFESSIONAL
 const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState('Initializing platform...');
 
   useEffect(() => {
-    // Start progress animation immediately
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -22,7 +21,6 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
       });
     }, 36);
 
-    // Update status messages
     const statusMessages = [
       'Initializing platform...',
       'Loading property database...',
@@ -52,42 +50,42 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex flex-col items-center justify-center transition-colors duration-300">
+    <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
       {/* Main Content - Centered */}
       <div className="flex-1 flex flex-col items-center justify-center">
         {/* Logo */}
-        <div className="flex items-center justify-center opacity-100">
-          <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
+        <div className="flex items-center justify-center">
+          <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center">
               <span className="text-2xl font-bold text-white">K</span>
             </div>
           </div>
         </div>
 
         {/* Branding */}
-        <div className="mt-6 opacity-100">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center">
+        <div className="mt-6">
+          <h1 className="text-3xl font-bold text-gray-900 text-center">
             Keyat
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-center text-sm mt-2">
+          <p className="text-gray-600 text-center text-sm mt-2">
             Real Estate Platform
           </p>
         </div>
       </div>
 
       {/* Footer with Progress - Fixed at Bottom */}
-      <div className="w-full max-w-md px-8 pb-8 opacity-100">
+      <div className="w-full max-w-md px-8 pb-8">
         {/* Status Message */}
         <div className="text-center mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600">
             {status}
           </p>
         </div>
 
         {/* Progress bar */}
-        <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
+        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mb-4">
           <div
-            className="h-full bg-gradient-to-r from-blue-600 to-green-600 rounded-full transition-all duration-75 ease-out"
+            className="h-full bg-blue-600 rounded-full transition-all duration-75 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -97,7 +95,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           <div className="text-center">
             <button
               onClick={handleSkip}
-              className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+              className="px-4 py-2 text-xs text-gray-500 hover:text-gray-700 transition-colors duration-200"
             >
               Skip
             </button>
@@ -105,12 +103,12 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         )}
 
         {/* Branding */}
-        <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="text-center pt-4 border-t border-gray-200">
           <div className="flex items-center justify-center space-x-2">
-            <span className="text-xs text-gray-400 dark:text-gray-600">
+            <span className="text-xs text-gray-400">
               powered by
             </span>
-            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+            <span className="text-sm font-semibold text-gray-800">
               BITROOT
             </span>
           </div>
@@ -120,32 +118,17 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-// Enhanced floating background with refined grid
-const FloatingBackground = () => {
-  const [mounted, setMounted] = useState(false);
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
+// Clean background
+const CleanBackground = () => {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {/* Refined gradient orbs - brand colors only */}
-      <div className="absolute top-1/4 -left-20 w-72 h-72 bg-gradient-to-r from-blue-400/8 to-cyan-400/8 rounded-full mix-blend-multiply blur-xl animate-float-slow"></div>
-      <div className="absolute top-1/2 -right-20 w-96 h-96 bg-gradient-to-r from-green-400/8 to-emerald-400/8 rounded-full mix-blend-multiply blur-xl animate-float-medium animation-delay-2000"></div>
-      
-      {/* Enhanced grid system - more structured */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
-      
-      {/* Subtle dot grid for depth */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(16,185,129,0.04)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)] opacity-60"></div>
+      <div className="absolute inset-0 bg-gray-50/50"></div>
+      <div className="absolute inset-0 clean-grid-bg opacity-30"></div>
     </div>
   );
 };
 
-// Enhanced Header Component
+// Professional Header Component
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -162,18 +145,18 @@ const Header = () => {
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled 
-        ? 'bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm' 
-        : 'bg-white/80 backdrop-blur-sm border-b border-white/20'
+        ? 'bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm' 
+        : 'bg-white/80 backdrop-blur-sm border-b border-gray-100'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-sm">K</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent leading-none">
+              <span className="text-xl font-bold text-gray-900 leading-none">
                 Keyat
               </span>
               <span className="text-[10px] text-gray-500 leading-none -mt-0.5">Powered by BITROOT</span>
@@ -185,13 +168,13 @@ const Header = () => {
             <a href="#features" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm py-2">
               Features
             </a>
-            <a href="#stats" className="text-gray-700 hover:text-green-600 transition-colors duration-200 font-medium text-sm py-2">
+            <a href="#stats" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm py-2">
               Progress
             </a>
             <a href="#testimonials" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm py-2">
               Testimonials
             </a>
-            <a href="#pricing" className="text-gray-700 hover:text-green-600 transition-colors duration-200 font-medium text-sm py-2">
+            <a href="#pricing" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm py-2">
               Pricing
             </a>
           </nav>
@@ -206,7 +189,7 @@ const Header = () => {
             </Link>
             <Link 
               href="/auth/register" 
-              className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm"
+              className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-200 text-sm"
             >
               Get Started
             </Link>
@@ -233,21 +216,21 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200/50">
+          <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-4">
               <a href="#features" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm py-2">
                 Features
               </a>
-              <a href="#stats" className="text-gray-700 hover:text-green-600 transition-colors duration-200 font-medium text-sm py-2">
+              <a href="#stats" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm py-2">
                 Progress
               </a>
               <a href="#testimonials" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm py-2">
                 Testimonials
               </a>
-              <a href="#pricing" className="text-gray-700 hover:text-green-600 transition-colors duration-200 font-medium text-sm py-2">
+              <a href="#pricing" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-sm py-2">
                 Pricing
               </a>
-              <div className="flex flex-col space-y-3 pt-4 border-t border-gray-200/50">
+              <div className="flex flex-col space-y-3 pt-4 border-t border-gray-200">
                 <Link 
                   href="/auth/login" 
                   className="px-4 py-2.5 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-200 border border-gray-200 text-center"
@@ -256,7 +239,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   href="/auth/register" 
-                  className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-center"
+                  className="px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-200 text-center"
                 >
                   Get Started
                 </Link>
@@ -269,7 +252,7 @@ const Header = () => {
   );
 };
 
-// Enhanced Footer Component
+// Professional Footer Component
 const Footer = () => {
   return (
     <footer className="relative z-10 bg-gray-900 text-white">
@@ -279,7 +262,7 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-sm">K</span>
               </div>
               <div>
@@ -411,7 +394,7 @@ const AnimatedCounter = ({ end, duration = 1800 }: { end: number; duration?: num
   );
 };
 
-// Enhanced feature card
+// Professional feature card
 const FeatureCard = ({ 
   icon, 
   title, 
@@ -446,14 +429,12 @@ const FeatureCard = ({
   return (
     <div 
       ref={ref}
-      className={`group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-500 ${
+      className={`group relative bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-500 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       } hover:-translate-y-1`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/0 to-green-500/0 group-hover:from-blue-500/5 group-hover:to-green-500/5 transition-all duration-500 -z-10"></div>
-      
-      <div className="text-3xl mb-3 transform group-hover:scale-110 transition-transform duration-300">
+      <div className="text-2xl mb-3 text-blue-600">
         {icon}
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2 leading-tight">{title}</h3>
@@ -471,29 +452,25 @@ const UserTypeSelector = () => {
       id: 'tenant', 
       label: 'Tenant/Buyer', 
       icon: '👤', 
-      description: 'Find perfect properties',
-      gradient: 'from-blue-500 to-cyan-500'
+      description: 'Find perfect properties'
     },
     { 
       id: 'landlord', 
       label: 'Property Owner', 
       icon: '🏠', 
-      description: 'Manage your listings',
-      gradient: 'from-green-500 to-emerald-500'
+      description: 'Manage your listings'
     },
     { 
       id: 'agent', 
       label: 'Real Estate Agent', 
       icon: '🤝', 
-      description: 'Grow your business',
-      gradient: 'from-blue-500 to-green-500'
+      description: 'Grow your business'
     },
     { 
       id: 'service_provider', 
       label: 'Service Provider', 
       icon: '🔧', 
-      description: 'Offer your services',
-      gradient: 'from-cyan-500 to-emerald-500'
+      description: 'Offer your services'
     }
   ];
 
@@ -505,8 +482,8 @@ const UserTypeSelector = () => {
           onClick={() => setSelectedType(type.id)}
           className={`relative p-4 rounded-xl text-left transition-all duration-300 transform hover:scale-105 ${
             selectedType === type.id
-              ? `bg-gradient-to-r ${type.gradient} text-white shadow-lg scale-105`
-              : 'bg-white/60 backdrop-blur-sm text-gray-700 hover:bg-white/80 border border-white/20'
+              ? 'bg-blue-600 text-white shadow-lg scale-105'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
           }`}
         >
           <div className="text-2xl mb-2">{type.icon}</div>
@@ -534,9 +511,9 @@ const TestimonialCard = ({
   content: string; 
   avatar: string; 
 }) => (
-  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+  <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
     <div className="flex items-center space-x-3 mb-4">
-      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white font-bold">
+      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
         {avatar}
       </div>
       <div>
@@ -548,7 +525,7 @@ const TestimonialCard = ({
   </div>
 );
 
-// 🎯 MAIN PAGE COMPONENT WITH INTELLIGENT SPLASH LOGIC
+// 🎯 MAIN PAGE COMPONENT
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
@@ -556,16 +533,11 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // 🧠 INTELLIGENT SPLASH LOGIC
     const hasVisited = localStorage.getItem('hasVisitedKeyat');
     const lastVisit = localStorage.getItem('lastVisitKeyat');
     const currentVersion = '1.0.0';
     const savedVersion = localStorage.getItem('keyatVersion');
     
-    // Show splash for:
-    // - First-time visitors
-    // - Returning after 7+ days  
-    // - After version updates
     const shouldShowSplash = !hasVisited || 
       (lastVisit && Date.now() - parseInt(lastVisit) > 7 * 24 * 60 * 60 * 1000) ||
       savedVersion !== currentVersion;
@@ -573,7 +545,6 @@ export default function HomePage() {
     setShowSplash(shouldShowSplash);
     setMounted(true);
 
-    // Mark visit for returning users who don't see splash
     if (!shouldShowSplash) {
       localStorage.setItem('lastVisitKeyat', Date.now().toString());
     }
@@ -659,7 +630,7 @@ export default function HomePage() {
   ];
 
   if (!mounted) {
-    return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50" />;
+    return <div className="min-h-screen bg-gray-50" />;
   }
 
   if (showSplash) {
@@ -667,8 +638,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 relative overflow-hidden">
-      <FloatingBackground />
+    <div className="min-h-screen bg-gray-50 relative overflow-hidden">
+      <CleanBackground />
       <Header />
       
       {/* Hero Section */}
@@ -676,16 +647,16 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="mb-8">
-              <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 text-sm font-medium mb-6">
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-700 text-sm font-medium mb-6">
                 🚀 Next-Generation Real Estate
               </div>
               
               <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                <span className="text-gray-900">
                   Smart Property
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-gray-900 to-gray-800 bg-clip-text text-transparent">
+                <span className="text-blue-600">
                   Management Platform
                 </span>
               </h1>
@@ -703,7 +674,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-16">
               <Link 
                 href="/auth/register" 
-                className="group relative px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                className="group relative px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
               >
                 <span className="relative z-10 flex items-center space-x-2 text-sm">
                   <span>Start Free Trial</span>
@@ -711,7 +682,7 @@ export default function HomePage() {
                 </span>
               </Link>
               
-              <button className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-blue-500 hover:text-blue-600 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm bg-white/50 text-sm">
+              <button className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-blue-500 hover:text-blue-600 transition-all duration-300 transform hover:scale-105 bg-white text-sm">
                 View Demo
               </button>
             </div>
@@ -719,7 +690,7 @@ export default function HomePage() {
             <div id="stats" className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
               {stats.map((stat, index) => (
                 <div key={stat.label} className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-1">
+                  <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-1">
                     <AnimatedCounter end={stat.number} />
                   </div>
                   <div className="text-gray-600 text-xs font-medium">{stat.label}</div>
@@ -731,20 +702,18 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative z-10 py-16 bg-white/30 backdrop-blur-sm">
+      <section id="features" className="relative z-10 py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                Platform Features
-              </span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+              Platform Features
             </h2>
             <p className="text-gray-600 max-w-xl mx-auto">
               Everything you need for modern real estate transactions
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
               <FeatureCard
                 key={feature.title}
@@ -759,13 +728,11 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="relative z-10 py-16 bg-white/50 backdrop-blur-sm">
+      <section id="testimonials" className="relative z-10 py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                What Our Users Say
-              </span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+              What Our Users Say
             </h2>
             <p className="text-gray-600 max-w-xl mx-auto">
               Join thousands of satisfied users transforming their real estate experience
@@ -789,8 +756,8 @@ export default function HomePage() {
       {/* CTA Section */}
       <section id="cta" className="relative z-10 py-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-gradient-to-r from-blue-600/5 to-green-600/5 rounded-2xl p-8 border border-white/20 backdrop-blur-sm">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+          <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
               Ready to Get Started?
             </h2>
             <p className="text-gray-600 mb-6">
@@ -803,13 +770,13 @@ export default function HomePage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email for early access"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm text-sm"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-sm"
                 required
               />
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
@@ -827,7 +794,7 @@ export default function HomePage() {
 
       <Footer />
 
-      {/* Optimized animations */}
+      {/* Clean animations */}
       <style jsx global>{`
         @keyframes fade-in-up {
           from {
@@ -840,42 +807,15 @@ export default function HomePage() {
           }
         }
         
-        @keyframes float-slow {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        
-        @keyframes float-medium {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-8px);
-          }
-        }
-        
         .animate-fade-in-up {
           animation: fade-in-up 0.6s ease-out forwards;
         }
         
-        .animate-float-slow {
-          animation: float-slow 6s ease-in-out infinite;
-        }
-        
-        .animate-float-medium {
-          animation: float-medium 4s ease-in-out infinite;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        
-        .animation-delay-4000 {
-          animation-delay: 4s;
+        .clean-grid-bg {
+          background-image: 
+            linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+          background-size: 50px 50px;
         }
       `}</style>
     </div>
