@@ -178,9 +178,9 @@ payment_methods: orange_money, mascom_myzaka, bank_transfer, cash
 
 ## 📱 **APP STRUCTURE (Updated)**
 
-```
-src/app/
+`src/app/
 ├── (consumer)/              # Tenant/Buyer interface
+│   ├── dashboard/           # ← ADDED: Consumer dashboard
 │   ├── search/
 │   ├── property/
 │   ├── booking/
@@ -221,8 +221,6 @@ src/app/
     ├── payments/
     ├── notifications/
     └── analytics/
-
-```
 
 ---
 

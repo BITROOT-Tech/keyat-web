@@ -1,321 +1,298 @@
-// src/app/(consumer)/search/page.tsx
+// src/app/(consumer)/search/page.tsx - COMPLETE PROFESSIONAL VERSION
 'use client';
 
 import { useState } from 'react';
+import { Search, Filter, MapPin, Home, Bed, Bath, Heart, Star } from 'lucide-react';
 
-// Sample property data for Botswana
-const sampleProperties = [
-  {
-    id: 1,
-    title: "Modern 3-Bedroom House in Gaborone",
-    type: "House",
-    price: 4500,
-    location: "Gaborone, Broadhurst",
-    bedrooms: 3,
-    bathrooms: 2,
-    image: "/api/placeholder/400/300",
-    featured: true
-  },
-  {
-    id: 2,
-    title: "Luxury Apartment in CBD",
-    type: "Apartment",
-    price: 3200,
-    location: "Gaborone, CBD",
-    bedrooms: 2,
-    bathrooms: 2,
-    image: "/api/placeholder/400/300",
-    featured: false
-  },
-  {
-    id: 3,
-    title: "Spacious Family Home in Francistown",
-    type: "House",
-    price: 3800,
-    location: "Francistown, Aerodrome",
-    bedrooms: 4,
-    bathrooms: 3,
-    image: "/api/placeholder/400/300",
-    featured: true
-  },
-  {
-    id: 4,
-    title: "Cozy Studio near University",
-    type: "Studio",
-    price: 1800,
-    location: "Gaborone, UB",
-    bedrooms: 1,
-    bathrooms: 1,
-    image: "/api/placeholder/400/300",
-    featured: false
-  },
-  {
-    id: 5,
-    title: "Vacation Home in Maun",
-    type: "House",
-    price: 2800,
-    location: "Maun",
-    bedrooms: 3,
-    bathrooms: 2,
-    image: "/api/placeholder/400/300",
-    featured: false
-  },
-  {
-    id: 6,
-    title: "Commercial Space in Kasane",
-    type: "Commercial",
-    price: 7500,
-    location: "Kasane",
-    bedrooms: 0,
-    bathrooms: 2,
-    image: "/api/placeholder/400/300",
-    featured: true
-  }
-];
-
-const botswanaCities = [
-  "All Cities",
-  "Gaborone",
-  "Francistown", 
-  "Maun",
-  "Kasane",
-  "Jwaneng",
-  "Lobatse"
-];
-
-const propertyTypes = [
-  "All Types",
-  "House",
-  "Apartment",
-  "Studio", 
-  "Commercial",
-  "Land"
-];
+interface Property {
+  id: string;
+  title: string;
+  price: number;
+  location: string;
+  beds: number;
+  baths: number;
+  sqft: number;
+  image: string;
+  rating: number;
+  isFeatured: boolean;
+}
 
 export default function SearchPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState("All Cities");
-  const [selectedType, setSelectedType] = useState("All Types");
-  const [priceRange, setPriceRange] = useState([0, 10000]);
-  const [bedrooms, setBedrooms] = useState(0);
-
-  const filteredProperties = sampleProperties.filter(property => {
-    const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         property.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCity = selectedCity === "All Cities" || property.location.includes(selectedCity);
-    const matchesType = selectedType === "All Types" || property.type === selectedType;
-    const matchesPrice = property.price >= priceRange[0] && property.price <= priceRange[1];
-    const matchesBedrooms = bedrooms === 0 || property.bedrooms >= bedrooms;
-
-    return matchesSearch && matchesCity && matchesType && matchesPrice && matchesBedrooms;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    minPrice: '',
+    maxPrice: '',
+    beds: '',
+    baths: '',
+    propertyType: ''
   });
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Mock data - replace with real data from Supabase
+  const properties: Property[] = [
+    {
+      id: '1',
+      title: 'Modern Apartment in Gaborone',
+      price: 4500,
+      location: 'Gaborone, Block 9',
+      beds: 2,
+      baths: 1,
+      sqft: 850,
+      image: '/api/placeholder/300/200',
+      rating: 4.5,
+      isFeatured: true
+    },
+    {
+      id: '2',
+      title: 'Spacious Family House',
+      price: 8000,
+      location: 'Phakalane, Gaborone',
+      beds: 4,
+      baths: 3,
+      sqft: 1800,
+      image: '/api/placeholder/300/200',
+      rating: 4.8,
+      isFeatured: false
+    },
+    {
+      id: '3',
+      title: 'Cozy Studio Apartment',
+      price: 2800,
+      location: 'Mall, Francistown',
+      beds: 1,
+      baths: 1,
+      sqft: 500,
+      image: '/api/placeholder/300/200',
+      rating: 4.2,
+      isFeatured: true
+    }
+  ];
+
+  const propertyTypes = [
+    'Apartment', 'House', 'Townhouse', 'Studio', 'Commercial'
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg"></div>
-                <span className="ml-2 text-xl font-bold text-gray-900">Keyat</span>
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">K</span>
               </div>
+              <h1 className="text-lg font-bold text-gray-900">Find Properties</h1>
             </div>
-            
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <a href="/search" className="bg-blue-100 text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Properties</a>
-                <a href="/agents" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Agents</a>
-                <a href="/services" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Services</a>
-              </div>
-            </div>
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-lg transition-colors ${
+                showFilters ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Filter className="h-5 w-5" />
+            </button>
+          </div>
 
-            <div className="flex items-center space-x-4">
-              <a href="/login" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
-              <a href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">Sign Up</a>
+          {/* Search Bar */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400" />
             </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+              placeholder="Search locations, properties..."
+            />
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Perfect Property in Botswana</h1>
-          <p className="text-gray-600">Discover {sampleProperties.length}+ properties across major cities</p>
-        </div>
-
-        {/* Search Filters */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            {/* Search Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search Properties</label>
-              <input
-                type="text"
-                placeholder="Enter location or property name..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+      {/* Filters Panel */}
+      {showFilters && (
+        <div className="bg-white border-b border-gray-200 px-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Price Range */}
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={filters.minPrice}
+                  onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={filters.maxPrice}
+                  onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                />
+              </div>
             </div>
 
-            {/* City Filter */}
+            {/* Beds & Baths */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Beds</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
+                value={filters.beds}
+                onChange={(e) => setFilters(prev => ({ ...prev, beds: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
               >
-                {botswanaCities.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
+                <option value="">Any</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Baths</label>
+              <select
+                value={filters.baths}
+                onChange={(e) => setFilters(prev => ({ ...prev, baths: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+              >
+                <option value="">Any</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
               </select>
             </div>
 
             {/* Property Type */}
-            <div>
+            <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
+                value={filters.propertyType}
+                onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
               >
+                <option value="">Any Type</option>
                 {propertyTypes.map(type => (
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
             </div>
 
-            {/* Bedrooms */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bedrooms</label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={bedrooms}
-                onChange={(e) => setBedrooms(Number(e.target.value))}
+            {/* Action Buttons */}
+            <div className="col-span-2 flex space-x-2 pt-2">
+              <button
+                onClick={() => setFilters({ minPrice: '', maxPrice: '', beds: '', baths: '', propertyType: '' })}
+                className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm"
               >
-                <option value={0}>Any</option>
-                <option value={1}>1+</option>
-                <option value={2}>2+</option>
-                <option value={3}>3+</option>
-                <option value={4}>4+</option>
-              </select>
+                Reset
+              </button>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+              >
+                Apply Filters
+              </button>
             </div>
           </div>
-
-          {/* Price Range */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price Range: BWP {priceRange[0]} - BWP {priceRange[1]}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="10000"
-              step="500"
-              className="w-full"
-              value={priceRange[1]}
-              onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-            />
-          </div>
-
-          {/* Quick City Filters */}
-          <div className="flex flex-wrap gap-2">
-            <span className="text-sm text-gray-600 mr-2">Quick filters:</span>
-            {botswanaCities.slice(1).map(city => (
-              <button
-                key={city}
-                onClick={() => setSelectedCity(city)}
-                className={`px-3 py-1 text-sm rounded-full border ${
-                  selectedCity === city 
-                    ? 'bg-blue-600 text-white border-blue-600' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                {city}
-              </button>
-            ))}
-          </div>
         </div>
+      )}
 
-        {/* Results Count */}
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-gray-600">
-            Showing {filteredProperties.length} of {sampleProperties.length} properties
-          </p>
-          <div className="flex items-center space-x-4">
-            <select className="text-sm border border-gray-300 rounded-md px-3 py-1">
-              <option>Sort by: Newest</option>
-              <option>Sort by: Price: Low to High</option>
-              <option>Sort by: Price: High to Low</option>
-            </select>
-          </div>
+      {/* Properties List */}
+      <main className="px-4 py-4">
+        {/* Results Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-medium text-gray-600">
+            {properties.length} properties found
+          </h2>
+          <button className="text-blue-600 font-medium text-sm hover:text-blue-700">
+            Sort by: Recommended
+          </button>
         </div>
 
         {/* Properties Grid */}
-        {filteredProperties.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🏠</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No properties found</h3>
-            <p className="text-gray-600">Try adjusting your search filters</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProperties.map(property => (
-              <div key={property.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-                <div className="relative">
-                  <div className="h-48 bg-gradient-to-br from-blue-100 to-green-100 rounded-t-lg flex items-center justify-center">
-                    <span className="text-4xl">🏠</span>
-                  </div>
-                  {property.featured && (
-                    <span className="absolute top-3 left-3 bg-orange-500 text-white px-2 py-1 text-xs rounded-full">
-                      Featured
-                    </span>
-                  )}
+        <div className="space-y-4">
+          {properties.map((property) => (
+            <div key={property.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              {/* Property Image */}
+              <div className="relative">
+                <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                  <Home className="h-12 w-12 text-gray-400" />
                 </div>
                 
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-gray-900">{property.title}</h3>
-                    <span className="text-lg font-bold text-green-600">BWP {property.price}/mo</span>
+                {/* Featured Badge */}
+                {property.isFeatured && (
+                  <div className="absolute top-3 left-3 bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">
+                    Featured
                   </div>
-                  
-                  <p className="text-gray-600 text-sm mb-3">{property.location}</p>
-                  
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
-                    <span className="mr-3">🛏️ {property.bedrooms} bed</span>
-                    <span>🚿 {property.bathrooms} bath</span>
+                )}
+
+                {/* Favorite Button */}
+                <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                  <Heart className="h-4 w-4 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Property Details */}
+              <div className="p-4">
+                {/* Price & Rating */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-1">
+                    <span className="text-lg font-bold text-gray-900">P{property.price.toLocaleString()}</span>
+                    <span className="text-gray-500 text-sm">/month</span>
                   </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">{property.type}</span>
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">
-                      View Details
-                    </button>
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                    <span className="text-sm text-gray-600">{property.rating}</span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
 
-        {/* Call to Action */}
-        <div className="mt-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Can't find what you're looking for?</h2>
-          <p className="text-gray-600 mb-6">Let our agents help you find the perfect property</p>
-          <div className="flex justify-center space-x-4">
-            <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700">
-              Contact an Agent
-            </button>
-            <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50">
-              Set Up Alerts
-            </button>
-          </div>
+                {/* Title */}
+                <h3 className="font-medium text-gray-900 mb-1 text-sm">{property.title}</h3>
+
+                {/* Location */}
+                <div className="flex items-center space-x-1 mb-3">
+                  <MapPin className="h-3 w-3 text-gray-400" />
+                  <span className="text-gray-600 text-xs">{property.location}</span>
+                </div>
+
+                {/* Property Features */}
+                <div className="flex items-center space-x-4 text-gray-600 text-xs">
+                  <div className="flex items-center space-x-1">
+                    <Bed className="h-3 w-3" />
+                    <span>{property.beds} bed{property.beds > 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Bath className="h-3 w-3" />
+                    <span>{property.baths} bath{property.baths > 1 ? 's' : ''}</span>
+                  </div>
+                  <div>
+                    <span>{property.sqft.toLocaleString()} sqft</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex space-x-2 mt-4">
+                  <button className="flex-1 py-2 px-3 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-50 transition-colors">
+                    View Details
+                  </button>
+                  <button className="flex-1 py-2 px-3 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition-colors">
+                    Contact
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
+
+        {/* Load More */}
+        <div className="text-center mt-6">
+          <button className="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm">
+            Load More Properties
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
