@@ -1,8 +1,14 @@
-// src/app/(consumer)/search/page.tsx - COMPLETE PROFESSIONAL VERSION
+// src/app/(consumer)/search/page.tsx - PREMIUM NATIVE VERSION
 'use client';
 
-import { useState } from 'react';
-import { Search, Filter, MapPin, Home, Bed, Bath, Heart, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { 
+  Search, Filter, MapPin, Home, Bed, Bath, Heart, Star, 
+  Square, Car, Building2, Crown, Sparkles, Zap, TrendingUp,
+  X, SlidersHorizontal, Grid3X3, List, Map
+} from 'lucide-react';
 
 interface Property {
   id: string;
@@ -12,9 +18,16 @@ interface Property {
   beds: number;
   baths: number;
   sqft: number;
+  parking: number;
   image: string;
   rating: number;
-  isFeatured: boolean;
+  premium: boolean;
+  investment_grade: boolean;
+  roi?: number;
+  views: number;
+  saved: number;
+  featured: boolean;
+  property_type: string;
 }
 
 export default function SearchPage() {
@@ -24,124 +37,348 @@ export default function SearchPage() {
     maxPrice: '',
     beds: '',
     baths: '',
-    propertyType: ''
+    propertyType: '',
+    investmentGrade: false,
+    premiumOnly: false
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
 
-  // Mock data - replace with real data from Supabase
+  // Mock data - replace with real Supabase query
   const properties: Property[] = [
     {
       id: '1',
-      title: 'Modern Apartment in Gaborone',
-      price: 4500,
-      location: 'Gaborone, Block 9',
+      title: 'The Residences • Luxury 2-Bedroom',
+      price: 14500,
+      location: 'Block 9, CBD Gaborone',
       beds: 2,
-      baths: 1,
-      sqft: 850,
+      baths: 2.5,
+      sqft: 1700,
+      parking: 2,
       image: '/api/placeholder/300/200',
-      rating: 4.5,
-      isFeatured: true
+      rating: 4.9,
+      premium: true,
+      investment_grade: true,
+      roi: 8.2,
+      views: 247,
+      saved: 38,
+      featured: true,
+      property_type: 'Luxury Apartment'
     },
     {
       id: '2',
-      title: 'Spacious Family House',
-      price: 8000,
-      location: 'Phakalane, Gaborone',
-      beds: 4,
-      baths: 3,
-      sqft: 1800,
+      title: 'Phakalane Executive Villa',
+      price: 25000,
+      location: 'Phakalane Golf Estate',
+      beds: 5,
+      baths: 4,
+      sqft: 3400,
+      parking: 3,
       image: '/api/placeholder/300/200',
       rating: 4.8,
-      isFeatured: false
+      premium: true,
+      investment_grade: true,
+      roi: 9.1,
+      views: 189,
+      saved: 25,
+      featured: true,
+      property_type: 'Executive Villa'
     },
     {
       id: '3',
-      title: 'Cozy Studio Apartment',
-      price: 2800,
-      location: 'Mall, Francistown',
-      beds: 1,
+      title: 'Modern City Apartment',
+      price: 6500,
+      location: 'Main Mall, Gaborone',
+      beds: 2,
       baths: 1,
-      sqft: 500,
+      sqft: 950,
+      parking: 1,
       image: '/api/placeholder/300/200',
-      rating: 4.2,
-      isFeatured: true
+      rating: 4.5,
+      premium: false,
+      investment_grade: false,
+      views: 156,
+      saved: 12,
+      featured: false,
+      property_type: 'Apartment'
     }
   ];
 
   const propertyTypes = [
-    'Apartment', 'House', 'Townhouse', 'Studio', 'Commercial'
+    'Luxury Apartment', 'Executive Villa', 'Apartment', 'Townhouse', 
+    'Studio', 'Commercial', 'Penthouse', 'Duplex'
   ];
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">K</span>
-              </div>
-              <h1 className="text-lg font-bold text-gray-900">Find Properties</h1>
+  useEffect(() => {
+    // Simulate loading properties
+    setTimeout(() => setLoading(false), 1000);
+  }, []);
+
+  const handleSaveProperty = async (propertyId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/auth/login');
+        return;
+      }
+
+      // Toggle save status
+      // Implementation would go here
+      console.log('Save property:', propertyId);
+    } catch (error) {
+      console.error('Error saving property:', error);
+    }
+  };
+
+  const PropertyCard = ({ property, viewMode }: { property: Property; viewMode: 'grid' | 'list' }) => (
+    <div 
+      onClick={() => router.push(`/property/${property.id}`)}
+      className={`bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 cursor-pointer group ${
+        viewMode === 'grid' ? 'flex flex-col' : 'flex'
+      }`}
+    >
+      {/* Property Image */}
+      <div className={`relative ${
+        viewMode === 'grid' ? 'w-full h-48' : 'w-32 h-32 flex-shrink-0'
+      }`}>
+        <div className={`w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center ${
+          viewMode === 'grid' ? 'rounded-t-2xl' : 'rounded-l-2xl'
+        }`}>
+          <Building2 className="h-8 w-8 text-slate-400" />
+        </div>
+        
+        {/* Premium Badge */}
+        {property.premium && (
+          <div className="absolute top-3 left-3">
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center space-x-1 shadow-lg">
+              <Crown className="h-3 w-3" />
+              <span>PREMIUM</span>
             </div>
-            <button 
-              onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-lg transition-colors ${
-                showFilters ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <Filter className="h-5 w-5" />
-            </button>
+          </div>
+        )}
+
+        {/* Investment Grade Badge */}
+        {property.investment_grade && (
+          <div className="absolute top-3 right-3">
+            <div className="bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+              INVESTMENT
+            </div>
+          </div>
+        )}
+
+        {/* Favorite Button */}
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSaveProperty(property.id);
+          }}
+          className="absolute bottom-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white transition-all shadow-sm hover:shadow-md"
+        >
+          <Heart className="h-4 w-4 text-slate-600" />
+        </button>
+      </div>
+
+      {/* Property Details */}
+      <div className={`p-4 flex-1 ${viewMode === 'list' ? 'flex flex-col justify-center' : ''}`}>
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-slate-900 text-sm leading-tight mb-1 truncate">
+              {property.title}
+            </h3>
+            <div className="flex items-center space-x-1 text-slate-600 mb-2">
+              <MapPin className="h-3 w-3" />
+              <span className="text-xs font-medium">{property.location}</span>
+            </div>
+          </div>
+          
+          <div className="text-right">
+            <div className="text-lg font-bold text-blue-600">
+              P{property.price.toLocaleString()}
+              <span className="text-slate-500 text-sm font-normal">/month</span>
+            </div>
+            {property.roi && (
+              <div className="flex items-center space-x-1 justify-end mt-1">
+                <TrendingUp className="h-3 w-3 text-emerald-600" />
+                <span className="text-emerald-600 text-xs font-bold">{property.roi}% ROI</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Property Features */}
+        <div className="flex items-center space-x-3 text-slate-600 text-xs mb-3">
+          <div className="flex items-center space-x-1">
+            <Bed className="h-3 w-3" />
+            <span className="font-medium">{property.beds}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Bath className="h-3 w-3" />
+            <span className="font-medium">{property.baths}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Square className="h-3 w-3" />
+            <span className="font-medium">{property.sqft.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Car className="h-3 w-3" />
+            <span className="font-medium">{property.parking}</span>
+          </div>
+        </div>
+
+        {/* Rating and Stats */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1">
+            <Star className="h-3 w-3 text-amber-500 fill-current" />
+            <span className="text-slate-700 text-xs font-medium">{property.rating}</span>
+          </div>
+          <div className="flex items-center space-x-2 text-slate-500 text-xs">
+            <span>{property.views} views</span>
+            <span>•</span>
+            <span>{property.saved} saved</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-500/20 rounded-full"></div>
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0"></div>
+          </div>
+          <p className="text-slate-600 font-medium text-sm mt-4">Loading premium properties...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 safe-area-padding">
+      {/* Premium Header */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50 supports-backdrop-blur:bg-white/60">
+        <div className="px-5 pt-6 pb-4">
+          {/* Header Bar */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-lg">K</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-900">Find Properties</h1>
+                <p className="text-slate-600 text-sm">Premium investment opportunities</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-1">
+              <button 
+                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center hover:shadow-md transition-all active:scale-95"
+              >
+                {viewMode === 'grid' ? 
+                  <List className="h-5 w-5 text-slate-600" /> : 
+                  <Grid3X3 className="h-5 w-5 text-slate-600" />
+                }
+              </button>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`w-10 h-10 rounded-xl shadow-sm border flex items-center justify-center transition-all active:scale-95 ${
+                  showFilters 
+                    ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300'
+                }`}
+              >
+                <SlidersHorizontal className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Smart Search Bar */}
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-              placeholder="Search locations, properties..."
+              className="w-full pl-11 pr-12 py-3 bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/30 transition-all text-slate-900 placeholder-slate-500 shadow-sm"
+              placeholder="Search locations, investments, or features..."
             />
+            <button 
+              onClick={() => {/* Handle search */}}
+              className="absolute inset-y-1.5 right-1.5 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-medium hover:shadow-lg transition-all active:scale-95 text-sm flex items-center space-x-1"
+            >
+              <span>Search</span>
+              <Zap className="h-3 w-3" />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Filters Panel */}
+      {/* Premium Filters Panel */}
       {showFilters && (
-        <div className="bg-white border-b border-gray-200 px-4 py-4">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/80 px-5 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-slate-900">Refine Search</h3>
+            <button 
+              onClick={() => setShowFilters(false)}
+              className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors"
+            >
+              <X className="h-4 w-4 text-slate-600" />
+            </button>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             {/* Price Range */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-              <div className="flex space-x-2">
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Price Range (P)</label>
+              <div className="flex space-x-3">
                 <input
                   type="number"
                   placeholder="Min"
                   value={filters.minPrice}
                   onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                  className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 placeholder-slate-500"
                 />
                 <input
                   type="number"
                   placeholder="Max"
                   value={filters.maxPrice}
                   onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                  className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 placeholder-slate-500"
                 />
               </div>
             </div>
 
             {/* Beds & Baths */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Beds</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Bedrooms</label>
               <select
                 value={filters.beds}
                 onChange={(e) => setFilters(prev => ({ ...prev, beds: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900"
+              >
+                <option value="">Any</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+                <option value="5">5+</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Bathrooms</label>
+              <select
+                value={filters.baths}
+                onChange={(e) => setFilters(prev => ({ ...prev, baths: e.target.value }))}
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900"
               >
                 <option value="">Any</option>
                 <option value="1">1+</option>
@@ -151,46 +388,61 @@ export default function SearchPage() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Baths</label>
-              <select
-                value={filters.baths}
-                onChange={(e) => setFilters(prev => ({ ...prev, baths: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-              >
-                <option value="">Any</option>
-                <option value="1">1+</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-              </select>
-            </div>
-
             {/* Property Type */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Property Type</label>
               <select
                 value={filters.propertyType}
                 onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900"
               >
-                <option value="">Any Type</option>
+                <option value="">All Types</option>
                 {propertyTypes.map(type => (
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
             </div>
 
+            {/* Premium Filters */}
+            <div className="col-span-2 space-y-3">
+              <label className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                <input 
+                  type="checkbox"
+                  checked={filters.premiumOnly}
+                  onChange={(e) => setFilters(prev => ({ ...prev, premiumOnly: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500"
+                />
+                <div className="flex items-center space-x-2">
+                  <Crown className="h-4 w-4 text-amber-500" />
+                  <span className="text-sm font-medium text-slate-900">Premium Properties Only</span>
+                </div>
+              </label>
+
+              <label className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                <input 
+                  type="checkbox"
+                  checked={filters.investmentGrade}
+                  onChange={(e) => setFilters(prev => ({ ...prev, investmentGrade: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500"
+                />
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-4 w-4 text-emerald-600" />
+                  <span className="text-sm font-medium text-slate-900">Investment Grade Only</span>
+                </div>
+              </label>
+            </div>
+
             {/* Action Buttons */}
-            <div className="col-span-2 flex space-x-2 pt-2">
+            <div className="col-span-2 flex space-x-3 pt-2">
               <button
-                onClick={() => setFilters({ minPrice: '', maxPrice: '', beds: '', baths: '', propertyType: '' })}
-                className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm"
+                onClick={() => setFilters({ minPrice: '', maxPrice: '', beds: '', baths: '', propertyType: '', investmentGrade: false, premiumOnly: false })}
+                className="flex-1 py-3 px-4 border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-all active:scale-95"
               >
-                Reset
+                Reset All
               </button>
               <button
                 onClick={() => setShowFilters(false)}
-                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-medium hover:shadow-lg transition-all active:scale-95"
               >
                 Apply Filters
               </button>
@@ -200,99 +452,57 @@ export default function SearchPage() {
       )}
 
       {/* Properties List */}
-      <main className="px-4 py-4">
+      <main className="px-5 py-6">
         {/* Results Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-gray-600">
-            {properties.length} properties found
-          </h2>
-          <button className="text-blue-600 font-medium text-sm hover:text-blue-700">
-            Sort by: Recommended
-          </button>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">
+              {properties.length} Premium Properties
+            </h2>
+            <p className="text-slate-600 text-sm">Investment opportunities in Botswana</p>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-slate-600 text-sm font-medium">Sort by:</span>
+            <select className="bg-white border border-slate-300 rounded-lg px-3 py-1 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>Recommended</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Newest First</option>
+              <option>Highest ROI</option>
+            </select>
+          </div>
         </div>
 
-        {/* Properties Grid */}
-        <div className="space-y-4">
+        {/* Properties Grid/List */}
+        <div className={`${
+          viewMode === 'grid' 
+            ? 'grid grid-cols-1 gap-4' 
+            : 'space-y-4'
+        }`}>
           {properties.map((property) => (
-            <div key={property.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              {/* Property Image */}
-              <div className="relative">
-                <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                  <Home className="h-12 w-12 text-gray-400" />
-                </div>
-                
-                {/* Featured Badge */}
-                {property.isFeatured && (
-                  <div className="absolute top-3 left-3 bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">
-                    Featured
-                  </div>
-                )}
-
-                {/* Favorite Button */}
-                <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
-                  <Heart className="h-4 w-4 text-gray-600" />
-                </button>
-              </div>
-
-              {/* Property Details */}
-              <div className="p-4">
-                {/* Price & Rating */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-1">
-                    <span className="text-lg font-bold text-gray-900">P{property.price.toLocaleString()}</span>
-                    <span className="text-gray-500 text-sm">/month</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600">{property.rating}</span>
-                  </div>
-                </div>
-
-                {/* Title */}
-                <h3 className="font-medium text-gray-900 mb-1 text-sm">{property.title}</h3>
-
-                {/* Location */}
-                <div className="flex items-center space-x-1 mb-3">
-                  <MapPin className="h-3 w-3 text-gray-400" />
-                  <span className="text-gray-600 text-xs">{property.location}</span>
-                </div>
-
-                {/* Property Features */}
-                <div className="flex items-center space-x-4 text-gray-600 text-xs">
-                  <div className="flex items-center space-x-1">
-                    <Bed className="h-3 w-3" />
-                    <span>{property.beds} bed{property.beds > 1 ? 's' : ''}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Bath className="h-3 w-3" />
-                    <span>{property.baths} bath{property.baths > 1 ? 's' : ''}</span>
-                  </div>
-                  <div>
-                    <span>{property.sqft.toLocaleString()} sqft</span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex space-x-2 mt-4">
-                  <button className="flex-1 py-2 px-3 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-50 transition-colors">
-                    View Details
-                  </button>
-                  <button className="flex-1 py-2 px-3 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition-colors">
-                    Contact
-                  </button>
-                </div>
-              </div>
-            </div>
+            <PropertyCard 
+              key={property.id} 
+              property={property} 
+              viewMode={viewMode} 
+            />
           ))}
         </div>
 
         {/* Load More */}
-        <div className="text-center mt-6">
-          <button className="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm">
-            Load More Properties
+        <div className="text-center mt-8">
+          <button className="bg-white border border-slate-300 text-slate-700 px-8 py-3 rounded-xl font-medium hover:bg-slate-50 transition-all active:scale-95 flex items-center space-x-2 mx-auto">
+            <Sparkles className="h-4 w-4" />
+            <span>Load More Properties</span>
           </button>
         </div>
       </main>
+
+      <style jsx global>{`
+        .safe-area-padding {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      `}</style>
     </div>
   );
 }

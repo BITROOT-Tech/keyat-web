@@ -1,4 +1,4 @@
-// src/app/(consumer)/booking/page.tsx - PREMIUM NATIVE VERSION
+// src/app/(consumer)/booking/page.tsx - MOBILE-FIRST NATIVE EXPERIENCE
 'use client';
 
 import { useState } from 'react';
@@ -10,19 +10,15 @@ import {
   Home, 
   User, 
   Phone, 
-  Mail, 
   MessageCircle,
   CheckCircle,
   XCircle,
   ChevronRight,
   Star,
   Shield,
-  Zap,
   Building2,
-  Sparkles,
   ArrowLeft,
-  Filter,
-  MoreHorizontal
+  Plus
 } from 'lucide-react';
 
 interface Booking {
@@ -30,7 +26,6 @@ interface Booking {
   propertyId: string;
   propertyTitle: string;
   propertyLocation: string;
-  propertyImage: string;
   price: number;
   date: string;
   time: string;
@@ -38,12 +33,10 @@ interface Booking {
   agent: {
     name: string;
     phone: string;
-    email: string;
     rating: number;
     verified: boolean;
   };
   notes: string;
-  createdAt: string;
   duration: number;
 }
 
@@ -53,14 +46,12 @@ export default function BookingPage() {
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
 
-  // Premium bookings data
   const bookings: Booking[] = [
     {
       id: '1',
       propertyId: '1',
-      propertyTitle: 'The Residences • Block 9',
+      propertyTitle: 'CBD Luxury Apartment',
       propertyLocation: 'CBD, Gaborone',
-      propertyImage: '/api/placeholder/300/200',
       price: 14500,
       date: '2024-02-15',
       time: '14:00',
@@ -68,20 +59,17 @@ export default function BookingPage() {
       agent: {
         name: 'Sarah Johnson',
         phone: '+267 71 123 456',
-        email: 'sarah@keyat.properties',
         rating: 4.9,
         verified: true
       },
-      notes: 'Please bring ID for verification. Parking available in basement P2.',
-      createdAt: '2024-02-10',
+      notes: 'Bring ID for verification. Parking in basement P2.',
       duration: 60
     },
     {
       id: '2',
       propertyId: '2',
-      propertyTitle: 'Phakalane Estate Villa',
-      propertyLocation: 'Phakalane Golf Estate',
-      propertyImage: '/api/placeholder/300/200',
+      propertyTitle: 'Phakalane Executive Home',
+      propertyLocation: 'Phakalane Estate',
       price: 25000,
       date: '2024-02-20',
       time: '10:00',
@@ -89,12 +77,10 @@ export default function BookingPage() {
       agent: {
         name: 'David Smith',
         phone: '+267 72 234 567',
-        email: 'david@keyat.properties',
         rating: 4.7,
         verified: true
       },
-      notes: 'Golf course view. Meet at clubhouse entrance.',
-      createdAt: '2024-02-12',
+      notes: 'Golf course view. Meet at clubhouse.',
       duration: 90
     }
   ];
@@ -105,7 +91,6 @@ export default function BookingPage() {
       propertyId: '3',
       propertyTitle: 'Capital Towers Penthouse',
       propertyLocation: 'Main Mall, Gaborone',
-      propertyImage: '/api/placeholder/300/200',
       price: 38000,
       date: '2024-01-25',
       time: '15:30',
@@ -113,35 +98,35 @@ export default function BookingPage() {
       agent: {
         name: 'Lisa Brown',
         phone: '+267 73 345 678',
-        email: 'lisa@keyat.properties',
         rating: 5.0,
         verified: true
       },
-      notes: 'Stunning city views. Private terrace access.',
-      createdAt: '2024-01-20',
+      notes: 'Stunning city views. Private terrace.',
       duration: 75
     }
   ];
 
-  const premiumProperties = [
+  const availableProperties = [
     {
       id: '1',
-      title: 'The Residences • Block 9',
+      title: 'CBD Luxury Apartment',
       location: 'CBD, Gaborone',
       price: 14500,
-      type: 'Luxury Apartment',
-      features: ['3 beds', '2.5 baths', '1,700 sqft'],
-      premium: true,
+      type: 'Apartment',
+      beds: 2,
+      baths: 2,
+      sqft: 1200,
       verified: true
     },
     {
       id: '2',
-      title: 'Phakalane Estate',
-      location: 'Phakalane Golf Estate',
+      title: 'Phakalane Executive Home',
+      location: 'Phakalane Estate',
       price: 25000,
-      type: 'Executive Villa',
-      features: ['5 beds', '4 baths', '3,400 sqft'],
-      premium: true,
+      type: 'House',
+      beds: 4,
+      baths: 3,
+      sqft: 2400,
       verified: true
     }
   ];
@@ -166,132 +151,138 @@ export default function BookingPage() {
     const StatusIcon = statusConfig.icon;
 
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 hover:border-slate-300 transition-all duration-300 hover:shadow-lg">
-        <div className="p-4">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-3">
-            <div 
-              className="flex-1 cursor-pointer"
-              onClick={() => router.push(`/property/${booking.propertyId}`)}
-            >
-              <h3 className="font-bold text-slate-900 text-base leading-tight mb-1">
-                {booking.propertyTitle}
-              </h3>
-              <div className="flex items-center space-x-1 text-slate-600 text-sm">
-                <MapPin className="h-3 w-3" />
-                <span>{booking.propertyLocation}</span>
-              </div>
-            </div>
-            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border text-xs font-bold ${statusConfig.color}`}>
-              <StatusIcon className="h-3 w-3" />
-              <span>{statusConfig.label}</span>
+      <div 
+        className="bg-card border rounded-xl p-3 hover:shadow-sm transition-all cursor-pointer active:scale-95 touch-manipulation"
+        onClick={() => router.push(`/property/${booking.propertyId}`)}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-foreground text-sm leading-tight mb-1 truncate">
+              {booking.propertyTitle}
+            </h3>
+            <div className="flex items-center space-x-1 text-muted-foreground text-xs">
+              <MapPin className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{booking.propertyLocation}</span>
             </div>
           </div>
-
-          {/* Booking Details */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-sm">
-                <Calendar className="h-4 w-4 text-slate-400" />
-                <div>
-                  <div className="text-slate-900 font-medium">
-                    {new Date(booking.date).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </div>
-                  <div className="text-slate-500 text-xs">
-                    {new Date(booking.date).toLocaleDateString('en-US', { 
-                      weekday: 'short' 
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-sm">
-                <Clock className="h-4 w-4 text-slate-400" />
-                <div>
-                  <div className="text-slate-900 font-medium">{booking.time}</div>
-                  <div className="text-slate-500 text-xs">{booking.duration} min</div>
-                </div>
-              </div>
-            </div>
+          <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border text-xs font-medium flex-shrink-0 ml-2 ${statusConfig.color}`}>
+            <StatusIcon className="h-3 w-3" />
+            <span>{statusConfig.label}</span>
           </div>
-
-          {/* Agent Info */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl mb-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center space-x-1">
-                  <span className="text-sm font-medium text-slate-900">{booking.agent.name}</span>
-                  {booking.agent.verified && (
-                    <Shield className="h-3 w-3 text-blue-600" />
-                  )}
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Star className="h-3 w-3 text-amber-500" />
-                  <span className="text-slate-600 text-xs">{booking.agent.rating}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-1">
-              <button className="w-8 h-8 bg-white border border-slate-300 rounded-lg flex items-center justify-center hover:border-blue-300 transition-colors">
-                <Phone className="h-3 w-3 text-slate-600" />
-              </button>
-              <button className="w-8 h-8 bg-white border border-slate-300 rounded-lg flex items-center justify-center hover:border-blue-300 transition-colors">
-                <MessageCircle className="h-3 w-3 text-slate-600" />
-              </button>
-            </div>
-          </div>
-
-          {/* Notes */}
-          {booking.notes && (
-            <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
-              <div className="text-sm text-blue-800 leading-relaxed">
-                {booking.notes}
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Booking Details */}
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <div className="flex items-center space-x-2 text-xs">
+            <Calendar className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+            <div>
+              <div className="text-foreground font-medium">
+                {new Date(booking.date).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+              </div>
+              <div className="text-muted-foreground text-xs">
+                {new Date(booking.date).toLocaleDateString('en-US', { 
+                  weekday: 'short' 
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs">
+            <Clock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+            <div>
+              <div className="text-foreground font-medium">{booking.time}</div>
+              <div className="text-muted-foreground text-xs">{booking.duration} min</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Agent Info */}
+        <div className="flex items-center justify-between p-2 bg-muted rounded-lg mb-2">
+          <div className="flex items-center space-x-2 flex-1 min-w-0">
+            <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="h-3 w-3 text-primary-foreground" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-1">
+                <span className="text-xs font-medium text-foreground truncate">{booking.agent.name}</span>
+                {booking.agent.verified && (
+                  <Shield className="h-3 w-3 text-primary flex-shrink-0" />
+                )}
+              </div>
+              <div className="flex items-center space-x-1">
+                <Star className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                <span className="text-muted-foreground text-xs">{booking.agent.rating}</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-1 ml-2">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`tel:${booking.agent.phone}`);
+              }}
+              className="w-6 h-6 bg-background border border-border rounded flex items-center justify-center hover:border-primary transition-colors active:scale-95"
+            >
+              <Phone className="h-3 w-3 text-muted-foreground" />
+            </button>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle message
+              }}
+              className="w-6 h-6 bg-background border border-border rounded flex items-center justify-center hover:border-primary transition-colors active:scale-95"
+            >
+              <MessageCircle className="h-3 w-3 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+
+        {/* Notes */}
+        {booking.notes && (
+          <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
+            <div className="text-xs text-blue-800 leading-relaxed">
+              {booking.notes}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 safe-area-padding">
-      {/* Premium Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="px-5 pt-6 pb-4">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
+    <div className="min-h-screen bg-background pb-20 safe-area-inset">
+      {/* Mobile-Optimized Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-backdrop-blur:bg-background/60 sticky top-0 z-50 safe-area-top">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2 flex-1 min-w-0">
               <button 
                 onClick={() => router.back()}
-                className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors"
+                className="p-1.5 hover:bg-accent rounded-lg transition-colors active:scale-95 touch-manipulation"
               >
-                <ArrowLeft className="h-5 w-5 text-slate-600" />
+                <ArrowLeft className="h-5 w-5 text-muted-foreground" />
               </button>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">Property Tours</h1>
-                <p className="text-slate-600 text-sm">Schedule and manage viewings</p>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl font-semibold text-foreground truncate">Property Tours</h1>
+                <p className="text-muted-foreground text-sm truncate">Schedule and manage viewings</p>
               </div>
             </div>
             
             <button 
               onClick={() => setShowBookingForm(true)}
-              className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2.5 rounded-xl font-medium hover:shadow-lg transition-all active:scale-95 flex items-center space-x-2"
+              className="bg-primary text-primary-foreground px-3 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors active:scale-95 flex items-center space-x-1 text-sm touch-manipulation"
             >
-              <Calendar className="h-4 w-4" />
-              <span>New Tour</span>
+              <Plus className="h-4 w-4" />
+              <span>New</span>
             </button>
           </div>
 
-          {/* Smart Tabs */}
-          <div className="bg-slate-100 rounded-xl p-1">
+          {/* Mobile-Optimized Tabs */}
+          <div className="bg-muted rounded-lg p-1">
             <div className="flex">
               {[
                 { id: 'upcoming', label: 'Upcoming', count: bookings.length },
@@ -300,15 +291,15 @@ export default function BookingPage() {
                 <button
                   key={id}
                   onClick={() => setActiveTab(id as any)}
-                  className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 ${
+                  className={`flex-1 py-2 px-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center space-x-1 touch-manipulation ${
                     activeTab === id 
-                      ? 'bg-white text-slate-900 shadow-sm' 
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-background text-foreground shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <span>{label}</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                    activeTab === id ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600'
+                  <span className="truncate">{label}</span>
+                  <span className={`px-1 py-0.5 rounded-full text-xs flex-shrink-0 ${
+                    activeTab === id ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
                   }`}>
                     {count}
                   </span>
@@ -319,9 +310,8 @@ export default function BookingPage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="px-5 pb-24">
-        {/* Bookings Grid */}
+      <main className="px-4 py-4 space-y-4">
+        {/* Bookings List */}
         <div className="space-y-3">
           {(activeTab === 'upcoming' ? bookings : pastBookings).map((booking) => (
             <BookingCard key={booking.id} booking={booking} />
@@ -329,25 +319,25 @@ export default function BookingPage() {
 
           {/* Empty State */}
           {(activeTab === 'upcoming' ? bookings : pastBookings).length === 0 && (
-            <div className="bg-white rounded-2xl p-8 text-center border border-slate-200">
-              <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Calendar className="h-8 w-8 text-slate-400" />
+            <div className="bg-card border rounded-xl p-6 text-center">
+              <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center mx-auto mb-3">
+                <Calendar className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              <h3 className="text-base font-semibold text-foreground mb-1">
                 {activeTab === 'upcoming' ? 'No upcoming tours' : 'No past tours'}
               </h3>
-              <p className="text-slate-600 text-sm mb-6 max-w-sm mx-auto">
+              <p className="text-muted-foreground text-xs mb-4 max-w-xs mx-auto">
                 {activeTab === 'upcoming' 
                   ? 'Schedule property tours to see them here.' 
-                  : 'Your completed property tours will appear here.'
+                  : 'Your completed tours will appear here.'
                 }
               </p>
               {activeTab === 'upcoming' && (
                 <button 
                   onClick={() => setShowBookingForm(true)}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all active:scale-95 flex items-center space-x-2 mx-auto"
+                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors active:scale-95 flex items-center space-x-1 text-sm mx-auto touch-manipulation"
                 >
-                  <Sparkles className="h-4 w-4" />
+                  <Calendar className="h-4 w-4" />
                   <span>Schedule Tour</span>
                 </button>
               )}
@@ -356,19 +346,19 @@ export default function BookingPage() {
         </div>
       </main>
 
-      {/* Premium Booking Modal */}
+      {/* Mobile-First Booking Modal */}
       {showBookingForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 md:items-center">
-          <div className="bg-white rounded-t-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto md:rounded-3xl native-scroll">
+        <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 safe-area-inset">
+          <div className="bg-background rounded-t-2xl w-full max-h-[85vh] overflow-y-auto touch-manipulation">
             {/* Header */}
-            <div className="p-6 border-b border-slate-200 sticky top-0 bg-white">
+            <div className="p-4 border-b border-border sticky top-0 bg-background">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-foreground truncate">
                     {selectedProperty ? 'Schedule Tour' : 'Select Property'}
                   </h3>
-                  <p className="text-slate-600 text-sm">
-                    {selectedProperty ? 'Choose date and time' : 'Choose a property to tour'}
+                  <p className="text-muted-foreground text-sm truncate">
+                    {selectedProperty ? 'Choose date and time' : 'Choose property to tour'}
                   </p>
                 </div>
                 <button 
@@ -376,79 +366,70 @@ export default function BookingPage() {
                     setShowBookingForm(false);
                     setSelectedProperty(null);
                   }}
-                  className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors"
+                  className="p-2 hover:bg-accent rounded-lg transition-colors active:scale-95 ml-2"
                 >
-                  <span className="text-xl">×</span>
+                  <span className="text-xl text-muted-foreground">×</span>
                 </button>
               </div>
             </div>
             
-            <div className="p-6">
+            <div className="p-4">
               {!selectedProperty ? (
                 // Property Selection
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-slate-900">Premium Properties</h4>
-                    <div className="flex items-center space-x-1 text-blue-600">
-                      <Shield className="h-4 w-4" />
-                      <span className="text-sm font-medium">Verified</span>
-                    </div>
-                  </div>
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-foreground text-sm">Available Properties</h4>
                   
-                  <div className="space-y-3">
-                    {premiumProperties.map((property) => (
+                  <div className="space-y-2">
+                    {availableProperties.map((property) => (
                       <div 
                         key={property.id}
                         onClick={() => handleNewBooking(property)}
-                        className="flex items-center space-x-3 p-4 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
+                        className="flex items-center space-x-3 p-3 bg-card border border-border rounded-xl cursor-pointer hover:border-primary transition-colors active:scale-95 touch-manipulation"
                       >
-                        <div className="w-16 h-16 bg-gradient-to-br from-slate-200 to-slate-300 rounded-xl flex items-center justify-center">
-                          <Building2 className="h-6 w-6 text-slate-400" />
+                        <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Building2 className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h5 className="font-bold text-slate-900 text-sm truncate">
+                          <div className="flex items-center space-x-1 mb-1">
+                            <h5 className="font-semibold text-foreground text-sm truncate">
                               {property.title}
                             </h5>
                             {property.verified && (
-                              <div className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full text-xs font-bold">
+                              <div className="bg-primary text-primary-foreground px-1 py-0.5 rounded text-xs font-medium flex-shrink-0">
                                 VERIFIED
                               </div>
                             )}
                           </div>
-                          <p className="text-slate-600 text-xs mb-1">{property.location}</p>
+                          <p className="text-muted-foreground text-xs mb-1 truncate">{property.location}</p>
                           <div className="flex items-center space-x-2">
-                            <span className="text-blue-600 font-bold text-sm">
+                            <span className="text-primary font-semibold text-sm">
                               P{property.price.toLocaleString()}
-                              <span className="text-slate-500 text-xs font-normal">/month</span>
                             </span>
-                            <div className="flex items-center space-x-1">
-                              {property.features.map((feature, index) => (
-                                <span key={index} className="text-slate-500 text-xs bg-slate-100 px-1.5 py-0.5 rounded">
-                                  {feature}
-                                </span>
-                              ))}
+                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                              <span>{property.beds} bd</span>
+                              <span>•</span>
+                              <span>{property.baths} ba</span>
                             </div>
                           </div>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
                 // Booking Form
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {/* Selected Property */}
-                  <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div className="bg-muted rounded-xl p-3 border border-border">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-slate-200 to-slate-300 rounded-xl flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-slate-400" />
+                      <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-slate-900 text-sm">{selectedProperty.title}</h4>
-                        <p className="text-slate-600 text-xs">{selectedProperty.location}</p>
-                        <div className="text-blue-600 font-bold text-sm">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-foreground text-sm truncate">{selectedProperty.title}</h4>
+                        <p className="text-muted-foreground text-xs truncate">{selectedProperty.location}</p>
+                        <div className="text-primary font-semibold text-sm">
                           P{selectedProperty.price.toLocaleString()}/month
                         </div>
                       </div>
@@ -456,18 +437,18 @@ export default function BookingPage() {
                   </div>
 
                   {/* Date & Time */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-semibold text-slate-900 mb-2">Tour Date</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Tour Date</label>
                       <input 
                         type="date" 
                         min={new Date().toISOString().split('T')[0]}
-                        className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900"
+                        className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-slate-900 mb-2">Preferred Time</label>
-                      <select className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900">
+                      <label className="block text-sm font-medium text-foreground mb-1">Time</label>
+                      <select className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground text-sm">
                         <option value="">Select time</option>
                         <option value="09:00">9:00 AM</option>
                         <option value="10:00">10:00 AM</option>
@@ -481,33 +462,32 @@ export default function BookingPage() {
 
                   {/* Additional Info */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-2">
-                      Additional Notes
-                      <span className="text-slate-500 font-normal ml-1">(Optional)</span>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Notes <span className="text-muted-foreground font-normal">(Optional)</span>
                     </label>
                     <textarea 
-                      rows={3}
-                      className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900 resize-none"
-                      placeholder="Any specific requirements, questions, or special requests for the agent..."
+                      rows={2}
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground text-sm resize-none"
+                      placeholder="Special requests or questions..."
                     />
                   </div>
 
                   {/* Confirmation */}
-                  <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-blue-600 flex-shrink-0" />
                       <div>
                         <div className="text-blue-800 font-medium text-sm">Instant Confirmation</div>
-                        <div className="text-blue-700 text-xs">You'll receive booking details immediately</div>
+                        <div className="text-blue-700 text-xs">Booking details sent immediately</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex space-x-3 pt-2">
+                  <div className="flex space-x-2 pt-2">
                     <button
                       onClick={() => setSelectedProperty(null)}
-                      className="flex-1 py-3 px-4 border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-all active:scale-95"
+                      className="flex-1 py-2 px-3 border border-border text-foreground rounded-lg font-medium hover:bg-accent transition-colors active:scale-95 text-sm touch-manipulation"
                     >
                       Back
                     </button>
@@ -517,10 +497,10 @@ export default function BookingPage() {
                         setShowBookingForm(false);
                         setSelectedProperty(null);
                       }}
-                      className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-medium hover:shadow-lg transition-all active:scale-95 flex items-center justify-center space-x-2"
+                      className="flex-1 py-2 px-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors active:scale-95 flex items-center justify-center space-x-1 text-sm touch-manipulation"
                     >
-                      <Zap className="h-4 w-4" />
-                      <span>Schedule Tour</span>
+                      <Calendar className="h-4 w-4" />
+                      <span>Schedule</span>
                     </button>
                   </div>
                 </div>
@@ -530,15 +510,36 @@ export default function BookingPage() {
         </div>
       )}
 
-      <style jsx global>{`
-        .safe-area-padding {
-          padding-bottom: env(safe-area-inset-bottom);
-        }
-        
-        .native-scroll {
-          -webkit-overflow-scrolling: touch;
-        }
-      `}</style>
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border z-40 safe-area-bottom">
+        <div className="px-4 py-2">
+          <div className="flex justify-around items-center">
+            {[
+              { icon: Home, label: 'Home', active: false, href: '/dashboard' },
+              { icon: Calendar, label: 'Tours', active: true, href: '/booking' },
+              { icon: Building2, label: 'Search', active: false, href: '/search' },
+              { icon: User, label: 'Profile', active: false, href: '/profile' },
+            ].map(({ icon: Icon, label, active, href }) => (
+              <button
+                key={label}
+                onClick={() => router.push(href)}
+                className={`flex flex-col items-center p-2 transition-all duration-200 min-w-0 flex-1 touch-manipulation ${
+                  active 
+                    ? 'text-primary' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <div className={`p-1.5 rounded-lg transition-all duration-200 ${
+                  active ? 'bg-primary/10' : 'hover:bg-accent'
+                }`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="text-xs mt-1 font-medium truncate">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
     </div>
   );
 }
