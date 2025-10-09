@@ -7,46 +7,9 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
   }
 }
 
@@ -59,11 +22,34 @@
   }
 }
 
-/* Custom animations */
-@keyframes fade-in-up {
+/* Safe area handling for mobile */
+.safe-area-padding {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Touch optimization */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile performance */
+@media (max-width: 768px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Add to your globals.css */
+@keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
@@ -74,7 +60,7 @@
 @keyframes scale-in {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
@@ -82,51 +68,10 @@
   }
 }
 
-@keyframes float-slow {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes float-medium {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }
 
 .animate-scale-in {
-  animation: scale-in 0.3s ease-out;
-}
-
-.animate-float-slow {
-  animation: float-slow 6s ease-in-out infinite;
-}
-
-.animate-float-medium {
-  animation: float-medium 4s ease-in-out infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
-}
-
-.clean-grid-bg {
-  background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
+  animation: scale-in 0.2s ease-out;
 }

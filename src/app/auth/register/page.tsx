@@ -1,128 +1,13 @@
-// src/app/auth/register/page.tsx - CLEAN PROFESSIONAL VERSION
+// src/app/auth/register/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-// Professional Notification Component
-const Notification = ({ type, text, onClose, show, action }: { 
-  type: string; 
-  text: string; 
-  onClose: () => void;
-  show: boolean;
-  action?: { label: string; onClick: () => void };
-}) => {
-  useEffect(() => {
-    if (show && type !== 'loading') {
-      const timer = setTimeout(onClose, 6000);
-      return () => clearTimeout(timer);
-    }
-  }, [show, type, onClose]);
-
-  if (!show) return null;
-
-  const icons = {
-    success: '✅',
-    error: '❌',
-    info: '💡',
-    loading: '⏳'
-  };
-
-  const styles = {
-    success: 'bg-green-500 border-green-600',
-    error: 'bg-red-500 border-red-600',
-    info: 'bg-blue-500 border-blue-600',
-    loading: 'bg-blue-600 border-blue-700'
-  };
-
-  return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-down">
-      <div className={`flex items-center space-x-4 px-6 py-4 rounded-xl text-white shadow-lg border ${styles[type as keyof typeof styles]} min-w-80 max-w-md backdrop-blur-sm`}>
-        <span className="text-xl flex-shrink-0">{icons[type as keyof typeof icons]}</span>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm leading-tight">{text}</p>
-          {action && (
-            <button 
-              onClick={action.onClick}
-              className="mt-2 text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors font-medium"
-            >
-              {action.label}
-            </button>
-          )}
-        </div>
-        <button 
-          onClick={onClose}
-          className="ml-2 hover:scale-110 transition-transform flex-shrink-0"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Professional Email Confirmation Modal
-const EmailConfirmationModal = ({ show, email, onResend, onClose }: {
-  show: boolean;
-  email: string;
-  onResend: () => void;
-  onClose: () => void;
-}) => {
-  if (!show) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-      <div className="bg-white rounded-xl p-6 mx-4 max-w-md w-full shadow-xl animate-scale-in">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md">
-            <span className="text-2xl text-white">📧</span>
-          </div>
-          
-          <h3 className="text-xl font-bold text-gray-900 mb-3">
-            Check Your Email!
-          </h3>
-          
-          <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-            We've sent a confirmation link to <strong>{email}</strong>. 
-            Click the link to verify your account and start using Keyat.
-          </p>
-
-          <div className="bg-blue-50 rounded-lg p-3 mb-4 text-left">
-            <div className="flex items-start space-x-2 text-sm text-blue-800">
-              <span>💡</span>
-              <div>
-                <p className="font-medium mb-1">Didn't receive the email?</p>
-                <ul className="text-xs space-y-1">
-                  <li>• Check your spam folder</li>
-                  <li>• Verify your email address</li>
-                  <li>• Wait a few minutes</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex space-x-3">
-            <button
-              onClick={onClose}
-              className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm"
-            >
-              Close
-            </button>
-            <button
-              onClick={onResend}
-              className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm text-sm"
-            >
-              Resend Email
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -134,385 +19,555 @@ export default function RegisterPage() {
     agreeToTerms: false
   });
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState<{ 
-    type: string; 
-    text: string; 
-    show: boolean;
-    action?: { label: string; onClick: () => void };
-  }>({ type: '', text: '', show: false });
-  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitError, setSubmitError] = useState('');
+  const [currentStep, setCurrentStep] = useState(0);
+  
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
-  const supabase = createClient();
+  // Auto-focus first field on step change
+  useEffect(() => {
+    if (currentStep === 1) {
+      setTimeout(() => firstNameRef.current?.focus(), 300);
+    } else if (currentStep === 2) {
+      setTimeout(() => passwordRef.current?.focus(), 300);
+    }
+  }, [currentStep]);
 
-  const showNotification = (type: string, text: string, action?: { label: string; onClick: () => void }) => {
-    setNotification({ type, text, show: true, action });
+  const validatePhone = (phone: string): boolean => {
+    const cleaned = phone.replace(/\s/g, '');
+    const botswanaRegex = /^(7[1-8]|72|74|75|76|77|78|79)\d{6}$/;
+    return botswanaRegex.test(cleaned);
   };
 
-  const hideNotification = () => {
-    setNotification(prev => ({ ...prev, show: false }));
+  const validateField = (field: string, value: any): string => {
+    switch (field) {
+      case 'firstName':
+        return !value?.trim() ? 'First name is required' : '';
+      case 'lastName':
+        return !value?.trim() ? 'Last name is required' : '';
+      case 'email':
+        if (!value) return 'Email is required';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Valid email is required';
+        return '';
+      case 'phone':
+        if (!value) return 'Phone number is required';
+        if (!validatePhone(value)) return 'Valid Botswana number required (e.g., 71 123 456)';
+        return '';
+      case 'password':
+        if (!value) return 'Password is required';
+        if (value.length < 8) return 'Must be at least 8 characters';
+        if (!/(?=.*[a-z])/.test(value)) return 'Include lowercase letter';
+        if (!/(?=.*[A-Z])/.test(value)) return 'Include uppercase letter';
+        if (!/(?=.*\d)/.test(value)) return 'Include number';
+        return '';
+      case 'confirmPassword':
+        if (!value) return 'Please confirm your password';
+        return value !== formData.password ? 'Passwords do not match' : '';
+      case 'userType':
+        return !value ? 'Please select an account type' : '';
+      default:
+        return '';
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
+  const validateStep = (step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (step === 0) {
+      const error = validateField('userType', formData.userType);
+      if (error) newErrors.userType = error;
+    }
+    
+    if (step === 1) {
+      const fields = ['firstName', 'lastName', 'email', 'phone'];
+      fields.forEach(field => {
+        const error = validateField(field, formData[field as keyof typeof formData]);
+        if (error) {
+          newErrors[field] = error;
+          setTouched(prev => ({ ...prev, [field]: true }));
+        }
+      });
+    }
+    
+    if (step === 2) {
+      const fields = ['password', 'confirmPassword', 'agreeToTerms'];
+      fields.forEach(field => {
+        const error = validateField(field, formData[field as keyof typeof formData]);
+        if (error) {
+          newErrors[field] = error;
+          setTouched(prev => ({ ...prev, [field]: true }));
+        }
+      });
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
+    
+    // Mark all fields as touched to show errors
+    const allFields = ['firstName', 'lastName', 'email', 'phone', 'password', 'confirmPassword', 'agreeToTerms', 'userType'];
+    const allTouched = allFields.reduce((acc, field) => {
+      acc[field] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+    setTouched(allTouched);
+    
+    if (!validateStep(2)) {
+      setCurrentStep(2);
+      return;
+    }
+
     setLoading(true);
-    showNotification('loading', 'Creating your account...');
-
-    if (formData.password !== formData.confirmPassword) {
-      showNotification('error', 'Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      showNotification('error', 'Password must be at least 6 characters');
-      setLoading(false);
-      return;
-    }
-
-    if (!formData.agreeToTerms) {
-      showNotification('error', 'Please agree to the terms and conditions');
-      setLoading(false);
-      return;
-    }
-
     try {
+      const supabase = createClient();
+      const formattedPhone = `+267${formData.phone.replace(/\s/g, '')}`;
+
       const { data, error } = await supabase.auth.signUp({
-        email: formData.email.trim(),
+        email: formData.email,
         password: formData.password,
         options: {
           data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            phone: formData.phone,
+            first_name: formData.firstName.trim(),
+            last_name: formData.lastName.trim(),
+            phone: formattedPhone,
             user_type: formData.userType,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
-      if (error) {
-        if (error.message.includes('User already registered')) {
-          showNotification('error', 'Account already exists. Please sign in.', {
-            label: 'Go to Login',
-            onClick: () => window.location.href = '/auth/login'
-          });
-        } else {
-          showNotification('error', error.message);
-        }
-      } else {
-        showNotification('success', 'Account created successfully!');
-        setShowEmailModal(true);
-        
-        // Reset form
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          password: '',
-          confirmPassword: '',
-          userType: 'tenant',
-          agreeToTerms: false
-        });
+      if (error) throw error;
+      
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        throw new Error('User already registered');
       }
-    } catch (error: unknown) {
-      showNotification('error', 'An unexpected error occurred');
+
+      if (data.user) {
+        router.push(`/auth/confirm?email=${encodeURIComponent(formData.email)}`);
+      }
+
+    } catch (error: any) {
+      setSubmitError(
+        error.message.includes('already registered') 
+          ? 'An account with this email already exists. Please sign in.'
+          : 'Failed to create account. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const resendConfirmation = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email: formData.email,
-    });
-
-    if (error) {
-      showNotification('error', error.message);
-    } else {
-      showNotification('success', 'Confirmation email sent!');
-      setShowEmailModal(false);
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Real-time validation for touched fields
+    if (touched[field]) {
+      const error = validateField(field, value);
+      setErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
     }
-    setLoading(false);
+    
+    if (submitError) setSubmitError('');
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Notification Popup */}
-      <Notification 
-        type={notification.type} 
-        text={notification.text} 
-        show={notification.show}
-        onClose={hideNotification}
-        action={notification.action}
-      />
+  const handleInputBlur = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const error = validateField(field, formData[field as keyof typeof formData]);
+    if (error) {
+      setErrors(prev => ({ ...prev, [field]: error }));
+    }
+  };
 
-      {/* Email Confirmation Modal */}
-      <EmailConfirmationModal 
-        show={showEmailModal}
-        email={formData.email}
-        onResend={resendConfirmation}
-        onClose={() => setShowEmailModal(false)}
-      />
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, 2));
+    }
+  };
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        {/* Professional Logo */}
-        <div className="flex justify-center">
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-lg">K</span>
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
+
+  // Password strength indicator
+  const getPasswordStrength = (password: string) => {
+    if (!password) return { strength: 0, label: '', color: '' };
+    
+    let strength = 0;
+    if (password.length >= 8) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/\d/.test(password)) strength += 1;
+    if (/[^a-zA-Z\d]/.test(password)) strength += 1;
+    
+    const strengths = [
+      { label: 'Very Weak', color: 'bg-red-500' },
+      { label: 'Weak', color: 'bg-orange-500' },
+      { label: 'Fair', color: 'bg-yellow-500' },
+      { label: 'Good', color: 'bg-blue-500' },
+      { label: 'Strong', color: 'bg-green-500' }
+    ];
+    
+    return { ...strengths[strength - 1] || strengths[0], strength };
+  };
+
+  const passwordStrength = getPasswordStrength(formData.password);
+
+  const userTypes = [
+    { value: 'tenant', label: 'Looking to Rent or Buy', icon: '🔍', description: 'Find properties' },
+    { value: 'landlord', label: 'Property Owner', icon: '🏠', description: 'List and manage' },
+    { value: 'agent', label: 'Real Estate Agent', icon: '🤝', description: 'Professional services' },
+    { value: 'service', label: 'Service Provider', icon: '🔧', description: 'Maintenance & repairs' }
+  ];
+
+  const steps = [
+    {
+      title: "Create your account",
+      subtitle: "Choose how you'll use Keyat",
+      component: (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-3">
+            {userTypes.map((type) => (
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => {
+                  handleInputChange('userType', type.value);
+                  setTimeout(nextStep, 150); // Smooth transition
+                }}
+                className={`p-4 rounded-xl border-2 text-left transition-all duration-200 group ${
+                  formData.userType === type.value
+                    ? 'border-blue-500 bg-blue-50 shadow-sm scale-[1.02]'
+                    : 'border-gray-300 bg-white hover:border-gray-400 hover:shadow-sm'
+                }`}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className={`text-2xl p-2 rounded-lg transition-colors ${
+                    formData.userType === type.value ? 'bg-blue-100' : 'bg-gray-100 group-hover:bg-gray-200'
+                  }`}>
+                    {type.icon}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="font-semibold text-gray-900 text-sm">{type.label}</h3>
+                    <p className="text-gray-600 text-xs mt-0.5">{type.description}</p>
+                  </div>
+                  {formData.userType === type.value && (
+                    <div className="w-6 h-6 rounded-full border-2 border-blue-500 bg-white flex items-center justify-center flex-shrink-0">
+                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    </div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+          {errors.userType && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700 font-medium">{errors.userType}</p>
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      title: "Your information",
+      subtitle: "We'll use this to create your account",
+      component: (
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                First name *
+              </label>
+              <input
+                ref={firstNameRef}
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => handleInputChange('firstName', e.target.value)}
+                onBlur={() => handleInputBlur('firstName')}
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                  errors.firstName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="John"
+              />
+              {errors.firstName && (
+                <p className="mt-2 text-sm text-red-600 font-medium">{errors.firstName}</p>
+              )}
             </div>
             <div>
-              <span className="text-2xl font-bold text-gray-900">Keyat</span>
-              <div className="h-1 w-full bg-blue-600 rounded-full mt-1"></div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Last name *
+              </label>
+              <input
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                onBlur={() => handleInputBlur('lastName')}
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                  errors.lastName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="Doe"
+              />
+              {errors.lastName && (
+                <p className="mt-2 text-sm text-red-600 font-medium">{errors.lastName}</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email address *
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              onBlur={() => handleInputBlur('email')}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
+              placeholder="john@example.com"
+            />
+            {errors.email && (
+              <p className="mt-2 text-sm text-red-600 font-medium">{errors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Phone number *
+            </label>
+            <div className="flex">
+              <span className="inline-flex items-center px-4 bg-gray-50 border border-r-0 border-gray-300 rounded-l-xl text-gray-700 text-sm font-medium">
+                +267
+              </span>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                onBlur={() => handleInputBlur('phone')}
+                className={`flex-1 px-4 py-3 border border-l-0 rounded-r-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                  errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="71 123 456"
+              />
+            </div>
+            {errors.phone && (
+              <p className="mt-2 text-sm text-red-600 font-medium">{errors.phone}</p>
+            )}
+          </div>
+
+          <div className="flex justify-between pt-4">
+            <button
+              type="button"
+              onClick={prevStep}
+              className="px-6 py-3 text-gray-700 font-medium rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={nextStep}
+              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors duration-200"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Account security",
+      subtitle: "Choose a strong password",
+      component: (
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password *
+            </label>
+            <input
+              ref={passwordRef}
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleInputChange('password', e.target.value)}
+              onBlur={() => handleInputBlur('password')}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
+              placeholder="At least 8 characters"
+            />
+            
+            {/* Password Strength Indicator */}
+            {formData.password && (
+              <div className="mt-3 space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">Password strength:</span>
+                  <span className={`font-medium ${
+                    passwordStrength.strength <= 2 ? 'text-red-600' :
+                    passwordStrength.strength === 3 ? 'text-yellow-600' :
+                    'text-green-600'
+                  }`}>
+                    {passwordStrength.label}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                    style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {errors.password && (
+              <p className="mt-2 text-sm text-red-600 font-medium">{errors.password}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Confirm password *
+            </label>
+            <input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+              onBlur={() => handleInputBlur('confirmPassword')}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                errors.confirmPassword ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
+              placeholder="Enter your password again"
+            />
+            {errors.confirmPassword && (
+              <p className="mt-2 text-sm text-red-600 font-medium">{errors.confirmPassword}</p>
+            )}
+          </div>
+
+          <div className={`flex items-start space-x-4 p-4 rounded-xl border transition-all duration-200 ${
+            errors.agreeToTerms ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'
+          }`}>
+            <input
+              type="checkbox"
+              checked={formData.agreeToTerms}
+              onChange={(e) => handleInputChange('agreeToTerms', e.target.checked)}
+              onBlur={() => handleInputBlur('agreeToTerms')}
+              className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label className="text-sm text-gray-700 flex-1">
+              I agree to the{' '}
+              <Link href="/terms" className="text-blue-600 hover:text-blue-500 font-medium underline">
+                Terms and Conditions
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="text-blue-600 hover:text-blue-500 font-medium underline">
+                Privacy Policy
+              </Link>
+            </label>
+          </div>
+          {errors.agreeToTerms && (
+            <p className="text-sm text-red-600 font-medium -mt-3">{errors.agreeToTerms}</p>
+          )}
+
+          {submitError && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-sm text-red-700 font-medium">{submitError}</p>
+            </div>
+          )}
+
+          <div className="flex justify-between pt-4">
+            <button
+              type="button"
+              onClick={prevStep}
+              className="px-6 py-3 text-gray-700 font-medium rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Creating account...
+                </div>
+              ) : (
+                'Create account'
+              )}
+            </button>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center space-x-3 mb-6 group">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+              <span className="text-white font-bold text-base">K</span>
+            </div>
+            <div className="text-left">
+              <span className="text-xl font-bold text-gray-900 block">Keyat</span>
+              <span className="text-xs text-gray-500 block -mt-1">Real Estate</span>
             </div>
           </Link>
-        </div>
-
-        {/* Header */}
-        <div className="mt-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">
-            Join Keyat
-          </h2>
-          <p className="text-gray-600 text-sm">
-            Start your real estate journey today
+          
+          <h1 className="text-2xl font-bold text-gray-900 mb-3">
+            {steps[currentStep].title}
+          </h1>
+          <p className="text-gray-600">
+            {steps[currentStep].subtitle}
           </p>
         </div>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-sm sm:rounded-lg sm:px-10 border border-gray-200">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* User Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
-                I want to...
-              </label>
-              <select
-                name="userType"
-                value={formData.userType}
-                onChange={handleChange}
-                disabled={loading}
-                className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 bg-white font-medium text-sm"
-              >
-                <option value="tenant">🏠 Rent or Buy Properties</option>
-                <option value="landlord">💰 List My Properties</option>
-                <option value="agent">🤝 Work as an Agent</option>
-                <option value="service_provider">🔧 Provide Services</option>
-              </select>
-            </div>
-
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  First name
-                </label>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  disabled={loading}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 bg-white text-sm"
-                  placeholder="First name"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Last name
-                </label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  disabled={loading}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 bg-white text-sm"
-                  placeholder="Last name"
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                disabled={loading}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 bg-white text-sm"
-                placeholder="Enter your email"
-              />
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone number
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 text-sm">+267</span>
+        {/* Improved Progress Indicator */}
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center space-x-8">
+            {steps.map((_, index) => (
+              <div key={index} className="flex items-center">
+                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium transition-all duration-300 ${
+                  index === currentStep
+                    ? 'border-blue-600 bg-blue-600 text-white scale-110'
+                    : index < currentStep
+                    ? 'border-green-500 bg-green-500 text-white'
+                    : 'border-gray-300 bg-white text-gray-400'
+                }`}>
+                  {index < currentStep ? '✓' : index + 1}
                 </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  autoComplete="tel"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
-                  disabled={loading}
-                  className="block w-full pl-14 pr-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 bg-white text-sm"
-                  placeholder="71 123 456"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                disabled={loading}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 bg-white text-sm"
-                placeholder="Create a password (min. 6 characters)"
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                disabled={loading}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 disabled:opacity-50 bg-white text-sm"
-                placeholder="Confirm your password"
-              />
-            </div>
-
-            {/* Terms Agreement */}
-            <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <input
-                id="agreeToTerms"
-                name="agreeToTerms"
-                type="checkbox"
-                required
-                checked={formData.agreeToTerms}
-                onChange={handleChange}
-                disabled={loading}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5 flex-shrink-0 disabled:opacity-50"
-              />
-              <label htmlFor="agreeToTerms" className="block text-sm text-gray-700">
-                I agree to the{' '}
-                <a href="#" className="text-blue-600 hover:text-blue-500 font-medium hover:underline">
-                  Terms and Conditions
-                </a>{' '}
-                and{' '}
-                <a href="#" className="text-blue-600 hover:text-blue-500 font-medium hover:underline">
-                  Privacy Policy
-                </a>
-                <p className="text-xs text-gray-500 mt-1">
-                  By creating an account, you agree to our terms and acknowledge our privacy policy.
-                </p>
-              </label>
-            </div>
-
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <span className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Creating account...</span>
-                  </span>
-                ) : (
-                  <span className="flex items-center space-x-2">
-                    <span>Create Keyat Account</span>
-                    <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-                  </span>
+                {index < steps.length - 1 && (
+                  <div className={`w-8 h-0.5 mx-2 transition-all duration-300 ${
+                    index < currentStep ? 'bg-green-500' : 'bg-gray-200'
+                  }`} />
                 )}
-              </button>
-            </div>
-          </form>
-
-          {/* Sign In Link */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link 
-                href="/auth/login" 
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors hover:underline"
-              >
-                Sign in to your account
-              </Link>
-            </p>
+              </div>
+            ))}
           </div>
+        </div>
 
-          {/* Botswana Features */}
-          <div className="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center justify-center space-x-2 text-sm mb-2">
-              <span className="text-base">🇧🇼</span>
-              <span className="font-medium text-gray-700">Built for Botswana</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2 text-xs text-gray-600 text-center">
-              <div className="flex flex-col items-center">
-                <span className="text-base">💰</span>
-                <span>Orange Money</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-base">📱</span>
-                <span>Mascom MyZaka</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-base">🔒</span>
-                <span>Secure</span>
-              </div>
-            </div>
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {steps[currentStep].component}
+        </form>
+
+        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+          <p className="text-gray-600 text-sm">
+            Already have an account?{' '}
+            <Link 
+              href="/auth/login" 
+              className="text-blue-600 hover:text-blue-500 font-medium underline transition-colors"
+            >
+              Sign in here
+            </Link>
+          </p>
         </div>
       </div>
     </div>
