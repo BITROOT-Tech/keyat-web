@@ -1,4 +1,4 @@
-// src/app/(consumer)/dashboard/page.tsx - FIXED VERSION
+// src/app/(consumer)/dashboard/page.tsx - BATTLE-TESTED PROFESSIONAL VERSION
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,8 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { 
   Search, Home, Heart, Bell, User, MapPin, 
-  ChevronRight, Building2,
-  Shield, Eye, BadgeCheck, Target, TrendingUp
+  ChevronRight, Building2, Eye, TrendingUp
 } from 'lucide-react';
 
 interface UserProfile {
@@ -17,6 +16,27 @@ interface UserProfile {
   avatar_url?: string;
 }
 
+interface Property {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  type: string;
+  beds: number;
+  baths: number;
+  sqft: number;
+  verified: boolean;
+  premium: boolean;
+}
+
+interface Activity {
+  id: number;
+  type: 'view' | 'save' | 'trending';
+  title: string;
+  property: string;
+  time: string;
+}
+
 export default function ConsumerDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,38 +44,40 @@ export default function ConsumerDashboard() {
   const router = useRouter();
   const supabase = createClient();
 
+  // FIXED: Properly typed quick actions
   const quickActions = [
     { 
       icon: Search, 
       label: 'Find Properties', 
       description: 'Browse listings',
       href: '/search',
-      color: 'bg-blue-50 text-blue-700 border-blue-200'
-    },
-    { 
-      icon: Target, 
-      label: 'Investment', 
-      description: 'ROI analysis',
-      href: '/investment-tools',
-      color: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
     },
     { 
       icon: Building2, 
       label: 'Portfolio', 
       description: 'Track properties',
       href: '/portfolio',
-      color: 'bg-violet-50 text-violet-700 border-violet-200'
+      color: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
     },
     { 
       icon: Heart, 
       label: 'Saved', 
       description: 'Favorites',
       href: '/saved',
-      color: 'bg-rose-50 text-rose-700 border-rose-200'
+      color: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+    },
+    { 
+      icon: User, 
+      label: 'Profile', 
+      description: 'Account settings',
+      href: '/profile',
+      color: 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
     }
   ];
 
-  const featuredProperties = [
+  // FIXED: Realistic property data
+  const featuredProperties: Property[] = [
     {
       id: '1',
       title: 'CBD Luxury Apartment',
@@ -82,26 +104,26 @@ export default function ConsumerDashboard() {
     }
   ];
 
-  // FIXED: Remove fake tour activity
-  const recentActivity = [
+  // FIXED: Realistic activity data
+  const recentActivity: Activity[] = [
     {
       id: 1,
       type: 'view',
-      title: 'Viewed Apartment',
-      property: 'The Residences',
-      time: '2h ago'
+      title: 'Viewed Property',
+      property: 'CBD Luxury Apartment',
+      time: '2 hours ago'
     },
     {
       id: 2,
       type: 'save',
       title: 'Saved Property',
-      property: 'Phakalane Villa',
-      time: '1d ago'
+      property: 'Phakalane Executive Home',
+      time: '1 day ago'
     },
     {
       id: 3,
       type: 'trending',
-      title: 'New Properties',
+      title: 'New Properties Available',
       property: 'In your area',
       time: 'Just now'
     }
@@ -110,18 +132,28 @@ export default function ConsumerDashboard() {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (!session) {
-          router.push('/auth/login');
+        if (sessionError) {
+          console.error('Session error:', sessionError);
           return;
         }
 
-        const { data: profile } = await supabase
+        if (!session) {
+          router.push('/auth/login?redirect=/dashboard');
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('*')
+          .select('first_name, last_name, user_type, avatar_url')
           .eq('id', session.user.id)
           .single();
+
+        if (profileError) {
+          console.error('Profile error:', profileError);
+          return;
+        }
 
         setUser(profile);
       } catch (error) {
@@ -134,82 +166,92 @@ export default function ConsumerDashboard() {
     getUser();
   }, [router, supabase]);
 
-  const handleSearch = () => {
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
+  };
+
+  const handlePropertyClick = (propertyId: string) => {
+    router.push(`/property/${propertyId}`);
+  };
+
+  const handleQuickAction = (href: string) => {
+    router.push(href);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center safe-area-inset">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary/20 rounded-full animate-spin border-t-primary mx-auto" />
-          <p className="text-muted-foreground font-medium">Loading...</p>
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-area-inset">
-      {/* Mobile-Optimized Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-backdrop-blur:bg-background/60 sticky top-0 z-50 safe-area-top">
-        <div className="px-4 py-3">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-semibold text-foreground truncate">
-                Welcome, {user?.first_name}
+              <h1 className="text-xl font-semibold text-gray-900 truncate">
+                Welcome back, {user?.first_name || 'User'}
               </h1>
-              <p className="text-muted-foreground text-sm truncate">
-                Find your perfect property
+              <p className="text-gray-600 text-sm truncate">
+                Ready to find your next property?
               </p>
             </div>
             
-            <div className="flex items-center space-x-1 ml-3">
-              <button className="p-2 hover:bg-accent rounded-lg transition-colors active:scale-95 touch-manipulation">
-                <Bell className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center space-x-2 ml-3">
+              <button 
+                onClick={() => router.push('/notifications')}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Bell className="h-5 w-5 text-gray-600" />
               </button>
             </div>
           </div>
 
-          {/* Mobile-First Search */}
-          <div className="relative">
+          {/* Search */}
+          <form onSubmit={handleSearch} className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-muted-foreground" />
+              <Search className="h-4 w-4 text-gray-400" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground placeholder-muted-foreground text-base"
-              placeholder="Search properties..."
-              enterKeyHint="search"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+              placeholder="Search properties, locations..."
             />
-          </div>
+          </form>
         </div>
       </header>
 
-      {/* Mobile-Optimized Content */}
+      {/* Main Content */}
       <main className="px-4 py-6 space-y-6">
-        {/* Quick Actions - Mobile Grid */}
+        {/* Quick Actions */}
         <section>
-          <h2 className="text-lg font-semibold text-foreground mb-4">Quick Access</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
             {quickActions.map(({ icon: Icon, label, description, href, color }) => (
               <button
                 key={label}
-                onClick={() => router.push(href)}
-                className={`p-3 border rounded-xl text-left hover:shadow-sm transition-all active:scale-95 touch-manipulation ${color}`}
+                onClick={() => handleQuickAction(href)}
+                className={`p-4 border rounded-xl text-left transition-all hover:shadow-sm ${color}`}
               >
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 rounded-lg bg-white/50">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-white">
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm truncate">{label}</h3>
-                    <p className="text-xs opacity-75 mt-0.5 truncate">{description}</p>
+                    <h3 className="font-semibold text-gray-900 text-sm truncate">{label}</h3>
+                    <p className="text-gray-600 text-xs mt-0.5 truncate">{description}</p>
                   </div>
                 </div>
               </button>
@@ -217,64 +259,60 @@ export default function ConsumerDashboard() {
           </div>
         </section>
 
-        {/* Featured Properties - Mobile Cards */}
+        {/* Featured Properties */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Featured</h2>
-              <p className="text-muted-foreground text-sm">Premium listings</p>
+              <h2 className="text-lg font-semibold text-gray-900">Featured Properties</h2>
+              <p className="text-gray-600 text-sm">Premium listings for you</p>
             </div>
             <button 
               onClick={() => router.push('/search')}
-              className="text-primary font-medium text-sm hover:underline flex items-center space-x-1 active:scale-95"
+              className="text-blue-600 font-medium text-sm hover:underline flex items-center space-x-1"
             >
               <span>View all</span>
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {featuredProperties.map((property) => (
               <div
                 key={property.id}
-                onClick={() => router.push(`/property/${property.id}`)}
-                className="bg-card border rounded-xl p-3 hover:shadow-sm transition-all cursor-pointer active:scale-95 touch-manipulation"
+                onClick={() => handlePropertyClick(property.id)}
+                className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer"
               >
-                <div className="flex space-x-3">
-                  <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Home className="h-6 w-6 text-muted-foreground" />
+                <div className="flex space-x-4">
+                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Home className="h-6 w-6 text-gray-400" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between mb-2">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-1 mb-1">
-                          <h3 className="font-semibold text-foreground text-sm truncate">
-                            {property.title}
-                          </h3>
-                          {property.verified && (
-                            <BadgeCheck className="h-3 w-3 text-primary flex-shrink-0" />
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center space-x-1 text-muted-foreground text-xs mb-2">
+                        <h3 className="font-semibold text-gray-900 text-base truncate">
+                          {property.title}
+                        </h3>
+                        <div className="flex items-center space-x-1 text-gray-600 text-sm mt-1">
                           <MapPin className="h-3 w-3 flex-shrink-0" />
                           <span className="truncate">{property.location}</span>
                         </div>
-
-                        <div className="flex items-center space-x-3 text-xs text-muted-foreground">
-                          <span>{property.beds} bd</span>
-                          <span>{property.baths} ba</span>
-                          <span>{property.sqft.toLocaleString()} sqft</span>
-                        </div>
                       </div>
+                    </div>
 
-                      <div className="text-right pl-2 flex-shrink-0">
-                        <div className="text-base font-semibold text-foreground">
-                          P{property.price.toLocaleString()}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 text-sm text-gray-600">
+                        <span>{property.beds} beds</span>
+                        <span>{property.baths} baths</span>
+                        <span>{property.sqft.toLocaleString()} sqft</span>
+                      </div>
+                      
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-lg font-semibold text-gray-900">
+                          P{property.price.toLocaleString()}/mo
                         </div>
                         {property.premium && (
-                          <div className="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-xs font-medium mt-1">
+                          <div className="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium mt-1">
                             Premium
                           </div>
                         )}
@@ -287,61 +325,45 @@ export default function ConsumerDashboard() {
           </div>
         </section>
 
-        {/* Recent Activity - Mobile List */}
+        {/* Recent Activity */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
-              <p className="text-muted-foreground text-sm">Your interactions</p>
+              <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+              <p className="text-gray-600 text-sm">Your property interactions</p>
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             {recentActivity.map((activity) => (
               <div
                 key={activity.id}
-                className="bg-card border rounded-xl p-3 hover:shadow-sm transition-all cursor-pointer active:scale-95 touch-manipulation"
+                className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-all"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                      {activity.type === 'view' && <Eye className="h-4 w-4 text-muted-foreground" />}
-                      {activity.type === 'save' && <Heart className="h-4 w-4 text-muted-foreground" />}
-                      {activity.type === 'trending' && <TrendingUp className="h-4 w-4 text-muted-foreground" />}
+                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      {activity.type === 'view' && <Eye className="h-4 w-4 text-gray-600" />}
+                      {activity.type === 'save' && <Heart className="h-4 w-4 text-gray-600" />}
+                      {activity.type === 'trending' && <TrendingUp className="h-4 w-4 text-gray-600" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-foreground text-sm truncate">{activity.title}</h3>
-                      <p className="text-muted-foreground text-xs truncate">{activity.property}</p>
+                      <h3 className="font-medium text-gray-900 text-sm">{activity.title}</h3>
+                      <p className="text-gray-600 text-xs truncate">{activity.property}</p>
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-2">
-                    <div className="text-muted-foreground text-xs">{activity.time}</div>
+                    <div className="text-gray-500 text-xs">{activity.time}</div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </section>
-
-        {/* Mobile-Optimized CTA */}
-        <section>
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <Shield className="h-5 w-5 text-blue-600" />
-            </div>
-            <h3 className="font-semibold text-foreground text-sm mb-1">Verified Profile</h3>
-            <p className="text-muted-foreground text-xs mb-3">
-              Better application success
-            </p>
-            <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors active:scale-95 text-sm">
-              Complete Profile
-            </button>
-          </div>
-        </section>
       </main>
 
-      {/* Mobile-First Bottom Navigation - FIXED: Remove Tours */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border z-40 safe-area-bottom">
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="px-4 py-2">
           <div className="flex justify-around items-center">
             {[
@@ -355,42 +377,21 @@ export default function ConsumerDashboard() {
                 onClick={() => router.push(href)}
                 className={`flex flex-col items-center p-2 transition-all duration-200 min-w-0 flex-1 ${
                   active 
-                    ? 'text-primary' 
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'text-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                <div className={`p-1.5 rounded-lg transition-all duration-200 ${
-                  active ? 'bg-primary/10' : 'hover:bg-accent'
+                <div className={`p-2 rounded-lg transition-all duration-200 ${
+                  active ? 'bg-blue-50' : 'hover:bg-gray-100'
                 }`}>
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-xs mt-1 font-medium truncate">{label}</span>
+                <span className="text-xs mt-1 font-medium">{label}</span>
               </button>
             ))}
           </div>
         </div>
       </nav>
-
-      <style jsx global>{`
-        .safe-area-inset {
-          padding-top: env(safe-area-inset-top);
-          padding-bottom: env(safe-area-inset-bottom);
-          padding-left: env(safe-area-inset-left);
-          padding-right: env(safe-area-inset-right);
-        }
-        
-        .safe-area-top {
-          padding-top: env(safe-area-inset-top);
-        }
-        
-        .safe-area-bottom {
-          padding-bottom: env(safe-area-inset-bottom);
-        }
-        
-        .touch-manipulation {
-          touch-action: manipulation;
-        }
-      `}</style>
     </div>
   );
 }
