@@ -1,11 +1,11 @@
 // src/app/auth/confirm/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-export default function ConfirmPage() {
+function ConfirmContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const [countdown, setCountdown] = useState(5);
@@ -90,5 +90,20 @@ export default function ConfirmPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ConfirmContent />
+    </Suspense>
   );
 }
