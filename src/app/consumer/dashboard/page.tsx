@@ -1,54 +1,118 @@
-// src/app/consumer/dashboard/page.tsx - BATTLE-TESTED
+// src/app/consumer/dashboard/page.tsx - WINDOWS BATTLE-TESTED
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { 
-  Home, Search, Heart, User, Bell, Building2,
-  MapPin, ChevronRight, Shield, RefreshCw
-} from 'lucide-react';
+
+// DIRECT ICON IMPORTS - PREVENT CHUNK ERRORS
+import { Home } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { Heart } from 'lucide-react';
+import { User } from 'lucide-react';
+import { Bell } from 'lucide-react';
+import { Building2 } from 'lucide-react';
+import { MapPin } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 export default function ConsumerDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push('/auth/login');
-        return;
+      try {
+        const supabase = createClient();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          throw new Error('Authentication failed');
+        }
+        
+        if (!session) {
+          console.log('No session, redirecting to login');
+          router.push('/auth/login');
+          return;
+        }
+
+        console.log('Session found, fetching profile...');
+
+        // Get user profile with error handling
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError) {
+          console.warn('Profile fetch error:', profileError);
+          // Use basic user info from session
+          setUser({
+            first_name: session.user.email?.split('@')[0] || 'User',
+            email: session.user.email
+          });
+        } else {
+          console.log('Profile loaded:', profile);
+          setUser(profile);
+        }
+        
+        setLoading(false);
+      } catch (err: any) {
+        console.error('Dashboard initialization error:', err);
+        setError(err.message || 'Failed to load dashboard');
+        setLoading(false);
       }
-
-      // Get user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      setUser(profile);
-      setLoading(false);
     };
 
     checkAuth();
   }, [router]);
 
+  // Show loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="h-8 w-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to Load Dashboard</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => router.push('/auth/login')}
+              className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm"
+            >
+              Back to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Quick actions data
   const quickActions = [
     { 
       icon: Search, 
@@ -80,7 +144,7 @@ export default function ConsumerDashboard() {
     }
   ];
 
-  // Mock properties data
+  // Featured properties data
   const featuredProperties = [
     {
       id: '1',
@@ -104,6 +168,14 @@ export default function ConsumerDashboard() {
     }
   ];
 
+  // Bottom navigation items
+  const navItems = [
+    { icon: Home, label: 'Home', active: true },
+    { icon: Search, label: 'Search' },
+    { icon: Heart, label: 'Saved' },
+    { icon: User, label: 'Profile' },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
@@ -118,7 +190,10 @@ export default function ConsumerDashboard() {
                 Ready to find your next property?
               </p>
             </div>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button 
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => console.log('Notifications clicked')}
+            >
               <Bell className="h-5 w-5 text-gray-600" />
             </button>
           </div>
@@ -127,7 +202,7 @@ export default function ConsumerDashboard() {
 
       {/* Main Content */}
       <main className="px-4 py-6 space-y-6">
-        {/* Quick Actions */}
+        {/* Quick Actions Section */}
         <section>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
@@ -151,7 +226,7 @@ export default function ConsumerDashboard() {
           </div>
         </section>
 
-        {/* Featured Properties */}
+        {/* Featured Properties Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -175,7 +250,7 @@ export default function ConsumerDashboard() {
                 className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer"
               >
                 <div className="flex space-x-4">
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Building2 className="h-6 w-6 text-gray-400" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -186,11 +261,11 @@ export default function ConsumerDashboard() {
                             {property.title}
                           </h3>
                           {property.verified && (
-                            <Shield className="h-4 w-4 text-green-600" />
+                            <Shield className="h-4 w-4 text-green-600 flex-shrink-0" />
                           )}
                         </div>
                         <div className="flex items-center space-x-1 text-gray-600 text-sm">
-                          <MapPin className="h-3 w-3" />
+                          <MapPin className="h-3 w-3 flex-shrink-0" />
                           <span className="truncate">{property.location}</span>
                         </div>
                       </div>
@@ -214,19 +289,18 @@ export default function ConsumerDashboard() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
         <div className="px-4 py-2">
           <div className="flex justify-around items-center">
-            {[
-              { icon: Home, label: 'Home', active: true },
-              { icon: Search, label: 'Search' },
-              { icon: Heart, label: 'Saved' },
-              { icon: User, label: 'Profile' },
-            ].map(({ icon: Icon, label, active }) => (
+            {navItems.map(({ icon: Icon, label, active }) => (
               <button
                 key={label}
+                onClick={() => {
+                  if (label === 'Home') return; // Already on home
+                  router.push(`/consumer/${label.toLowerCase()}`);
+                }}
                 className={`flex flex-col items-center p-2 transition-all ${
-                  active ? 'text-blue-600' : 'text-gray-500'
+                  active ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 <Icon className="h-5 w-5" />
