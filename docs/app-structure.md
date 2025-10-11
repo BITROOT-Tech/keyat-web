@@ -1,16 +1,16 @@
 src/app/
 ├── consumer/                 # Tenant/Buyer interface - CLEAN
-│   ├── dashboard/           # ✅ COMPLETE
-│   ├── search/              # ✅ COMPLETE  
+│   ├── dashboard/           
+│   ├── search/             
 │   ├── property/
-│   │   └── [id]/           # ✅ COMPLETE
-│   ├── profile/            # ✅ COMPLETE
-│   ├── booking/            # ← NEXT
+│   │   └── [id]/          
+│   ├── profile/      
+│   ├── booking/            
 │   ├── moving/
 │   └── services/
 │
 ├── landlord/                # Property Owner interface - CLEAN
-│   ├── dashboard/          # ✅ COMPLETE
+│   ├── dashboard/          
 │   ├── properties/
 │   ├── tenants/
 │   ├── earnings/
