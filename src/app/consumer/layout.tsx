@@ -1,4 +1,4 @@
-// app/consumer/layout.tsx - UPDATED
+//src\app\consumer\layout.tsx
 'use client';
 
 import { Suspense } from 'react';

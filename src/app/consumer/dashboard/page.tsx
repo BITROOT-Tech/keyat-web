@@ -1,4 +1,4 @@
-// app/consumer/dashboard/page.tsx - COMPLETE PRODUCTION PAGE
+//src\app\consumer\dashboard\page.tsx
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';

@@ -1,7 +1,7 @@
-﻿// src/app/landlord/dashboard/page.tsx - PRODUCTION BATTLE-TESTED
+﻿// src/app/landlord/dashboard/page.tsx - COMPLETE WITH LOGOUT
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { 
@@ -9,7 +9,8 @@ import {
   ChevronRight, Building2, Eye, TrendingUp,
   Loader2, AlertCircle, RefreshCw, Shield,
   Calendar, DollarSign, Users, Settings,
-  BarChart3, FileText, MessageSquare
+  BarChart3, FileText, MessageSquare,
+  LogOut // ADD THIS IMPORT
 } from 'lucide-react';
 
 // Types
@@ -485,11 +486,37 @@ const BookingItem = ({ booking }: { booking: Booking }) => {
 export default function LandlordDashboard() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false); // ADD THIS STATE
+  const userMenuRef = useRef<HTMLDivElement>(null); // ADD THIS REF
 
   const { user, loading: userLoading, error: userError, refetch: refetchUser } = useUserProfile();
   const { properties, loading: propertiesLoading, error: propertiesError, refetch: refetchProperties } = useLandlordProperties();
   const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useDashboardStats();
   const { bookings, loading: bookingsLoading, error: bookingsError, refetch: refetchBookings } = useRecentBookings();
+
+  // ADD CLICK OUTSIDE TO CLOSE USER MENU
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // ADD LOGOUT FUNCTION
+  const handleLogout = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push('/auth/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const quickActions = [
     { 
@@ -580,6 +607,62 @@ export default function LandlordDashboard() {
               >
                 <Bell className="h-5 w-5 text-gray-600" />
               </button>
+              
+              {/* ADD USER MENU WITH LOGOUT */}
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      {user?.first_name?.[0] || user?.email?.[0] || 'L'}
+                    </span>
+                  </div>
+                </button>
+
+                {/* USER DROPDOWN MENU */}
+                {showUserMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-gray-200">
+                      <p className="font-semibold text-gray-900 text-sm truncate">
+                        {user?.first_name || 'Landlord'}
+                      </p>
+                      <p className="text-gray-600 text-xs truncate">
+                        {user?.email}
+                      </p>
+                    </div>
+                    
+                    <div className="py-1">
+                      <button
+                        onClick={() => router.push('/landlord/profile')}
+                        className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <User className="h-4 w-4" />
+                        <span>My Profile</span>
+                      </button>
+                      
+                      <button
+                        onClick={() => router.push('/landlord/settings')}
+                        className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <Settings className="h-4 w-4" />
+                        <span>Settings</span>
+                      </button>
+                      
+                      <div className="border-t border-gray-200 my-1"></div>
+                      
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
