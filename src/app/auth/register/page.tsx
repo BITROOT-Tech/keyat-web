@@ -1,10 +1,12 @@
-// src/app/auth/register/page.tsx
+// src/app/auth/register/page.tsx - COMPLETELY FIXED
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { validateEmail, validatePhone, validatePassword, validateRequired } from '@/lib/validators';
+import { USER_ROLES, TEST_ACCOUNTS } from '@/lib/constants';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,7 +17,7 @@ export default function RegisterPage() {
     phone: '',
     password: '',
     confirmPassword: '',
-    userType: 'tenant',
+    userType: 'tenant' as string,
     agreeToTerms: false
   });
   const [loading, setLoading] = useState(false);
@@ -37,38 +39,26 @@ export default function RegisterPage() {
     }
   }, [currentStep]);
 
-  const validatePhone = (phone: string): boolean => {
-    const cleaned = phone.replace(/\s/g, '');
-    const botswanaRegex = /^(7[1-8]|72|74|75|76|77|78|79)\d{6}$/;
-    return botswanaRegex.test(cleaned);
-  };
-
+  // Enhanced validation using our new validators
   const validateField = (field: string, value: any): string => {
     switch (field) {
       case 'firstName':
-        return !value?.trim() ? 'First name is required' : '';
+        return validateRequired(value, 'First name');
       case 'lastName':
-        return !value?.trim() ? 'Last name is required' : '';
+        return validateRequired(value, 'Last name');
       case 'email':
-        if (!value) return 'Email is required';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Valid email is required';
-        return '';
+        return validateEmail(value);
       case 'phone':
-        if (!value) return 'Phone number is required';
-        if (!validatePhone(value)) return 'Valid Botswana number required (e.g., 71 123 456)';
-        return '';
+        return validatePhone(value);
       case 'password':
-        if (!value) return 'Password is required';
-        if (value.length < 8) return 'Must be at least 8 characters';
-        if (!/(?=.*[a-z])/.test(value)) return 'Include lowercase letter';
-        if (!/(?=.*[A-Z])/.test(value)) return 'Include uppercase letter';
-        if (!/(?=.*\d)/.test(value)) return 'Include number';
-        return '';
+        return validatePassword(value);
       case 'confirmPassword':
         if (!value) return 'Please confirm your password';
         return value !== formData.password ? 'Passwords do not match' : '';
       case 'userType':
         return !value ? 'Please select an account type' : '';
+      case 'agreeToTerms':
+        return !value ? 'You must agree to the terms and conditions' : '';
       default:
         return '';
     }
@@ -151,7 +141,9 @@ export default function RegisterPage() {
       }
 
       if (data.user) {
-        router.push(`/auth/confirm?email=${encodeURIComponent(formData.email)}`);
+        // Redirect based on user type
+        const redirectPath = formData.userType === 'tenant' ? '/dashboard' : `/${formData.userType}/dashboard`;
+        router.push(`/auth/confirm?email=${encodeURIComponent(formData.email)}&redirect=${redirectPath}`);
       }
 
     } catch (error: any) {
@@ -196,23 +188,27 @@ export default function RegisterPage() {
 
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
 
-  // Password strength indicator
+  // Enhanced password strength indicator
   const getPasswordStrength = (password: string) => {
-    if (!password) return { strength: 0, label: '', color: '' };
+    if (!password) return { strength: 0, label: '', color: '', width: '0%' };
     
     let strength = 0;
-    if (password.length >= 8) strength += 1;
-    if (/[a-z]/.test(password)) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-    if (/\d/.test(password)) strength += 1;
-    if (/[^a-zA-Z\d]/.test(password)) strength += 1;
+    const checks = [
+      password.length >= 8,
+      /[a-z]/.test(password),
+      /[A-Z]/.test(password),
+      /\d/.test(password),
+      /[^a-zA-Z\d]/.test(password)
+    ];
+    
+    strength = checks.filter(Boolean).length;
     
     const strengths = [
-      { label: 'Very Weak', color: 'bg-red-500' },
-      { label: 'Weak', color: 'bg-orange-500' },
-      { label: 'Fair', color: 'bg-yellow-500' },
-      { label: 'Good', color: 'bg-blue-500' },
-      { label: 'Strong', color: 'bg-green-500' }
+      { label: 'Very Weak', color: 'bg-red-500', width: '20%' },
+      { label: 'Weak', color: 'bg-orange-500', width: '40%' },
+      { label: 'Fair', color: 'bg-yellow-500', width: '60%' },
+      { label: 'Good', color: 'bg-blue-500', width: '80%' },
+      { label: 'Strong', color: 'bg-green-500', width: '100%' }
     ];
     
     return { ...strengths[strength - 1] || strengths[0], strength };
@@ -220,11 +216,36 @@ export default function RegisterPage() {
 
   const passwordStrength = getPasswordStrength(formData.password);
 
+  // Enhanced user types with constants - FIXED TYPE ISSUES
   const userTypes = [
-    { value: 'tenant', label: 'Looking to Rent or Buy', icon: '🔍', description: 'Find properties' },
-    { value: 'landlord', label: 'Property Owner', icon: '🏠', description: 'List and manage' },
-    { value: 'agent', label: 'Real Estate Agent', icon: '🤝', description: 'Professional services' },
-    { value: 'service', label: 'Service Provider', icon: '🔧', description: 'Maintenance & repairs' }
+    { 
+      value: USER_ROLES.TENANT as string,
+      label: 'Looking to Rent or Buy', 
+      icon: '🔍', 
+      description: 'Find properties',
+      testAccount: TEST_ACCOUNTS.TENANT.email
+    },
+    { 
+      value: USER_ROLES.LANDLORD as string,
+      label: 'Property Owner', 
+      icon: '🏠', 
+      description: 'List and manage properties',
+      testAccount: TEST_ACCOUNTS.LANDLORD.email
+    },
+    { 
+      value: USER_ROLES.AGENT as string,
+      label: 'Real Estate Agent', 
+      icon: '🤝', 
+      description: 'Professional services',
+      testAccount: TEST_ACCOUNTS.AGENT.email
+    },
+    { 
+      value: USER_ROLES.SERVICE as string,
+      label: 'Service Provider', 
+      icon: '🔧', 
+      description: 'Maintenance & repairs',
+      testAccount: TEST_ACCOUNTS.SERVICE.email
+    }
   ];
 
   const steps = [
@@ -240,7 +261,7 @@ export default function RegisterPage() {
                 type="button"
                 onClick={() => {
                   handleInputChange('userType', type.value);
-                  setTimeout(nextStep, 150); // Smooth transition
+                  setTimeout(nextStep, 150);
                 }}
                 className={`p-4 rounded-xl border-2 text-left transition-all duration-200 group ${
                   formData.userType === type.value
@@ -257,6 +278,12 @@ export default function RegisterPage() {
                   <div className="flex-1 text-left">
                     <h3 className="font-semibold text-gray-900 text-sm">{type.label}</h3>
                     <p className="text-gray-600 text-xs mt-0.5">{type.description}</p>
+                    {/* Show test account info in dev */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <p className="text-blue-600 text-xs mt-1 font-mono">
+                        Test: {type.testAccount}
+                      </p>
+                    )}
                   </div>
                   {formData.userType === type.value && (
                     <div className="w-6 h-6 rounded-full border-2 border-blue-500 bg-white flex items-center justify-center flex-shrink-0">
@@ -356,11 +383,15 @@ export default function RegisterPage() {
                   errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="71 123 456"
+                maxLength={8}
               />
             </div>
             {errors.phone && (
               <p className="mt-2 text-sm text-red-600 font-medium">{errors.phone}</p>
             )}
+            <p className="text-xs text-gray-500 mt-1">
+              Enter your 8-digit Botswana number
+            </p>
           </div>
 
           <div className="flex justify-between pt-4">
@@ -400,10 +431,10 @@ export default function RegisterPage() {
               className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                 errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
-              placeholder="At least 8 characters"
+              placeholder="At least 8 characters with letters and numbers"
             />
             
-            {/* Password Strength Indicator */}
+            {/* Enhanced Password Strength Indicator */}
             {formData.password && (
               <div className="mt-3 space-y-2">
                 <div className="flex justify-between text-xs">
@@ -419,8 +450,22 @@ export default function RegisterPage() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
-                    style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
+                    style={{ width: passwordStrength.width }}
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                  <div className={`${formData.password.length >= 8 ? 'text-green-600' : ''}`}>
+                    ✓ 8+ characters
+                  </div>
+                  <div className={`${/[a-z]/.test(formData.password) ? 'text-green-600' : ''}`}>
+                    ✓ Lowercase letter
+                  </div>
+                  <div className={`${/[A-Z]/.test(formData.password) ? 'text-green-600' : ''}`}>
+                    ✓ Uppercase letter
+                  </div>
+                  <div className={`${/\d/.test(formData.password) ? 'text-green-600' : ''}`}>
+                    ✓ Number
+                  </div>
                 </div>
               </div>
             )}
@@ -568,6 +613,12 @@ export default function RegisterPage() {
               Sign in here
             </Link>
           </p>
+          {/* Development helper */}
+          {process.env.NODE_ENV === 'development' && (
+            <p className="text-xs text-gray-500 mt-2">
+              Test password: <code className="bg-gray-100 px-1 rounded">Password123!</code>
+            </p>
+          )}
         </div>
       </div>
     </div>

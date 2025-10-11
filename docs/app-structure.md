@@ -1,5 +1,5 @@
 src/app/
-├── (consumer)/              # Tenant/Buyer interface
+├── consumer/                 # Tenant/Buyer interface - CLEAN
 │   ├── dashboard/           # ✅ COMPLETE
 │   ├── search/              # ✅ COMPLETE  
 │   ├── property/
@@ -9,28 +9,28 @@ src/app/
 │   ├── moving/
 │   └── services/
 │
-├── (landlord)/              # Property Owner interface
-│   ├── dashboard/
+├── landlord/                # Property Owner interface - CLEAN
+│   ├── dashboard/          # ✅ COMPLETE
 │   ├── properties/
 │   ├── tenants/
 │   ├── earnings/
 │   └── services/
 │
-├── (agent)/                 # Real Estate Agent interface
+├── agent/                   # Real Estate Agent interface - CLEAN
 │   ├── dashboard/
 │   ├── listings/
 │   ├── clients/
 │   ├── commissions/
 │   └── leads/
 │
-├── (service-provider)/      # Moving/Maintenance companies
+├── service-provider/        # Moving/Maintenance companies - CLEAN
 │   ├── dashboard/
 │   ├── jobs/
 │   ├── schedule/
 │   ├── earnings/
 │   └── fleet/
 │
-├── (admin)/                 # Platform management
+├── admin/                   # Platform management - CLEAN
 │   ├── dashboard/
 │   ├── users/
 │   ├── properties/
@@ -38,7 +38,12 @@ src/app/
 │   ├── disputes/
 │   └── analytics/
 │
-└── api/
+├── auth/                    # Authentication - CLEAN
+│   ├── login/
+│   ├── register/
+│   └── reset-password/
+│
+└── api/                     # API routes
     ├── properties/
     ├── bookings/
     ├── agents/
