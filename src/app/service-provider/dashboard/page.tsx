@@ -1,4 +1,4 @@
-﻿// src/app/landlord/dashboard/page.tsx - CLEAN LANDLORD DASHBOARD
+// src/app/service-provider/dashboard/page.tsx - CLEAN SERVICE PROVIDER DASHBOARD
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -14,19 +14,20 @@ const BellIcon = dynamic(() => import('lucide-react').then(mod => mod.Bell));
 const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
 const ShieldIcon = dynamic(() => import('lucide-react').then(mod => mod.Shield));
 const StarIcon = dynamic(() => import('lucide-react').then(mod => mod.Star));
+const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
 const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
 const ZapIcon = dynamic(() => import('lucide-react').then(mod => mod.Zap));
 const ChevronRightIcon = dynamic(() => import('lucide-react').then(mod => mod.ChevronRight));
 const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
+const WrenchIcon = dynamic(() => import('lucide-react').then(mod => mod.Wrench));
+const ClockIcon = dynamic(() => import('lucide-react').then(mod => mod.Clock));
+const DollarSignIcon = dynamic(() => import('lucide-react').then(mod => mod.DollarSign));
+const TrendingUpIcon = dynamic(() => import('lucide-react').then(mod => mod.TrendingUp));
+const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
 const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
 const PlusIcon = dynamic(() => import('lucide-react').then(mod => mod.Plus));
 const UsersIcon = dynamic(() => import('lucide-react').then(mod => mod.Users));
-const DollarSignIcon = dynamic(() => import('lucide-react').then(mod => mod.DollarSign));
-const BarChartIcon = dynamic(() => import('lucide-react').then(mod => mod.BarChart3));
 const SettingsIcon = dynamic(() => import('lucide-react').then(mod => mod.Settings));
-const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
-const RefreshIcon = dynamic(() => import('lucide-react').then(mod => mod.RefreshCw));
-const AlertIcon = dynamic(() => import('lucide-react').then(mod => mod.AlertCircle));
 
 // ERROR BOUNDARY COMPONENT
 function DashboardError({ error, onRetry }: { error: string; onRetry: () => void }) {
@@ -50,7 +51,7 @@ function DashboardError({ error, onRetry }: { error: string; onRetry: () => void
 }
 
 // SKELETON LOADERS
-function PropertySkeleton() {
+function ServiceRequestSkeleton() {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
       <div className="flex space-x-4">
@@ -68,26 +69,14 @@ function PropertySkeleton() {
   );
 }
 
-function BookingSkeleton() {
-  return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-2/3" />
-        <div className="h-3 bg-gray-200 rounded w-1/2" />
-        <div className="h-3 bg-gray-200 rounded w-3/4" />
-      </div>
-    </div>
-  );
-}
-
-export default function LandlordDashboard() {
+export default function ServiceProviderDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [notifications, setNotifications] = useState(2);
+  const [notifications, setNotifications] = useState(3);
   const [refreshing, setRefreshing] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -159,8 +148,10 @@ export default function LandlordDashboard() {
       if (profileError) {
         // Fallback to session data
         setUser({
-          first_name: session.user.email?.split('@')[0] || 'Landlord',
-          email: session.user.email
+          first_name: session.user.email?.split('@')[0] || 'Service Provider',
+          email: session.user.email,
+          company_name: 'Premium Services',
+          service_type: 'General Maintenance'
         });
       } else {
         setUser(profile);
@@ -180,9 +171,9 @@ export default function LandlordDashboard() {
   const handleQuickSearch = () => {
     const query = searchQuery.trim();
     if (query) {
-      router.push(`/landlord/search?q=${encodeURIComponent(query)}`);
+      router.push(`/service-provider/search?q=${encodeURIComponent(query)}`);
     } else {
-      router.push('/landlord/search');
+      router.push('/service-provider/search');
     }
   };
 
@@ -200,10 +191,10 @@ export default function LandlordDashboard() {
 
   // USER MENU OPTIONS
   const userMenuOptions = [
-    { icon: UserIcon, label: 'My Profile', action: () => router.push('/landlord/profile') },
-    { icon: BellIcon, label: 'Notifications', action: () => router.push('/landlord/notifications') },
-    { icon: DollarSignIcon, label: 'Finances', action: () => router.push('/landlord/finances') },
-    { icon: UsersIcon, label: 'Tenants', action: () => router.push('/landlord/tenants') },
+    { icon: UserIcon, label: 'My Profile', action: () => router.push('/service-provider/profile') },
+    { icon: BellIcon, label: 'Notifications', action: () => router.push('/service-provider/notifications') },
+    { icon: CalendarIcon, label: 'Schedule', action: () => router.push('/service-provider/schedule') },
+    { icon: StarIcon, label: 'Portfolio', action: () => router.push('/service-provider/portfolio') },
     { icon: ShieldIcon, label: 'Sign Out', action: handleLogout, destructive: true }
   ];
 
@@ -211,92 +202,95 @@ export default function LandlordDashboard() {
   const quickActions = [
     { 
       icon: PlusIcon, 
-      label: 'Add Property', 
-      description: 'List new property',
-      action: () => router.push('/landlord/properties/new'),
+      label: 'New Service', 
+      description: 'Create service offer',
+      action: () => router.push('/service-provider/services/new'),
       color: 'bg-blue-50 text-blue-700 border-blue-200'
     },
     { 
-      icon: BuildingIcon, 
-      label: 'My Properties', 
-      description: 'Manage listings',
-      action: () => router.push('/landlord/properties'),
+      icon: CalendarIcon, 
+      label: 'Schedule', 
+      description: 'View calendar',
+      action: () => router.push('/service-provider/schedule'),
       color: 'bg-green-50 text-green-700 border-green-200'
     },
     { 
       icon: DollarSignIcon, 
-      label: 'Finances', 
-      description: 'View income',
-      action: () => router.push('/landlord/finances'),
+      label: 'Earnings', 
+      description: 'View revenue',
+      action: () => router.push('/service-provider/earnings'),
       color: 'bg-purple-50 text-purple-700 border-purple-200'
     },
     { 
       icon: UsersIcon, 
-      label: 'Tenants', 
-      description: 'Manage tenants',
-      action: () => router.push('/landlord/tenants'),
+      label: 'Clients', 
+      description: 'Manage clients',
+      action: () => router.push('/service-provider/clients'),
       color: 'bg-orange-50 text-orange-700 border-orange-200'
     }
   ];
 
-  // PROPERTY DATA
-  const properties = [
+  // SERVICE TYPES
+  const serviceTypes = [
+    { id: 'plumbing', name: 'Plumbing', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    { id: 'electrical', name: 'Electrical', color: 'bg-orange-50 text-orange-700 border-orange-200' },
+    { id: 'painting', name: 'Painting', color: 'bg-green-50 text-green-700 border-green-200' },
+    { id: 'carpentry', name: 'Carpentry', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+    { id: 'construction', name: 'Construction', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+    { id: 'maintenance', name: 'Maintenance', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' }
+  ];
+
+  // SERVICE REQUESTS DATA
+  const serviceRequests = [
     {
       id: '1',
       title: 'CBD Luxury Apartment',
       location: 'CBD, Gaborone',
-      price: 14500,
-      beds: 2,
-      baths: 2,
-      area: 1200,
-      status: 'available',
-      image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400'
+      service: 'Plumbing Repair',
+      urgency: 'high',
+      status: 'assigned',
+      scheduled: 'Tomorrow, 10:00 AM',
+      cost: 1200,
+      client: 'John Landlord'
     },
     {
       id: '2', 
       title: 'Phakalane Executive Home',
       location: 'Phakalane Estate',
-      price: 25000,
-      beds: 4,
-      baths: 3,
-      area: 2400,
-      status: 'rented',
-      image: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400'
-    }
-  ];
-
-  // BOOKINGS DATA
-  const bookings = [
-    {
-      id: '1',
-      property_title: 'CBD Luxury Apartment',
-      tenant_name: 'John Tenant',
-      scheduled_date: 'Tomorrow, 10:00 AM',
-      status: 'confirmed'
+      service: 'Electrical Inspection',
+      urgency: 'medium',
+      status: 'pending',
+      scheduled: 'Dec 15, 2:00 PM',
+      cost: 2500,
+      client: 'Sarah Manager'
     },
     {
-      id: '2',
-      property_title: 'Phakalane Executive Home', 
-      tenant_name: 'Sarah Smith',
-      scheduled_date: 'Dec 15, 2:00 PM',
-      status: 'pending'
+      id: '3',
+      title: 'Broadhurst Family House',
+      location: 'Broadhurst, Gaborone',
+      service: 'Interior Painting',
+      urgency: 'low',
+      status: 'completed',
+      scheduled: 'Dec 10, 9:00 AM',
+      cost: 4500,
+      client: 'Mike Tenant'
     }
   ];
 
   // DASHBOARD STATS
   const dashboardStats = {
-    total_properties: 8,
-    occupied_properties: 5,
-    vacant_properties: 3,
-    monthly_income: 89500
+    active_requests: 8,
+    monthly_revenue: 28500,
+    average_rating: 4.7,
+    response_time: 2.5
   };
 
-  const handlePropertyClick = (propertyId: string) => {
-    router.push(`/landlord/properties/${propertyId}`);
+  const handleServiceTypeClick = (serviceType: string) => {
+    router.push(`/service-provider/services?type=${serviceType}`);
   };
 
-  const handleBookingClick = (bookingId: string) => {
-    router.push(`/landlord/bookings/${bookingId}`);
+  const handleRequestClick = (requestId: string) => {
+    router.push(`/service-provider/requests/${requestId}`);
   };
 
   // ERROR STATE
@@ -318,24 +312,17 @@ export default function LandlordDashboard() {
           ))}
         </div>
         
-        {/* Quick Actions Skeleton */}
-        <div className="grid grid-cols-2 gap-3">
-          {[...Array(4)].map((_, i) => (
+        {/* Service Types Skeleton */}
+        <div className="grid grid-cols-3 gap-3">
+          {[...Array(6)].map((_, i) => (
             <div key={i} className="h-20 bg-white rounded-2xl animate-pulse" />
           ))}
         </div>
         
-        {/* Properties Skeleton */}
+        {/* Requests Skeleton */}
         <div className="space-y-4">
-          {[...Array(2)].map((_, i) => (
-            <PropertySkeleton key={i} />
-          ))}
-        </div>
-
-        {/* Bookings Skeleton */}
-        <div className="space-y-3">
-          {[...Array(2)].map((_, i) => (
-            <BookingSkeleton key={i} />
+          {[...Array(3)].map((_, i) => (
+            <ServiceRequestSkeleton key={i} />
           ))}
         </div>
       </div>
@@ -368,17 +355,18 @@ export default function LandlordDashboard() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-semibold text-gray-900 truncate">
-                Welcome back, {user?.first_name || 'Landlord'}
+                Welcome back, {user?.first_name || 'Service Provider'}
               </h1>
               <p className="text-gray-600 text-sm truncate">
-                Manage your properties and tenants
+                Manage your service requests and schedule
+                {user?.company_name && ` • ${user.company_name}`}
               </p>
             </div>
 
             {/* USER CONTROLS */}
             <div className="flex items-center space-x-2 flex-shrink-0">
               <button
-                onClick={() => router.push('/landlord/notifications')}
+                onClick={() => router.push('/service-provider/notifications')}
                 className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Notifications"
               >
@@ -394,9 +382,9 @@ export default function LandlordDashboard() {
                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   aria-label="User menu"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
-                      {user?.first_name?.[0] || user?.email?.[0] || 'L'}
+                      {user?.first_name?.[0] || user?.email?.[0] || 'S'}
                     </span>
                   </div>
                 </button>
@@ -411,11 +399,16 @@ export default function LandlordDashboard() {
                     >
                       <div className="px-4 py-3 border-b border-gray-200">
                         <p className="font-semibold text-gray-900 text-sm truncate">
-                          {user?.first_name || 'Landlord'}
+                          {user?.first_name || 'Service Provider'}
                         </p>
                         <p className="text-gray-600 text-xs truncate">
                           {user?.email}
                         </p>
+                        {user?.company_name && (
+                          <p className="text-gray-500 text-xs mt-1">
+                            {user.company_name}
+                          </p>
+                        )}
                       </div>
 
                       <div className="py-1">
@@ -449,12 +442,12 @@ export default function LandlordDashboard() {
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search properties, tenants, locations..."
+              placeholder="Search service requests, clients, locations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyPress}
               className="w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all placeholder-gray-500"
-              aria-label="Search properties"
+              aria-label="Search service requests"
             />
           </div>
         </div>
@@ -466,28 +459,29 @@ export default function LandlordDashboard() {
         <section aria-labelledby="quick-stats-heading">
           <div className="flex items-center justify-between mb-4">
             <h2 id="quick-stats-heading" className="text-lg font-semibold text-gray-900">
-              Property Overview
+              Business Overview
             </h2>
-            <BarChartIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
+            <TrendingUpIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-blue-50 text-blue-700 border border-blue-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium opacity-80">Total Properties</p>
-                  <p className="text-2xl font-bold mt-1">{dashboardStats.total_properties}</p>
+                  <p className="text-sm font-medium opacity-80">Active Requests</p>
+                  <p className="text-2xl font-bold mt-1">{dashboardStats.active_requests}</p>
+                  <p className="text-xs opacity-70 mt-1">In progress</p>
                 </div>
                 <div className="p-2 bg-white rounded-lg">
-                  <BuildingIcon className="h-5 w-5" />
+                  <ClockIcon className="h-5 w-5" />
                 </div>
               </div>
             </div>
             <div className="bg-green-50 text-green-700 border border-green-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium opacity-80">Monthly Income</p>
-                  <p className="text-2xl font-bold mt-1">P{dashboardStats.monthly_income.toLocaleString()}</p>
-                  <p className="text-xs opacity-70 mt-1">Gross revenue</p>
+                  <p className="text-sm font-medium opacity-80">Monthly Revenue</p>
+                  <p className="text-2xl font-bold mt-1">P{dashboardStats.monthly_revenue.toLocaleString()}</p>
+                  <p className="text-xs opacity-70 mt-1">Estimated earnings</p>
                 </div>
                 <div className="p-2 bg-white rounded-lg">
                   <DollarSignIcon className="h-5 w-5" />
@@ -497,27 +491,50 @@ export default function LandlordDashboard() {
             <div className="bg-purple-50 text-purple-700 border border-purple-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium opacity-80">Occupied</p>
-                  <p className="text-2xl font-bold mt-1">{dashboardStats.occupied_properties}</p>
-                  <p className="text-xs opacity-70 mt-1">{Math.round((dashboardStats.occupied_properties / dashboardStats.total_properties) * 100)}% occupancy</p>
+                  <p className="text-sm font-medium opacity-80">Avg Rating</p>
+                  <p className="text-2xl font-bold mt-1">{dashboardStats.average_rating}</p>
+                  <p className="text-xs opacity-70 mt-1">Customer satisfaction</p>
                 </div>
                 <div className="p-2 bg-white rounded-lg">
-                  <UsersIcon className="h-5 w-5" />
+                  <StarIcon className="h-5 w-5" />
                 </div>
               </div>
             </div>
             <div className="bg-orange-50 text-orange-700 border border-orange-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium opacity-80">Vacant</p>
-                  <p className="text-2xl font-bold mt-1">{dashboardStats.vacant_properties}</p>
-                  <p className="text-xs opacity-70 mt-1">Available for rent</p>
+                  <p className="text-sm font-medium opacity-80">Response Time</p>
+                  <p className="text-2xl font-bold mt-1">{dashboardStats.response_time}h</p>
+                  <p className="text-xs opacity-70 mt-1">Average response</p>
                 </div>
                 <div className="p-2 bg-white rounded-lg">
-                  <HomeIcon className="h-5 w-5" />
+                  <TrendingUpIcon className="h-5 w-5" />
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* SERVICE TYPES */}
+        <section aria-labelledby="service-types-heading">
+          <h2 id="service-types-heading" className="text-lg font-semibold text-gray-900 mb-4">
+            Service Types
+          </h2>
+          <div className="grid grid-cols-3 gap-3">
+            {serviceTypes.map((service) => (
+              <button
+                key={service.id}
+                onClick={() => handleServiceTypeClick(service.id)}
+                className={`p-3 border rounded-xl text-center transition-all hover:shadow-sm active:scale-95 ${service.color}`}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="p-2 rounded-lg bg-white">
+                    <WrenchIcon className="h-4 w-4" />
+                  </div>
+                  <span className="text-xs font-medium capitalize">{service.name}</span>
+                </div>
+              </button>
+            ))}
           </div>
         </section>
 
@@ -550,14 +567,14 @@ export default function LandlordDashboard() {
           </div>
         </section>
 
-        {/* RECENT PROPERTIES */}
-        <section aria-labelledby="recent-properties-heading">
+        {/* RECENT SERVICE REQUESTS */}
+        <section aria-labelledby="recent-requests-heading">
           <div className="flex items-center justify-between mb-4">
-            <h2 id="recent-properties-heading" className="text-lg font-semibold text-gray-900">
-              Recent Properties
+            <h2 id="recent-requests-heading" className="text-lg font-semibold text-gray-900">
+              Recent Requests
             </h2>
             <button 
-              onClick={() => router.push('/landlord/properties')}
+              onClick={() => router.push('/service-provider/requests')}
               className="text-blue-600 text-sm hover:underline font-medium flex items-center space-x-1"
             >
               <span>View all</span>
@@ -566,98 +583,65 @@ export default function LandlordDashboard() {
           </div>
 
           <div className="space-y-4">
-            {properties.map((property) => (
+            {serviceRequests.map((request) => (
               <div
-                key={property.id}
-                onClick={() => handlePropertyClick(property.id)}
+                key={request.id}
+                onClick={() => handleRequestClick(request.id)}
                 className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer"
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && handlePropertyClick(property.id)}
-                aria-label={`View ${property.title} in ${property.location}`}
+                onKeyDown={(e) => e.key === 'Enter' && handleRequestClick(request.id)}
+                aria-label={`View ${request.service} request for ${request.title}`}
               >
                 <div className="flex space-x-4">
                   <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 relative">
-                    <img 
-                      src={property.image} 
-                      alt={property.title}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                      property.status === 'available' ? 'bg-green-100 text-green-700' :
-                      property.status === 'rented' ? 'bg-blue-100 text-blue-700' :
-                      'bg-orange-100 text-orange-700'
-                    }`}>
-                      {property.status}
-                    </div>
+                    <WrenchIcon className="h-6 w-6 text-gray-600" />
+                    <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${
+                      request.urgency === 'high' ? 'bg-red-500' : 
+                      request.urgency === 'medium' ? 'bg-orange-500' : 'bg-green-500'
+                    }`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <h3 className="font-semibold text-gray-900 text-sm truncate">
-                        {property.title}
+                        {request.service}
                       </h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                        request.status === 'completed' ? 'bg-green-100 text-green-700' :
+                        request.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
+                        'bg-orange-100 text-orange-700'
+                      }`}>
+                        {request.status}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1 text-gray-600 text-sm mb-2">
+                      <BuildingIcon className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{request.title}</span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-gray-500 text-xs mb-2">
                       <MapPinIcon className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">{property.location}</span>
+                      <span className="truncate">{request.location}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 text-sm text-gray-600">
-                        <span>{property.beds} bed</span>
-                        <span>{property.baths} bath</span>
-                        <span>{property.area} sqft</span>
+                        <div className="flex items-center space-x-1">
+                          <CalendarIcon className="h-3 w-3" />
+                          <span className="text-xs">{request.scheduled}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <UserIcon className="h-3 w-3" />
+                          <span className="text-xs">{request.client}</span>
+                        </div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-gray-900">
-                          P{property.price.toLocaleString()}/mo
+                          P{request.cost.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 capitalize">
+                          {request.urgency} priority
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* RECENT BOOKINGS */}
-        <section aria-labelledby="recent-bookings-heading">
-          <div className="flex items-center justify-between mb-4">
-            <h2 id="recent-bookings-heading" className="text-lg font-semibold text-gray-900">
-              Recent Bookings
-            </h2>
-            <button 
-              onClick={() => router.push('/landlord/bookings')}
-              className="text-blue-600 text-sm hover:underline font-medium flex items-center space-x-1"
-            >
-              <span>View all</span>
-              <ChevronRightIcon className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {bookings.map((booking) => (
-              <div
-                key={booking.id}
-                onClick={() => handleBookingClick(booking.id)}
-                className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-sm transition-all cursor-pointer"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && handleBookingClick(booking.id)}
-                aria-label={`View booking for ${booking.property_title}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 text-sm">{booking.property_title}</h3>
-                    <p className="text-gray-600 text-xs mt-0.5">With {booking.tenant_name}</p>
-                    <p className="text-gray-500 text-xs mt-1">{booking.scheduled_date}</p>
-                  </div>
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize flex-shrink-0 ${
-                    booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                    booking.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                    'bg-blue-100 text-blue-700'
-                  }`}>
-                    {booking.status}
                   </div>
                 </div>
               </div>
@@ -671,10 +655,10 @@ export default function LandlordDashboard() {
         <div className="px-4 py-2">
           <div className="flex justify-around items-center">
             {[
-              { icon: HomeIcon, label: 'Dashboard', active: true, href: '/landlord/dashboard' },
-              { icon: BuildingIcon, label: 'Properties', href: '/landlord/properties' },
-              { icon: BarChartIcon, label: 'Analytics', href: '/landlord/analytics' },
-              { icon: UserIcon, label: 'Profile', href: '/landlord/profile' },
+              { icon: HomeIcon, label: 'Dashboard', active: true, href: '/service-provider/dashboard' },
+              { icon: CalendarIcon, label: 'Schedule', href: '/service-provider/schedule' },
+              { icon: WrenchIcon, label: 'Services', href: '/service-provider/services' },
+              { icon: UserIcon, label: 'Profile', href: '/service-provider/profile' },
             ].map(({ icon: Icon, label, active, href }) => (
               <button
                 key={label}

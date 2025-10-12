@@ -1,4 +1,4 @@
-﻿// src/app/landlord/dashboard/page.tsx - CLEAN LANDLORD DASHBOARD
+// src/app/admin/dashboard/page.tsx - CLEAN ADMIN DASHBOARD
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -11,22 +11,21 @@ import dynamic from 'next/dynamic';
 const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
 const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Building2));
 const BellIcon = dynamic(() => import('lucide-react').then(mod => mod.Bell));
-const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
+const UsersIcon = dynamic(() => import('lucide-react').then(mod => mod.Users));
 const ShieldIcon = dynamic(() => import('lucide-react').then(mod => mod.Shield));
-const StarIcon = dynamic(() => import('lucide-react').then(mod => mod.Star));
-const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
+const BarChartIcon = dynamic(() => import('lucide-react').then(mod => mod.BarChart3));
 const ZapIcon = dynamic(() => import('lucide-react').then(mod => mod.Zap));
 const ChevronRightIcon = dynamic(() => import('lucide-react').then(mod => mod.ChevronRight));
 const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
 const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
-const PlusIcon = dynamic(() => import('lucide-react').then(mod => mod.Plus));
-const UsersIcon = dynamic(() => import('lucide-react').then(mod => mod.Users));
-const DollarSignIcon = dynamic(() => import('lucide-react').then(mod => mod.DollarSign));
-const BarChartIcon = dynamic(() => import('lucide-react').then(mod => mod.BarChart3));
 const SettingsIcon = dynamic(() => import('lucide-react').then(mod => mod.Settings));
 const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
-const RefreshIcon = dynamic(() => import('lucide-react').then(mod => mod.RefreshCw));
-const AlertIcon = dynamic(() => import('lucide-react').then(mod => mod.AlertCircle));
+const AlertTriangleIcon = dynamic(() => import('lucide-react').then(mod => mod.AlertTriangle));
+const TrendingUpIcon = dynamic(() => import('lucide-react').then(mod => mod.TrendingUp));
+const DollarSignIcon = dynamic(() => import('lucide-react').then(mod => mod.DollarSign));
+const EyeIcon = dynamic(() => import('lucide-react').then(mod => mod.Eye));
+const CheckCircleIcon = dynamic(() => import('lucide-react').then(mod => mod.CheckCircle));
+const XCircleIcon = dynamic(() => import('lucide-react').then(mod => mod.XCircle));
 
 // ERROR BOUNDARY COMPONENT
 function DashboardError({ error, onRetry }: { error: string; onRetry: () => void }) {
@@ -50,11 +49,11 @@ function DashboardError({ error, onRetry }: { error: string; onRetry: () => void
 }
 
 // SKELETON LOADERS
-function PropertySkeleton() {
+function UserSkeleton() {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
       <div className="flex space-x-4">
-        <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0" />
+        <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0" />
         <div className="flex-1 space-y-2">
           <div className="h-4 bg-gray-200 rounded w-3/4" />
           <div className="h-3 bg-gray-200 rounded w-1/2" />
@@ -68,7 +67,7 @@ function PropertySkeleton() {
   );
 }
 
-function BookingSkeleton() {
+function ReportSkeleton() {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
       <div className="space-y-2">
@@ -80,14 +79,14 @@ function BookingSkeleton() {
   );
 }
 
-export default function LandlordDashboard() {
+export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [notifications, setNotifications] = useState(2);
+  const [notifications, setNotifications] = useState(5);
   const [refreshing, setRefreshing] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -159,8 +158,9 @@ export default function LandlordDashboard() {
       if (profileError) {
         // Fallback to session data
         setUser({
-          first_name: session.user.email?.split('@')[0] || 'Landlord',
-          email: session.user.email
+          first_name: session.user.email?.split('@')[0] || 'Admin',
+          email: session.user.email,
+          user_type: 'admin'
         });
       } else {
         setUser(profile);
@@ -180,9 +180,9 @@ export default function LandlordDashboard() {
   const handleQuickSearch = () => {
     const query = searchQuery.trim();
     if (query) {
-      router.push(`/landlord/search?q=${encodeURIComponent(query)}`);
+      router.push(`/admin/search?q=${encodeURIComponent(query)}`);
     } else {
-      router.push('/landlord/search');
+      router.push('/admin/search');
     }
   };
 
@@ -200,103 +200,121 @@ export default function LandlordDashboard() {
 
   // USER MENU OPTIONS
   const userMenuOptions = [
-    { icon: UserIcon, label: 'My Profile', action: () => router.push('/landlord/profile') },
-    { icon: BellIcon, label: 'Notifications', action: () => router.push('/landlord/notifications') },
-    { icon: DollarSignIcon, label: 'Finances', action: () => router.push('/landlord/finances') },
-    { icon: UsersIcon, label: 'Tenants', action: () => router.push('/landlord/tenants') },
+    { icon: UserIcon, label: 'Admin Profile', action: () => router.push('/admin/profile') },
+    { icon: SettingsIcon, label: 'System Settings', action: () => router.push('/admin/settings') },
+    { icon: UsersIcon, label: 'User Management', action: () => router.push('/admin/users') },
+    { icon: ShieldIcon, label: 'Security', action: () => router.push('/admin/security') },
     { icon: ShieldIcon, label: 'Sign Out', action: handleLogout, destructive: true }
   ];
 
   // QUICK ACTIONS
   const quickActions = [
     { 
-      icon: PlusIcon, 
-      label: 'Add Property', 
-      description: 'List new property',
-      action: () => router.push('/landlord/properties/new'),
+      icon: UsersIcon, 
+      label: 'User Management', 
+      description: 'Manage all users',
+      action: () => router.push('/admin/users'),
       color: 'bg-blue-50 text-blue-700 border-blue-200'
     },
     { 
       icon: BuildingIcon, 
-      label: 'My Properties', 
+      label: 'Properties', 
       description: 'Manage listings',
-      action: () => router.push('/landlord/properties'),
+      action: () => router.push('/admin/properties'),
       color: 'bg-green-50 text-green-700 border-green-200'
     },
     { 
-      icon: DollarSignIcon, 
-      label: 'Finances', 
-      description: 'View income',
-      action: () => router.push('/landlord/finances'),
+      icon: BarChartIcon, 
+      label: 'Analytics', 
+      description: 'View platform stats',
+      action: () => router.push('/admin/analytics'),
       color: 'bg-purple-50 text-purple-700 border-purple-200'
     },
     { 
-      icon: UsersIcon, 
-      label: 'Tenants', 
-      description: 'Manage tenants',
-      action: () => router.push('/landlord/tenants'),
+      icon: SettingsIcon, 
+      label: 'System Settings', 
+      description: 'Platform configuration',
+      action: () => router.push('/admin/settings'),
       color: 'bg-orange-50 text-orange-700 border-orange-200'
     }
   ];
 
-  // PROPERTY DATA
-  const properties = [
+  // ADMIN STATS
+  const adminStats = {
+    total_users: 1247,
+    active_listings: 289,
+    platform_revenue: 125400,
+    pending_approvals: 23,
+    system_health: 99.8
+  };
+
+  // RECENT USERS DATA
+  const recentUsers = [
     {
       id: '1',
-      title: 'CBD Luxury Apartment',
-      location: 'CBD, Gaborone',
-      price: 14500,
-      beds: 2,
-      baths: 2,
-      area: 1200,
-      status: 'available',
-      image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400'
+      name: 'John Landlord',
+      email: 'john@example.com',
+      type: 'landlord',
+      status: 'active',
+      join_date: '2 days ago'
     },
     {
       id: '2', 
-      title: 'Phakalane Executive Home',
-      location: 'Phakalane Estate',
-      price: 25000,
-      beds: 4,
-      baths: 3,
-      area: 2400,
-      status: 'rented',
-      image: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400'
+      name: 'Sarah Agent',
+      email: 'sarah@example.com',
+      type: 'agent',
+      status: 'pending',
+      join_date: '1 day ago'
+    },
+    {
+      id: '3',
+      name: 'Mike Tenant',
+      email: 'mike@example.com',
+      type: 'tenant',
+      status: 'active',
+      join_date: '3 hours ago'
+    },
+    {
+      id: '4',
+      name: 'Service Pro',
+      email: 'service@example.com',
+      type: 'service',
+      status: 'active',
+      join_date: '5 days ago'
     }
   ];
 
-  // BOOKINGS DATA
-  const bookings = [
+  // SYSTEM REPORTS
+  const systemReports = [
     {
       id: '1',
-      property_title: 'CBD Luxury Apartment',
-      tenant_name: 'John Tenant',
-      scheduled_date: 'Tomorrow, 10:00 AM',
-      status: 'confirmed'
+      title: 'Platform Performance',
+      status: 'normal',
+      description: 'All systems operating normally',
+      timestamp: '5 minutes ago'
     },
     {
       id: '2',
-      property_title: 'Phakalane Executive Home', 
-      tenant_name: 'Sarah Smith',
-      scheduled_date: 'Dec 15, 2:00 PM',
-      status: 'pending'
+      title: 'Security Audit',
+      status: 'warning',
+      description: '2 failed login attempts detected',
+      timestamp: '1 hour ago'
+    },
+    {
+      id: '3',
+      title: 'Database Backup',
+      status: 'success',
+      description: 'Nightly backup completed successfully',
+      timestamp: '6 hours ago'
     }
   ];
 
-  // DASHBOARD STATS
-  const dashboardStats = {
-    total_properties: 8,
-    occupied_properties: 5,
-    vacant_properties: 3,
-    monthly_income: 89500
+  const handleUserClick = (userId: string) => {
+    router.push(`/admin/users/${userId}`);
   };
 
-  const handlePropertyClick = (propertyId: string) => {
-    router.push(`/landlord/properties/${propertyId}`);
-  };
-
-  const handleBookingClick = (bookingId: string) => {
-    router.push(`/landlord/bookings/${bookingId}`);
+  const handleReportClick = (reportId: string) => {
+    router.push(`/admin/reports/${reportId}`);
   };
 
   // ERROR STATE
@@ -325,17 +343,17 @@ export default function LandlordDashboard() {
           ))}
         </div>
         
-        {/* Properties Skeleton */}
+        {/* Users Skeleton */}
         <div className="space-y-4">
-          {[...Array(2)].map((_, i) => (
-            <PropertySkeleton key={i} />
+          {[...Array(4)].map((_, i) => (
+            <UserSkeleton key={i} />
           ))}
         </div>
 
-        {/* Bookings Skeleton */}
+        {/* Reports Skeleton */}
         <div className="space-y-3">
-          {[...Array(2)].map((_, i) => (
-            <BookingSkeleton key={i} />
+          {[...Array(3)].map((_, i) => (
+            <ReportSkeleton key={i} />
           ))}
         </div>
       </div>
@@ -368,17 +386,17 @@ export default function LandlordDashboard() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-semibold text-gray-900 truncate">
-                Welcome back, {user?.first_name || 'Landlord'}
+                Welcome back, {user?.first_name || 'Admin'}
               </h1>
               <p className="text-gray-600 text-sm truncate">
-                Manage your properties and tenants
+                Manage platform operations and users
               </p>
             </div>
 
             {/* USER CONTROLS */}
             <div className="flex items-center space-x-2 flex-shrink-0">
               <button
-                onClick={() => router.push('/landlord/notifications')}
+                onClick={() => router.push('/admin/notifications')}
                 className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Notifications"
               >
@@ -392,11 +410,11 @@ export default function LandlordDashboard() {
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  aria-label="User menu"
+                  aria-label="Admin menu"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
-                      {user?.first_name?.[0] || user?.email?.[0] || 'L'}
+                      {user?.first_name?.[0] || user?.email?.[0] || 'A'}
                     </span>
                   </div>
                 </button>
@@ -411,10 +429,13 @@ export default function LandlordDashboard() {
                     >
                       <div className="px-4 py-3 border-b border-gray-200">
                         <p className="font-semibold text-gray-900 text-sm truncate">
-                          {user?.first_name || 'Landlord'}
+                          {user?.first_name || 'Admin'}
                         </p>
                         <p className="text-gray-600 text-xs truncate">
                           {user?.email}
+                        </p>
+                        <p className="text-gray-500 text-xs mt-1">
+                          System Administrator
                         </p>
                       </div>
 
@@ -449,12 +470,12 @@ export default function LandlordDashboard() {
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search properties, tenants, locations..."
+              placeholder="Search users, properties, reports..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyPress}
               className="w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all placeholder-gray-500"
-              aria-label="Search properties"
+              aria-label="Search platform"
             />
           </div>
         </div>
@@ -466,7 +487,7 @@ export default function LandlordDashboard() {
         <section aria-labelledby="quick-stats-heading">
           <div className="flex items-center justify-between mb-4">
             <h2 id="quick-stats-heading" className="text-lg font-semibold text-gray-900">
-              Property Overview
+              Platform Overview
             </h2>
             <BarChartIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
           </div>
@@ -474,47 +495,48 @@ export default function LandlordDashboard() {
             <div className="bg-blue-50 text-blue-700 border border-blue-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium opacity-80">Total Properties</p>
-                  <p className="text-2xl font-bold mt-1">{dashboardStats.total_properties}</p>
-                </div>
-                <div className="p-2 bg-white rounded-lg">
-                  <BuildingIcon className="h-5 w-5" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-green-50 text-green-700 border border-green-200 rounded-xl p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium opacity-80">Monthly Income</p>
-                  <p className="text-2xl font-bold mt-1">P{dashboardStats.monthly_income.toLocaleString()}</p>
-                  <p className="text-xs opacity-70 mt-1">Gross revenue</p>
-                </div>
-                <div className="p-2 bg-white rounded-lg">
-                  <DollarSignIcon className="h-5 w-5" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-purple-50 text-purple-700 border border-purple-200 rounded-xl p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium opacity-80">Occupied</p>
-                  <p className="text-2xl font-bold mt-1">{dashboardStats.occupied_properties}</p>
-                  <p className="text-xs opacity-70 mt-1">{Math.round((dashboardStats.occupied_properties / dashboardStats.total_properties) * 100)}% occupancy</p>
+                  <p className="text-sm font-medium opacity-80">Total Users</p>
+                  <p className="text-2xl font-bold mt-1">{adminStats.total_users}</p>
+                  <p className="text-xs opacity-70 mt-1">Registered accounts</p>
                 </div>
                 <div className="p-2 bg-white rounded-lg">
                   <UsersIcon className="h-5 w-5" />
                 </div>
               </div>
             </div>
+            <div className="bg-green-50 text-green-700 border border-green-200 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium opacity-80">Active Listings</p>
+                  <p className="text-2xl font-bold mt-1">{adminStats.active_listings}</p>
+                  <p className="text-xs opacity-70 mt-1">Properties available</p>
+                </div>
+                <div className="p-2 bg-white rounded-lg">
+                  <BuildingIcon className="h-5 w-5" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-purple-50 text-purple-700 border border-purple-200 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium opacity-80">Platform Revenue</p>
+                  <p className="text-2xl font-bold mt-1">P{adminStats.platform_revenue.toLocaleString()}</p>
+                  <p className="text-xs opacity-70 mt-1">Monthly earnings</p>
+                </div>
+                <div className="p-2 bg-white rounded-lg">
+                  <DollarSignIcon className="h-5 w-5" />
+                </div>
+              </div>
+            </div>
             <div className="bg-orange-50 text-orange-700 border border-orange-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium opacity-80">Vacant</p>
-                  <p className="text-2xl font-bold mt-1">{dashboardStats.vacant_properties}</p>
-                  <p className="text-xs opacity-70 mt-1">Available for rent</p>
+                  <p className="text-sm font-medium opacity-80">System Health</p>
+                  <p className="text-2xl font-bold mt-1">{adminStats.system_health}%</p>
+                  <p className="text-xs opacity-70 mt-1">Uptime & performance</p>
                 </div>
                 <div className="p-2 bg-white rounded-lg">
-                  <HomeIcon className="h-5 w-5" />
+                  <TrendingUpIcon className="h-5 w-5" />
                 </div>
               </div>
             </div>
@@ -525,7 +547,7 @@ export default function LandlordDashboard() {
         <section aria-labelledby="quick-actions-heading">
           <div className="flex items-center justify-between mb-4">
             <h2 id="quick-actions-heading" className="text-lg font-semibold text-gray-900">
-              Quick Actions
+              Admin Actions
             </h2>
             <ZapIcon className="h-5 w-5 text-yellow-500 flex-shrink-0" />
           </div>
@@ -550,14 +572,14 @@ export default function LandlordDashboard() {
           </div>
         </section>
 
-        {/* RECENT PROPERTIES */}
-        <section aria-labelledby="recent-properties-heading">
+        {/* RECENT USERS */}
+        <section aria-labelledby="recent-users-heading">
           <div className="flex items-center justify-between mb-4">
-            <h2 id="recent-properties-heading" className="text-lg font-semibold text-gray-900">
-              Recent Properties
+            <h2 id="recent-users-heading" className="text-lg font-semibold text-gray-900">
+              Recent Users
             </h2>
             <button 
-              onClick={() => router.push('/landlord/properties')}
+              onClick={() => router.push('/admin/users')}
               className="text-blue-600 text-sm hover:underline font-medium flex items-center space-x-1"
             >
               <span>View all</span>
@@ -566,51 +588,66 @@ export default function LandlordDashboard() {
           </div>
 
           <div className="space-y-4">
-            {properties.map((property) => (
+            {recentUsers.map((user) => (
               <div
-                key={property.id}
-                onClick={() => handlePropertyClick(property.id)}
+                key={user.id}
+                onClick={() => handleUserClick(user.id)}
                 className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer"
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && handlePropertyClick(property.id)}
-                aria-label={`View ${property.title} in ${property.location}`}
+                onKeyDown={(e) => e.key === 'Enter' && handleUserClick(user.id)}
+                aria-label={`View ${user.name} profile`}
               >
                 <div className="flex space-x-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 relative">
-                    <img 
-                      src={property.image} 
-                      alt={property.title}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                      property.status === 'available' ? 'bg-green-100 text-green-700' :
-                      property.status === 'rented' ? 'bg-blue-100 text-blue-700' :
-                      'bg-orange-100 text-orange-700'
-                    }`}>
-                      {property.status}
-                    </div>
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <UserIcon className="h-5 w-5 text-gray-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <h3 className="font-semibold text-gray-900 text-sm truncate">
-                        {property.title}
-                      </h3>
-                    </div>
-                    <div className="flex items-center space-x-1 text-gray-600 text-sm mb-2">
-                      <MapPinIcon className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">{property.location}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm truncate">
+                          {user.name}
+                        </h3>
+                        <p className="text-gray-600 text-xs truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                          user.status === 'active' ? 'bg-green-100 text-green-700' :
+                          user.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {user.status}
+                        </span>
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 capitalize">
+                          {user.type}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 text-sm text-gray-600">
-                        <span>{property.beds} bed</span>
-                        <span>{property.baths} bath</span>
-                        <span>{property.area} sqft</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">
-                          P{property.price.toLocaleString()}/mo
-                        </div>
+                      <p className="text-gray-500 text-xs">
+                        Joined {user.join_date}
+                      </p>
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/admin/users/${user.id}/edit`);
+                          }}
+                          className="text-blue-600 text-xs hover:underline font-medium"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/admin/users/${user.id}/view`);
+                          }}
+                          className="text-gray-600 text-xs hover:underline font-medium"
+                        >
+                          View
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -620,14 +657,14 @@ export default function LandlordDashboard() {
           </div>
         </section>
 
-        {/* RECENT BOOKINGS */}
-        <section aria-labelledby="recent-bookings-heading">
+        {/* SYSTEM REPORTS */}
+        <section aria-labelledby="system-reports-heading">
           <div className="flex items-center justify-between mb-4">
-            <h2 id="recent-bookings-heading" className="text-lg font-semibold text-gray-900">
-              Recent Bookings
+            <h2 id="system-reports-heading" className="text-lg font-semibold text-gray-900">
+              System Reports
             </h2>
             <button 
-              onClick={() => router.push('/landlord/bookings')}
+              onClick={() => router.push('/admin/reports')}
               className="text-blue-600 text-sm hover:underline font-medium flex items-center space-x-1"
             >
               <span>View all</span>
@@ -636,28 +673,45 @@ export default function LandlordDashboard() {
           </div>
 
           <div className="space-y-3">
-            {bookings.map((booking) => (
+            {systemReports.map((report) => (
               <div
-                key={booking.id}
-                onClick={() => handleBookingClick(booking.id)}
+                key={report.id}
+                onClick={() => handleReportClick(report.id)}
                 className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-sm transition-all cursor-pointer"
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && handleBookingClick(booking.id)}
-                aria-label={`View booking for ${booking.property_title}`}
+                onKeyDown={(e) => e.key === 'Enter' && handleReportClick(report.id)}
+                aria-label={`View ${report.title} report`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 text-sm">{booking.property_title}</h3>
-                    <p className="text-gray-600 text-xs mt-0.5">With {booking.tenant_name}</p>
-                    <p className="text-gray-500 text-xs mt-1">{booking.scheduled_date}</p>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="font-medium text-gray-900 text-sm truncate">
+                        {report.title}
+                      </h3>
+                      {report.status === 'success' && (
+                        <CheckCircleIcon className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      )}
+                      {report.status === 'warning' && (
+                        <AlertTriangleIcon className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                      )}
+                      {report.status === 'error' && (
+                        <XCircleIcon className="h-4 w-4 text-red-500 flex-shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-gray-600 text-xs mt-0.5">
+                      {report.description}
+                    </p>
+                    <p className="text-gray-500 text-xs mt-1">
+                      {report.timestamp}
+                    </p>
                   </div>
                   <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize flex-shrink-0 ${
-                    booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                    booking.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                    'bg-blue-100 text-blue-700'
+                    report.status === 'success' ? 'bg-green-100 text-green-700' :
+                    report.status === 'warning' ? 'bg-orange-100 text-orange-700' :
+                    'bg-red-100 text-red-700'
                   }`}>
-                    {booking.status}
+                    {report.status}
                   </div>
                 </div>
               </div>
@@ -671,10 +725,10 @@ export default function LandlordDashboard() {
         <div className="px-4 py-2">
           <div className="flex justify-around items-center">
             {[
-              { icon: HomeIcon, label: 'Dashboard', active: true, href: '/landlord/dashboard' },
-              { icon: BuildingIcon, label: 'Properties', href: '/landlord/properties' },
-              { icon: BarChartIcon, label: 'Analytics', href: '/landlord/analytics' },
-              { icon: UserIcon, label: 'Profile', href: '/landlord/profile' },
+              { icon: HomeIcon, label: 'Dashboard', active: true, href: '/admin/dashboard' },
+              { icon: UsersIcon, label: 'Users', href: '/admin/users' },
+              { icon: BarChartIcon, label: 'Analytics', href: '/admin/analytics' },
+              { icon: SettingsIcon, label: 'Settings', href: '/admin/settings' },
             ].map(({ icon: Icon, label, active, href }) => (
               <button
                 key={label}
