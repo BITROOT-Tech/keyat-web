@@ -1,4 +1,3 @@
-//src\components\consumer\Sidebar.tsx
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
@@ -7,19 +6,20 @@ import dynamic from 'next/dynamic';
 
 // Lazy load icons
 const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
-const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
-const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
-const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
-const TruckIcon = dynamic(() => import('lucide-react').then(mod => mod.Truck));
-const WrenchIcon = dynamic(() => import('lucide-react').then(mod => mod.Wrench));
-const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
 const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Building2));
+const PlusIcon = dynamic(() => import('lucide-react').then(mod => mod.Plus));
+const UsersIcon = dynamic(() => import('lucide-react').then(mod => mod.Users));
+const DollarSignIcon = dynamic(() => import('lucide-react').then(mod => mod.DollarSign));
+const BarChartIcon = dynamic(() => import('lucide-react').then(mod => mod.BarChart3));
+const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
+const SettingsIcon = dynamic(() => import('lucide-react').then(mod => mod.Settings));
+const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
 
 interface SidebarProps {
   user?: any;
 }
 
-export default function ConsumerSidebar({ user }: SidebarProps) {
+export default function LandlordSidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -27,44 +27,51 @@ export default function ConsumerSidebar({ user }: SidebarProps) {
     {
       icon: HomeIcon,
       label: 'Dashboard',
-      href: '/consumer/dashboard',
-      active: pathname === '/consumer/dashboard',
-      description: 'Your overview'
+      href: '/landlord/dashboard',
+      active: pathname === '/landlord/dashboard',
+      description: 'Property overview'
     },
     {
-      icon: SearchIcon,
-      label: 'Search Properties',
-      href: '/consumer/search',
-      active: pathname?.startsWith('/consumer/search'),
-      description: 'Find your perfect home'
+      icon: BuildingIcon,
+      label: 'My Properties',
+      href: '/landlord/properties',
+      active: pathname?.startsWith('/landlord/properties'),
+      description: 'Manage listings'
     },
     {
-      icon: HeartIcon,
-      label: 'Saved Properties',
-      href: '/consumer/saved',
-      active: pathname?.startsWith('/consumer/saved'),
-      description: 'Your favorites'
+      icon: PlusIcon,
+      label: 'Add Property',
+      href: '/landlord/properties/new',
+      active: pathname?.startsWith('/landlord/properties/new'),
+      description: 'Create new listing'
+    },
+    {
+      icon: UsersIcon,
+      label: 'Tenants',
+      href: '/landlord/tenants',
+      active: pathname?.startsWith('/landlord/tenants'),
+      description: 'Manage tenants'
+    },
+    {
+      icon: DollarSignIcon,
+      label: 'Finances',
+      href: '/landlord/finances',
+      active: pathname?.startsWith('/landlord/finances'),
+      description: 'Income & expenses'
     },
     {
       icon: CalendarIcon,
-      label: 'My Bookings',
-      href: '/consumer/booking',
-      active: pathname?.startsWith('/consumer/booking'),
+      label: 'Bookings',
+      href: '/landlord/bookings',
+      active: pathname?.startsWith('/landlord/bookings'),
       description: 'Viewings & tours'
     },
     {
-      icon: TruckIcon,
-      label: 'Moving Services',
-      href: '/consumer/moving',
-      active: pathname?.startsWith('/consumer/moving'),
-      description: 'Relocation help'
-    },
-    {
-      icon: WrenchIcon,
-      label: 'Home Services',
-      href: '/consumer/services',
-      active: pathname?.startsWith('/consumer/services'),
-      description: 'Maintenance & repairs'
+      icon: BarChartIcon,
+      label: 'Analytics',
+      href: '/landlord/analytics',
+      active: pathname?.startsWith('/landlord/analytics'),
+      description: 'Performance insights'
     },
   ];
 
@@ -83,12 +90,12 @@ export default function ConsumerSidebar({ user }: SidebarProps) {
         {/* Sidebar header */}
         <div className="flex items-center justify-between flex-shrink-0 px-6 py-4 border-b border-gray-200">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
               <BuildingIcon className="h-5 w-5 text-white" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-gray-900">Keyat</h1>
-              <p className="text-xs text-gray-500">Consumer</p>
+              <p className="text-xs text-gray-500">Landlord</p>
             </div>
           </div>
         </div>
@@ -103,12 +110,12 @@ export default function ConsumerSidebar({ user }: SidebarProps) {
               whileTap={{ scale: 0.98 }}
               className={`w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-left transition-all duration-200 touch-manipulation ${
                 active
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  ? 'bg-green-50 text-green-700 border border-green-200'
                   : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
               <div className={`p-2 rounded-lg ${
-                active ? 'bg-blue-100' : 'bg-gray-100'
+                active ? 'bg-green-100' : 'bg-gray-100'
               }`}>
                 <Icon className="h-4 w-4" />
               </div>
@@ -123,21 +130,21 @@ export default function ConsumerSidebar({ user }: SidebarProps) {
         {/* User profile footer */}
         <div className="flex-shrink-0 p-4 border-t border-gray-200">
           <button
-            onClick={() => router.push('/consumer/profile')}
+            onClick={() => router.push('/landlord/profile')}
             className={`w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-left transition-all duration-200 ${
-              pathname?.startsWith('/consumer/profile')
-                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+              pathname?.startsWith('/landlord/profile')
+                ? 'bg-green-50 text-green-700 border border-green-200'
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
-                {user?.first_name?.[0] || user?.email?.[0] || 'U'}
+                {user?.first_name?.[0] || user?.email?.[0] || 'L'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm truncate">
-                {user?.first_name || 'User'}
+                {user?.first_name || 'Landlord'}
               </p>
               <p className="text-xs text-gray-500 truncate">View Profile</p>
             </div>

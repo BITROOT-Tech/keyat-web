@@ -1,38 +1,29 @@
-﻿// src/app/landlord/dashboard/page.tsx - CLEAN LANDLORD DASHBOARD
-'use client';
+﻿'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import { Header, BottomNav } from '@/components/landlord';
 
-// LAZY LOAD ICONS - NO ERRORS!
-const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
-const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Building2));
-const BellIcon = dynamic(() => import('lucide-react').then(mod => mod.Bell));
-const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
+// LAZY LOAD ICONS
 const ShieldIcon = dynamic(() => import('lucide-react').then(mod => mod.Shield));
 const StarIcon = dynamic(() => import('lucide-react').then(mod => mod.Star));
-const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
-const ZapIcon = dynamic(() => import('lucide-react').then(mod => mod.Zap));
+const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
 const ChevronRightIcon = dynamic(() => import('lucide-react').then(mod => mod.ChevronRight));
-const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
-const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
+const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Building2));
 const PlusIcon = dynamic(() => import('lucide-react').then(mod => mod.Plus));
 const UsersIcon = dynamic(() => import('lucide-react').then(mod => mod.Users));
 const DollarSignIcon = dynamic(() => import('lucide-react').then(mod => mod.DollarSign));
 const BarChartIcon = dynamic(() => import('lucide-react').then(mod => mod.BarChart3));
-const SettingsIcon = dynamic(() => import('lucide-react').then(mod => mod.Settings));
-const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
-const RefreshIcon = dynamic(() => import('lucide-react').then(mod => mod.RefreshCw));
-const AlertIcon = dynamic(() => import('lucide-react').then(mod => mod.AlertCircle));
+const ZapIcon = dynamic(() => import('lucide-react').then(mod => mod.Zap));
 
 // ERROR BOUNDARY COMPONENT
 function DashboardError({ error, onRetry }: { error: string; onRetry: () => void }) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="text-center max-w-sm">
+    <div className="min-h-screen flex items-center justify-center p-4 safe-area-padding">
+      <div className="text-center max-w-sm w-full">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <ShieldIcon className="h-8 w-8 text-red-600" />
         </div>
@@ -40,7 +31,7 @@ function DashboardError({ error, onRetry }: { error: string; onRetry: () => void
         <p className="text-gray-600 mb-4 text-sm">{error}</p>
         <button
           onClick={onRetry}
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
         >
           Try Again
         </button>
@@ -52,10 +43,10 @@ function DashboardError({ error, onRetry }: { error: string; onRetry: () => void
 // SKELETON LOADERS
 function PropertySkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
-      <div className="flex space-x-4">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse w-full">
+      <div className="flex space-x-4 w-full">
         <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0" />
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2 min-w-0">
           <div className="h-4 bg-gray-200 rounded w-3/4" />
           <div className="h-3 bg-gray-200 rounded w-1/2" />
           <div className="flex justify-between">
@@ -70,7 +61,7 @@ function PropertySkeleton() {
 
 function BookingSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse w-full">
       <div className="space-y-2">
         <div className="h-4 bg-gray-200 rounded w-2/3" />
         <div className="h-3 bg-gray-200 rounded w-1/2" />
@@ -86,22 +77,8 @@ export default function LandlordDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [notifications, setNotifications] = useState(2);
   const [refreshing, setRefreshing] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
-
-  // CLOSE USER MENU ON CLICK OUTSIDE
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // PULL-TO-REFRESH
   useEffect(() => {
@@ -157,7 +134,6 @@ export default function LandlordDashboard() {
         .single();
 
       if (profileError) {
-        // Fallback to session data
         setUser({
           first_name: session.user.email?.split('@')[0] || 'Landlord',
           email: session.user.email
@@ -186,26 +162,9 @@ export default function LandlordDashboard() {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleQuickSearch();
-    }
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
   };
-
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/auth/login');
-  };
-
-  // USER MENU OPTIONS
-  const userMenuOptions = [
-    { icon: UserIcon, label: 'My Profile', action: () => router.push('/landlord/profile') },
-    { icon: BellIcon, label: 'Notifications', action: () => router.push('/landlord/notifications') },
-    { icon: DollarSignIcon, label: 'Finances', action: () => router.push('/landlord/finances') },
-    { icon: UsersIcon, label: 'Tenants', action: () => router.push('/landlord/tenants') },
-    { icon: ShieldIcon, label: 'Sign Out', action: handleLogout, destructive: true }
-  ];
 
   // QUICK ACTIONS
   const quickActions = [
@@ -214,14 +173,14 @@ export default function LandlordDashboard() {
       label: 'Add Property', 
       description: 'List new property',
       action: () => router.push('/landlord/properties/new'),
-      color: 'bg-blue-50 text-blue-700 border-blue-200'
+      color: 'bg-green-50 text-green-700 border-green-200'
     },
     { 
       icon: BuildingIcon, 
       label: 'My Properties', 
       description: 'Manage listings',
       action: () => router.push('/landlord/properties'),
-      color: 'bg-green-50 text-green-700 border-green-200'
+      color: 'bg-blue-50 text-blue-700 border-blue-200'
     },
     { 
       icon: DollarSignIcon, 
@@ -307,43 +266,46 @@ export default function LandlordDashboard() {
   // LOADING STATE
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 space-y-6">
+      <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding lg:pb-0 w-full overflow-hidden">
         {/* Header Skeleton */}
-        <div className="h-32 bg-white rounded-2xl animate-pulse" />
+        <div className="h-20 bg-white border-b border-gray-200 animate-pulse w-full" />
         
-        {/* Stats Skeleton */}
-        <div className="grid grid-cols-2 gap-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-white rounded-2xl animate-pulse" />
-          ))}
-        </div>
-        
-        {/* Quick Actions Skeleton */}
-        <div className="grid grid-cols-2 gap-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-20 bg-white rounded-2xl animate-pulse" />
-          ))}
-        </div>
-        
-        {/* Properties Skeleton */}
-        <div className="space-y-4">
-          {[...Array(2)].map((_, i) => (
-            <PropertySkeleton key={i} />
-          ))}
-        </div>
+        {/* Content */}
+        <div className="p-4 space-y-6 lg:max-w-4xl lg:mx-auto w-full overflow-hidden">
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 bg-white rounded-2xl animate-pulse w-full" />
+            ))}
+          </div>
+          
+          {/* Quick Actions Skeleton */}
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-20 bg-white rounded-2xl animate-pulse w-full" />
+            ))}
+          </div>
+          
+          {/* Properties Skeleton */}
+          <div className="space-y-4 w-full">
+            {[...Array(2)].map((_, i) => (
+              <PropertySkeleton key={i} />
+            ))}
+          </div>
 
-        {/* Bookings Skeleton */}
-        <div className="space-y-3">
-          {[...Array(2)].map((_, i) => (
-            <BookingSkeleton key={i} />
-          ))}
+          {/* Bookings Skeleton */}
+          <div className="space-y-3 w-full">
+            {[...Array(2)].map((_, i) => (
+              <BookingSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 w-full overflow-hidden">
       {/* REFRESH INDICATOR */}
       <AnimatePresence>
         {refreshing && (
@@ -351,7 +313,7 @@ export default function LandlordDashboard() {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className="fixed top-0 left-0 right-0 bg-blue-600 text-white py-3 text-center text-sm z-50 font-medium"
+            className="fixed top-0 left-0 right-0 bg-green-600 text-white py-3 text-center text-sm z-50 font-medium safe-area-padding"
           >
             🔄 Refreshing...
           </motion.div>
@@ -359,119 +321,26 @@ export default function LandlordDashboard() {
       </AnimatePresence>
 
       {/* HEADER */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white border-b border-gray-200 sticky top-0 z-30"
-      >
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-semibold text-gray-900 truncate">
-                Welcome back, {user?.first_name || 'Landlord'}
-              </h1>
-              <p className="text-gray-600 text-sm truncate">
-                Manage your properties and tenants
-              </p>
-            </div>
-
-            {/* USER CONTROLS */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <button
-                onClick={() => router.push('/landlord/notifications')}
-                className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Notifications"
-              >
-                <BellIcon className="h-5 w-5 text-gray-600" />
-                {notifications > 0 && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
-                )}
-              </button>
-
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  aria-label="User menu"
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
-                      {user?.first_name?.[0] || user?.email?.[0] || 'L'}
-                    </span>
-                  </div>
-                </button>
-
-                <AnimatePresence>
-                  {showUserMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 py-2 z-50"
-                    >
-                      <div className="px-4 py-3 border-b border-gray-200">
-                        <p className="font-semibold text-gray-900 text-sm truncate">
-                          {user?.first_name || 'Landlord'}
-                        </p>
-                        <p className="text-gray-600 text-xs truncate">
-                          {user?.email}
-                        </p>
-                      </div>
-
-                      <div className="py-1">
-                        {userMenuOptions.map(({ icon: Icon, label, action, destructive }) => (
-                          <button
-                            key={label}
-                            onClick={() => {
-                              action();
-                              setShowUserMenu(false);
-                            }}
-                            className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${
-                              destructive 
-                                ? 'text-red-600 hover:bg-red-50' 
-                                : 'text-gray-700 hover:bg-gray-50'
-                            }`}
-                          >
-                            <Icon className="h-4 w-4 flex-shrink-0" />
-                            <span className="truncate">{label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-
-          {/* SEARCH BAR */}
-          <div className="relative">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search properties, tenants, locations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className="w-full pl-10 pr-4 py-3 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all placeholder-gray-500"
-              aria-label="Search properties"
-            />
-          </div>
-        </div>
-      </motion.header>
+      <Header
+        user={user}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        onQuickSearch={handleQuickSearch}
+        notifications={notifications}
+      />
 
       {/* MAIN CONTENT */}
-      <main className="p-4 space-y-6">
+      <main className="p-4 space-y-6 pb-24 lg:pb-6 lg:max-w-4xl lg:mx-auto w-full overflow-hidden">
         {/* QUICK STATS */}
-        <section aria-labelledby="quick-stats-heading">
-          <div className="flex items-center justify-between mb-4">
+        <section aria-labelledby="quick-stats-heading" className="w-full">
+          <div className="flex items-center justify-between mb-4 w-full">
             <h2 id="quick-stats-heading" className="text-lg font-semibold text-gray-900">
               Property Overview
             </h2>
-            <BarChartIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
+            <BarChartIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-blue-50 text-blue-700 border border-blue-200 rounded-xl p-4">
+          <div className="grid grid-cols-2 gap-3 w-full">
+            <div className="bg-green-50 text-green-700 border border-green-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium opacity-80">Total Properties</p>
@@ -482,7 +351,7 @@ export default function LandlordDashboard() {
                 </div>
               </div>
             </div>
-            <div className="bg-green-50 text-green-700 border border-green-200 rounded-xl p-4">
+            <div className="bg-blue-50 text-blue-700 border border-blue-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium opacity-80">Monthly Income</p>
@@ -514,7 +383,7 @@ export default function LandlordDashboard() {
                   <p className="text-xs opacity-70 mt-1">Available for rent</p>
                 </div>
                 <div className="p-2 bg-white rounded-lg">
-                  <HomeIcon className="h-5 w-5" />
+                  <BuildingIcon className="h-5 w-5" />
                 </div>
               </div>
             </div>
@@ -522,61 +391,63 @@ export default function LandlordDashboard() {
         </section>
 
         {/* QUICK ACTIONS */}
-        <section aria-labelledby="quick-actions-heading">
-          <div className="flex items-center justify-between mb-4">
+        <section aria-labelledby="quick-actions-heading" className="w-full">
+          <div className="flex items-center justify-between mb-4 w-full">
             <h2 id="quick-actions-heading" className="text-lg font-semibold text-gray-900">
               Quick Actions
             </h2>
             <ZapIcon className="h-5 w-5 text-yellow-500 flex-shrink-0" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 w-full">
             {quickActions.map(({ icon: Icon, label, description, color, action }) => (
-              <button
+              <motion.button
                 key={label}
                 onClick={action}
-                className={`p-4 rounded-2xl border text-left transition-all hover:shadow-md ${color}`}
+                whileTap={{ scale: 0.98 }}
+                className={`p-4 rounded-2xl border text-left transition-all hover:shadow-md touch-manipulation ${color} w-full`}
               >
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-white">
+                <div className="flex items-center space-x-3 w-full">
+                  <div className="p-2 rounded-lg bg-white flex-shrink-0">
                     <Icon className="h-4 w-4" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <h3 className="font-semibold text-sm truncate">{label}</h3>
                     <p className="text-xs opacity-75 mt-0.5 truncate">{description}</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
             ))}
           </div>
         </section>
 
         {/* RECENT PROPERTIES */}
-        <section aria-labelledby="recent-properties-heading">
-          <div className="flex items-center justify-between mb-4">
+        <section aria-labelledby="recent-properties-heading" className="w-full">
+          <div className="flex items-center justify-between mb-4 w-full">
             <h2 id="recent-properties-heading" className="text-lg font-semibold text-gray-900">
               Recent Properties
             </h2>
             <button 
               onClick={() => router.push('/landlord/properties')}
-              className="text-blue-600 text-sm hover:underline font-medium flex items-center space-x-1"
+              className="text-green-600 text-sm hover:underline font-medium flex items-center space-x-1 touch-manipulation flex-shrink-0"
             >
               <span>View all</span>
-              <ChevronRightIcon className="h-4 w-4" />
+              <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             {properties.map((property) => (
-              <div
+              <motion.div
                 key={property.id}
                 onClick={() => handlePropertyClick(property.id)}
-                className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer"
+                whileTap={{ scale: 0.98 }}
+                className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer touch-manipulation w-full"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && handlePropertyClick(property.id)}
                 aria-label={`View ${property.title} in ${property.location}`}
               >
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 w-full">
                   <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 relative">
                     <img 
                       src={property.image} 
@@ -591,23 +462,23 @@ export default function LandlordDashboard() {
                       {property.status}
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <h3 className="font-semibold text-gray-900 text-sm truncate">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="flex items-center space-x-2 mb-1 w-full">
+                      <h3 className="font-semibold text-gray-900 text-sm truncate flex-1 min-w-0">
                         {property.title}
                       </h3>
                     </div>
-                    <div className="flex items-center space-x-1 text-gray-600 text-sm mb-2">
+                    <div className="flex items-center space-x-1 text-gray-600 text-sm mb-2 w-full">
                       <MapPinIcon className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">{property.location}</span>
+                      <span className="truncate flex-1 min-w-0">{property.location}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 text-sm text-gray-600">
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center space-x-3 text-sm text-gray-600 flex-shrink-0">
                         <span>{property.beds} bed</span>
                         <span>{property.baths} bath</span>
                         <span>{property.area} sqft</span>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex-shrink-0">
                         <div className="text-lg font-bold text-gray-900">
                           P{property.price.toLocaleString()}/mo
                         </div>
@@ -615,44 +486,45 @@ export default function LandlordDashboard() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
 
         {/* RECENT BOOKINGS */}
-        <section aria-labelledby="recent-bookings-heading">
-          <div className="flex items-center justify-between mb-4">
+        <section aria-labelledby="recent-bookings-heading" className="w-full">
+          <div className="flex items-center justify-between mb-4 w-full">
             <h2 id="recent-bookings-heading" className="text-lg font-semibold text-gray-900">
               Recent Bookings
             </h2>
             <button 
               onClick={() => router.push('/landlord/bookings')}
-              className="text-blue-600 text-sm hover:underline font-medium flex items-center space-x-1"
+              className="text-green-600 text-sm hover:underline font-medium flex items-center space-x-1 touch-manipulation flex-shrink-0"
             >
               <span>View all</span>
-              <ChevronRightIcon className="h-4 w-4" />
+              <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 w-full">
             {bookings.map((booking) => (
-              <div
+              <motion.div
                 key={booking.id}
                 onClick={() => handleBookingClick(booking.id)}
-                className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-sm transition-all cursor-pointer"
+                whileTap={{ scale: 0.98 }}
+                className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-sm transition-all cursor-pointer touch-manipulation w-full"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && handleBookingClick(booking.id)}
                 aria-label={`View booking for ${booking.property_title}`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 text-sm">{booking.property_title}</h3>
-                    <p className="text-gray-600 text-xs mt-0.5">With {booking.tenant_name}</p>
-                    <p className="text-gray-500 text-xs mt-1">{booking.scheduled_date}</p>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <h3 className="font-medium text-gray-900 text-sm truncate">{booking.property_title}</h3>
+                    <p className="text-gray-600 text-xs mt-0.5 truncate">With {booking.tenant_name}</p>
+                    <p className="text-gray-500 text-xs mt-1 truncate">{booking.scheduled_date}</p>
                   </div>
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize flex-shrink-0 ${
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize flex-shrink-0 ml-2 ${
                     booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                     booking.status === 'pending' ? 'bg-orange-100 text-orange-700' :
                     'bg-blue-100 text-blue-700'
@@ -660,42 +532,14 @@ export default function LandlordDashboard() {
                     {booking.status}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
       </main>
 
       {/* BOTTOM NAVIGATION */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="px-4 py-2">
-          <div className="flex justify-around items-center">
-            {[
-              { icon: HomeIcon, label: 'Dashboard', active: true, href: '/landlord/dashboard' },
-              { icon: BuildingIcon, label: 'Properties', href: '/landlord/properties' },
-              { icon: BarChartIcon, label: 'Analytics', href: '/landlord/analytics' },
-              { icon: UserIcon, label: 'Profile', href: '/landlord/profile' },
-            ].map(({ icon: Icon, label, active, href }) => (
-              <button
-                key={label}
-                onClick={() => router.push(href)}
-                className={`flex flex-col items-center p-2 transition-all duration-200 min-w-0 flex-1 ${
-                  active 
-                    ? 'text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <div className={`p-2 rounded-lg transition-all duration-200 ${
-                  active ? 'bg-blue-50' : 'hover:bg-gray-100'
-                }`}>
-                  <Icon className="h-5 w-5" />
-                </div>
-                <span className="text-xs mt-1 font-medium">{label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
+      <BottomNav />
     </div>
   );
 }
