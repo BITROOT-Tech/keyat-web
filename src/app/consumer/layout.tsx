@@ -1,5 +1,7 @@
 'use client';
 
+import { Sidebar } from '@/components/consumer';
+
 export default function ConsumerLayout({
   children,
 }: {
@@ -7,9 +9,15 @@ export default function ConsumerLayout({
 }) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <main>
-        {children}
-      </main>
+      {/* Desktop Sidebar */}
+      <Sidebar />
+      
+      {/* Main Content Area */}
+      <div className="lg:pl-64">
+        <main className="min-h-screen">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

@@ -7,12 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { Header, BottomNav } from '@/components/consumer';
 
-// LAZY LOAD ICONS - NO BELLICON HERE
+// LAZY LOAD ICONS
 const ShieldIcon = dynamic(() => import('lucide-react').then(mod => mod.Shield));
 const StarIcon = dynamic(() => import('lucide-react').then(mod => mod.Star));
 const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
 const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
-const ZapIcon = dynamic(() => import('lucide-react').then(mod => mod.Zap));
 const ChevronRightIcon = dynamic(() => import('lucide-react').then(mod => mod.ChevronRight));
 const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Building2));
 const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
@@ -23,7 +22,7 @@ const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
 function DashboardError({ error, onRetry }: { error: string; onRetry: () => void }) {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 safe-area-padding">
-      <div className="text-center max-w-sm">
+      <div className="text-center max-w-sm w-full">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <ShieldIcon className="h-8 w-8 text-red-600" />
         </div>
@@ -43,10 +42,10 @@ function DashboardError({ error, onRetry }: { error: string; onRetry: () => void
 // SKELETON LOADERS
 function PropertySkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
-      <div className="flex space-x-4">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse w-full">
+      <div className="flex space-x-4 w-full">
         <div className="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0" />
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2 min-w-0">
           <div className="h-4 bg-gray-200 rounded w-3/4" />
           <div className="h-3 bg-gray-200 rounded w-1/2" />
           <div className="flex justify-between">
@@ -61,10 +60,10 @@ function PropertySkeleton() {
 
 function QuickActionSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
-      <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 bg-gray-200 rounded-lg" />
-        <div className="flex-1 space-y-2">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse w-full">
+      <div className="flex items-center space-x-3 w-full">
+        <div className="w-8 h-8 bg-gray-200 rounded-lg flex-shrink-0" />
+        <div className="flex-1 space-y-2 min-w-0">
           <div className="h-4 bg-gray-200 rounded w-3/4" />
           <div className="h-3 bg-gray-200 rounded w-1/2" />
         </div>
@@ -75,9 +74,9 @@ function QuickActionSkeleton() {
 
 function WelcomeSkeleton() {
   return (
-    <div className="animate-pulse">
-      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
-      <div className="h-4 bg-gray-200 rounded w-1/2" />
+    <div className="animate-pulse w-full">
+      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2 mx-auto" />
+      <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto" />
     </div>
   );
 }
@@ -186,7 +185,7 @@ export default function ConsumerDashboard() {
     return 'Good evening';
   };
 
-  // QUICK ACTIONS - NO DUPLICATE NOTIFICATION BELL
+  // QUICK ACTIONS
   const quickActions = [
     { 
       icon: SearchIcon, 
@@ -254,24 +253,26 @@ export default function ConsumerDashboard() {
   // LOADING STATE
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding"> {/* Increased padding */}
+      <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding lg:pb-0 w-full overflow-hidden">
         {/* Header Skeleton */}
-        <div className="h-20 bg-white border-b border-gray-200 animate-pulse" />
+        <div className="h-20 bg-white border-b border-gray-200 animate-pulse w-full" />
         
         {/* Content */}
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-6 lg:max-w-4xl lg:mx-auto w-full overflow-hidden">
           {/* Welcome Skeleton */}
-          <WelcomeSkeleton />
+          <div className="w-full overflow-hidden">
+            <WelcomeSkeleton />
+          </div>
           
           {/* Quick Actions Skeleton */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 w-full">
             {[...Array(4)].map((_, i) => (
               <QuickActionSkeleton key={i} />
             ))}
           </div>
           
           {/* Properties Skeleton */}
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             {[...Array(2)].map((_, i) => (
               <PropertySkeleton key={i} />
             ))}
@@ -282,7 +283,7 @@ export default function ConsumerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding"> {/* Increased from pb-20 to pb-24 */}
+    <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding lg:pb-0 w-full overflow-hidden">
       {/* REFRESH INDICATOR */}
       <AnimatePresence>
         {refreshing && (
@@ -290,142 +291,152 @@ export default function ConsumerDashboard() {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className="fixed top-0 left-0 right-0 bg-blue-600 text-white py-3 text-center text-sm z-50 font-medium safe-area-padding"
+            className="fixed top-0 left-0 right-0 bg-blue-600 text-white py-3 text-center text-sm z-50 font-medium safe-area-padding w-full"
           >
             🔄 Refreshing...
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* HEADER - CLEAN & MINIMAL */}
-      <Header
-        user={user}
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onQuickSearch={handleQuickSearch}
-        notifications={notifications}
-      />
+      {/* HEADER */}
+      <div className="w-full">
+        <Header
+          user={user}
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onQuickSearch={handleQuickSearch}
+          notifications={notifications}
+        />
+      </div>
 
       {/* MAIN CONTENT */}
-      <main className="p-4 space-y-6">
-        {/* WELCOME MESSAGE - NOW IN CONTENT AREA */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {getGreeting()}, {user?.first_name || 'User'}! 👋
-          </h1>
-          <p className="text-gray-600 text-sm">
-            Ready to find your perfect property?
-          </p>
-        </motion.section>
+      <div className="w-full overflow-hidden">
+        <main className="p-4 space-y-6 lg:max-w-4xl lg:mx-auto lg:px-8 w-full">
+          {/* WELCOME MESSAGE */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center w-full"
+          >
+            <div className="w-full max-w-full">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 lg:text-3xl break-words">
+                {getGreeting()}, {user?.first_name || 'User'}! 👋
+              </h1>
+              <p className="text-gray-600 text-sm lg:text-base break-words">
+                Ready to find your perfect property?
+              </p>
+            </div>
+          </motion.section>
 
-        {/* QUICK ACTIONS */}
-        <section aria-labelledby="quick-actions-heading">
-          <div className="flex items-center justify-between mb-4">
-            <h2 id="quick-actions-heading" className="text-lg font-semibold text-gray-900">
-              Quick Access
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {quickActions.map(({ icon: Icon, label, description, color, action }) => (
-              <motion.button
-                key={label}
-                onClick={action}
-                whileTap={{ scale: 0.98 }}
-                className={`p-4 rounded-2xl border text-left transition-all hover:shadow-md touch-manipulation ${color}`}
+          {/* QUICK ACTIONS */}
+          <section aria-labelledby="quick-actions-heading" className="w-full">
+            <div className="flex items-center justify-between mb-4 w-full">
+              <h2 id="quick-actions-heading" className="text-lg font-semibold text-gray-900 lg:text-xl break-words">
+                Quick Access
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 w-full">
+              {quickActions.map(({ icon: Icon, label, description, color, action }) => (
+                <motion.button
+                  key={label}
+                  onClick={action}
+                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02 }}
+                  className={`p-4 rounded-2xl border text-left transition-all hover:shadow-md touch-manipulation ${color} w-full min-w-0`}
+                >
+                  <div className="flex items-center space-x-3 w-full">
+                    <div className="p-2 rounded-lg bg-white flex-shrink-0">
+                      <Icon className="h-4 w-4 lg:h-5 lg:w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <h3 className="font-semibold text-sm truncate lg:text-base">{label}</h3>
+                      <p className="text-xs opacity-75 mt-0.5 truncate lg:text-sm">{description}</p>
+                    </div>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </section>
+
+          {/* FEATURED PROPERTIES */}
+          <section aria-labelledby="featured-properties-heading" className="w-full">
+            <div className="flex items-center justify-between mb-4 w-full">
+              <h2 id="featured-properties-heading" className="text-lg font-semibold text-gray-900 lg:text-xl break-words flex-1 min-w-0 pr-2">
+                Featured Properties
+              </h2>
+              <button 
+                onClick={() => router.push('/consumer/search')}
+                className="text-blue-600 text-sm hover:underline font-medium flex items-center space-x-1 touch-manipulation lg:text-base flex-shrink-0 whitespace-nowrap"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-white">
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm truncate">{label}</h3>
-                    <p className="text-xs opacity-75 mt-0.5 truncate">{description}</p>
-                  </div>
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        </section>
+                <span>View all</span>
+                <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />
+              </button>
+            </div>
 
-        {/* FEATURED PROPERTIES */}
-        <section aria-labelledby="featured-properties-heading">
-          <div className="flex items-center justify-between mb-4">
-            <h2 id="featured-properties-heading" className="text-lg font-semibold text-gray-900">
-              Featured Properties
-            </h2>
-            <button 
-              onClick={() => router.push('/consumer/search')}
-              className="text-blue-600 text-sm hover:underline font-medium flex items-center space-x-1 touch-manipulation"
-            >
-              <span>View all</span>
-              <ChevronRightIcon className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {featuredProperties.map((property) => (
-              <motion.div
-                key={property.id}
-                onClick={() => router.push(`/consumer/property/${property.id}`)}
-                whileTap={{ scale: 0.98 }}
-                className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer touch-manipulation"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && router.push(`/consumer/property/${property.id}`)}
-                aria-label={`View ${property.title} in ${property.location}`}
-              >
-                <div className="flex space-x-4">
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 relative">
-                    <BuildingIcon className="h-6 w-6 text-gray-400" />
-                    {property.featured && (
-                      <div className="absolute -top-1 -left-1 bg-amber-500 text-white px-2 py-1 rounded text-xs font-medium">
-                        Featured
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <h3 className="font-semibold text-gray-900 text-sm truncate">
-                        {property.title}
-                      </h3>
-                      {property.verified && (
-                        <ShieldIcon className="h-4 w-4 text-green-500 flex-shrink-0" aria-label="Verified property" />
+            <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0 w-full">
+              {featuredProperties.map((property) => (
+                <motion.div
+                  key={property.id}
+                  onClick={() => router.push(`/consumer/property/${property.id}`)}
+                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer touch-manipulation lg:p-6 w-full"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && router.push(`/consumer/property/${property.id}`)}
+                  aria-label={`View ${property.title} in ${property.location}`}
+                >
+                  <div className="flex space-x-4 lg:space-x-6 w-full">
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 relative lg:w-24 lg:h-24">
+                      <BuildingIcon className="h-6 w-6 text-gray-400 lg:h-8 lg:w-8" />
+                      {property.featured && (
+                        <div className="absolute -top-1 -left-1 bg-amber-500 text-white px-2 py-1 rounded text-xs font-medium whitespace-nowrap">
+                          Featured
+                        </div>
                       )}
                     </div>
-                    <div className="flex items-center space-x-1 text-gray-600 text-sm mb-2">
-                      <MapPinIcon className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">{property.location}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 text-sm text-gray-600">
-                        <span>{property.beds} bed</span>
-                        <span>{property.baths} bath</span>
-                        <span>{property.area} sqft</span>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex items-center space-x-2 mb-1 w-full">
+                        <h3 className="font-semibold text-gray-900 text-sm truncate lg:text-lg flex-1 min-w-0">
+                          {property.title}
+                        </h3>
+                        {property.verified && (
+                          <ShieldIcon className="h-4 w-4 text-green-500 flex-shrink-0 lg:h-5 lg:w-5" aria-label="Verified property" />
+                        )}
                       </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">
-                          P{property.price.toLocaleString()}/mo
+                      <div className="flex items-center space-x-1 text-gray-600 text-sm mb-2 lg:text-base w-full">
+                        <MapPinIcon className="h-3 w-3 flex-shrink-0 lg:h-4 lg:w-4" />
+                        <span className="truncate flex-1 min-w-0">{property.location}</span>
+                      </div>
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center space-x-3 text-sm text-gray-600 lg:text-base flex-shrink-0 whitespace-nowrap">
+                          <span>{property.beds} bed</span>
+                          <span>{property.baths} bath</span>
+                          <span>{property.area} sqft</span>
                         </div>
-                        <div className="flex items-center space-x-1 text-xs text-gray-500">
-                          <StarIcon className="h-3 w-3 text-yellow-500 fill-current" />
-                          <span>{property.rating}</span>
+                        <div className="text-right flex-shrink-0 ml-2">
+                          <div className="text-lg font-bold text-gray-900 lg:text-xl whitespace-nowrap">
+                            P{property.price.toLocaleString()}/mo
+                          </div>
+                          <div className="flex items-center space-x-1 text-xs text-gray-500 lg:text-sm justify-end">
+                            <StarIcon className="h-3 w-3 text-yellow-500 fill-current lg:h-4 lg:w-4 flex-shrink-0" />
+                            <span>{property.rating}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      </main>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
 
-      {/* BOTTOM NAVIGATION - PROFILE ACCESS HERE */}
-      <BottomNav />
+      {/* BOTTOM NAVIGATION */}
+      <div className="w-full">
+        <BottomNav />
+      </div>
     </div>
   );
 }
