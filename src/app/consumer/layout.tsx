@@ -1,10 +1,10 @@
-// src/app/consumer/layout.tsx - COMPLETE & FIXED
+// src/app/consumer/layout.tsx - FIXED VERSION
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Sidebar } from '@/components/consumer';
+import { Sidebar, BottomNav } from '@/components/consumer';
 
 export default function ConsumerLayout({
   children,
@@ -61,15 +61,20 @@ export default function ConsumerLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 consumer-dashboard">
       {/* Desktop Sidebar */}
       <Sidebar user={user} />
       
-      {/* Main Content Area */}
+      {/* Main Content Area with proper BottomNav spacing */}
       <div className="lg:pl-64">
-        <main className="min-h-screen">
+        <main className="min-h-screen pb-20 lg:pb-0"> {/* CRITICAL: Add bottom padding */}
           {children}
         </main>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden">
+        <BottomNav />
       </div>
     </div>
   );

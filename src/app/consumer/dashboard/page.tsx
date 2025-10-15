@@ -1,4 +1,4 @@
-// src/app/consumer/dashboard/page.tsx - PERFECTED VERSION
+// src/app/consumer/dashboard/page.tsx - PERFECTED VERSION (HEADER REMOVED)
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { Header, BottomNav } from '@/components/consumer';
 
 // LAZY LOAD ICONS
 const ShieldIcon = dynamic(() => import('lucide-react').then(mod => mod.Shield));
@@ -17,7 +16,6 @@ const ChevronRightIcon = dynamic(() => import('lucide-react').then(mod => mod.Ch
 const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Building2));
 const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
 const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
-const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
 const TrendingUpIcon = dynamic(() => import('lucide-react').then(mod => mod.TrendingUp));
 const ClockIcon = dynamic(() => import('lucide-react').then(mod => mod.Clock));
 const ZapIcon = dynamic(() => import('lucide-react').then(mod => mod.Zap));
@@ -92,10 +90,9 @@ export default function ConsumerDashboard() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [notifications, setNotifications] = useState(3);
   const [refreshing, setRefreshing] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
 
   // PULL-TO-REFRESH
   useEffect(() => {
@@ -171,16 +168,12 @@ export default function ConsumerDashboard() {
   }, [checkAuth]);
 
   const handleQuickSearch = () => {
-    const query = searchQuery.trim();
+    const query = localSearchQuery.trim();
     if (query) {
       router.push(`/consumer/search?q=${encodeURIComponent(query)}`);
     } else {
       router.push('/consumer/search');
     }
-  };
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
   };
 
   // Get greeting based on time of day
@@ -336,10 +329,7 @@ export default function ConsumerDashboard() {
   // LOADING STATE
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding lg:pb-0 w-full overflow-hidden">
-        {/* Header Skeleton */}
-        <div className="h-20 bg-white border-b border-gray-200 animate-pulse w-full" />
-        
+      <div className="min-h-screen bg-gray-50 pb-20 safe-area-padding lg:pb-0 w-full overflow-hidden">
         {/* Content */}
         <div className="p-4 space-y-6 lg:max-w-4xl lg:mx-auto w-full overflow-hidden">
           {/* Welcome Skeleton */}
@@ -370,7 +360,7 @@ export default function ConsumerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50/30 to-gray-50 pb-24 safe-area-padding lg:pb-0 w-full overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/30 to-gray-50 safe-area-padding w-full overflow-hidden">
       {/* REFRESH INDICATOR */}
       <AnimatePresence>
         {refreshing && (
@@ -384,17 +374,6 @@ export default function ConsumerDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* HEADER */}
-      <div className="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200/50">
-        <Header
-          user={user}
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          onQuickSearch={handleQuickSearch}
-          notifications={notifications}
-        />
-      </div>
 
       {/* MAIN CONTENT */}
       <div className="w-full overflow-hidden">
@@ -638,11 +617,6 @@ export default function ConsumerDashboard() {
             </div>
           </section>
         </main>
-      </div>
-
-      {/* BOTTOM NAVIGATION */}
-      <div className="w-full bg-white/80 backdrop-blur-sm border-t border-gray-200/50">
-        <BottomNav />
       </div>
     </div>
   );
