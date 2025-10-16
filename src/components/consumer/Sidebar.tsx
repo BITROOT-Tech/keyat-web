@@ -1,4 +1,4 @@
-// src/components/consumer/Sidebar.tsx - COMPLETE & ENHANCED
+// src/components/consumer/Sidebar.tsx - UPDATED VERSION
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
@@ -96,9 +96,9 @@ export default function Sidebar({ user }: SidebarProps) {
       className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-40"
     >
       {/* Sidebar component */}
-      <div className="flex flex-col flex-1 min-h-0 bg-white border-r border-gray-200">
+      <div className="flex flex-col flex-1 min-h-0 bg-white/95 backdrop-blur-sm border-r border-gray-200/80">
         {/* Sidebar header */}
-        <div className="flex items-center justify-between flex-shrink-0 px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between flex-shrink-0 px-6 py-4 border-b border-gray-200/80">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
               <HomeIcon className="h-5 w-5 text-white" />
@@ -111,7 +111,7 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
 
         {/* User welcome section */}
-        <div className="px-6 py-4 border-b border-gray-200 bg-blue-50/50">
+        <div className="px-6 py-4 border-b border-gray-200/80 bg-blue-50/50">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
@@ -164,7 +164,7 @@ export default function Sidebar({ user }: SidebarProps) {
         </nav>
 
         {/* Footer section */}
-        <div className="flex-shrink-0 p-4 border-t border-gray-200 space-y-2">
+        <div className="flex-shrink-0 p-4 border-t border-gray-200/80 space-y-2">
           <button
             onClick={() => router.push('/consumer/settings')}
             className={`w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-left transition-all duration-200 ${

@@ -1,4 +1,4 @@
-// src/components/consumer/BottomNav.tsx - COMPLETE & ALWAYS VISIBLE ON MOBILE
+// src/components/consumer/BottomNav.tsx - UPDATED WITH MOVING & SERVICES
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
@@ -12,8 +12,8 @@ const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search))
 const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
 const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
 const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
-const MapIcon = dynamic(() => import('lucide-react').then(mod => mod.Map));
-const BellIcon = dynamic(() => import('lucide-react').then(mod => mod.Bell));
+const TruckIcon = dynamic(() => import('lucide-react').then(mod => mod.Truck));
+const WrenchIcon = dynamic(() => import('lucide-react').then(mod => mod.Wrench));
 
 export default function ConsumerBottomNav() {
   const pathname = usePathname();
@@ -25,7 +25,7 @@ export default function ConsumerBottomNav() {
   useEffect(() => {
     setMounted(true);
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024); // Changed to 1024 to be more inclusive
+      setIsMobile(window.innerWidth < 1024);
     };
 
     checkScreenSize();
@@ -33,6 +33,7 @@ export default function ConsumerBottomNav() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // UPDATED: Added Moving & Services, removed Explore for Phase 1 focus
   const navItems = [
     { 
       icon: HomeIcon, 
@@ -50,33 +51,33 @@ export default function ConsumerBottomNav() {
       badge: 'New'
     },
     { 
-      icon: MapIcon, 
-      label: 'Explore', 
-      href: '/consumer/explore',
-      active: pathname?.startsWith('/consumer/explore'),
-      description: 'Map view'
+      icon: TruckIcon, 
+      label: 'Moving', 
+      href: '/consumer/moving',
+      active: pathname?.startsWith('/consumer/moving'),
+      description: 'Moving services',
+      badge: 'Hot' // Highlight new service
     },
     { 
-      icon: HeartIcon, 
-      label: 'Saved', 
-      href: '/consumer/saved',
-      active: pathname?.startsWith('/consumer/saved'),
-      description: 'Favorites',
-      count: 3 // Example count
+      icon: WrenchIcon, 
+      label: 'Services', 
+      href: '/consumer/services',
+      active: pathname?.startsWith('/consumer/services'),
+      description: 'Maintenance & more'
     },
     { 
       icon: CalendarIcon, 
       label: 'Bookings', 
       href: '/consumer/booking',
       active: pathname?.startsWith('/consumer/booking'),
-      description: 'Viewings'
+      description: 'Viewings & tours'
     },
     { 
       icon: UserIcon, 
       label: 'Profile', 
       href: '/consumer/profile',
       active: pathname?.startsWith('/consumer/profile'),
-      description: 'Account'
+      description: 'Account & settings'
     },
   ];
 
@@ -87,10 +88,10 @@ export default function ConsumerBottomNav() {
   // Don't render until mounted to avoid hydration issues
   if (!mounted) {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-bottom z-50 lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 safe-area-bottom z-50 lg:hidden">
         <div className="px-2 py-3">
           <div className="flex justify-around items-center">
-            {[...Array(5)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <div key={i} className="flex flex-col items-center p-1 min-w-0 flex-1">
                 <div className="w-10 h-10 bg-gray-200 rounded-xl animate-pulse" />
                 <div className="h-3 bg-gray-200 rounded w-8 mt-1 animate-pulse" />
@@ -116,7 +117,6 @@ export default function ConsumerBottomNav() {
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
         className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 safe-area-bottom z-50 shadow-2xl shadow-black/10"
         style={{
-          // Ensure it's always above other content
           position: 'fixed',
           bottom: '0',
           left: '0',
@@ -129,7 +129,7 @@ export default function ConsumerBottomNav() {
         
         <div className="px-1 py-2">
           <div className="flex justify-around items-center">
-            {navItems.map(({ icon: Icon, label, href, active, badge, count }) => (
+            {navItems.map(({ icon: Icon, label, href, active, badge }) => (
               <motion.button
                 key={label}
                 onClick={() => handleNavigation(href)}
@@ -143,25 +143,18 @@ export default function ConsumerBottomNav() {
                 aria-label={label}
                 aria-current={active ? 'page' : undefined}
               >
-                {/* Badge for new features */}
+                {/* Badge for new/hot features */}
                 {badge && (
                   <motion.span
                     initial={{ scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
-                    className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none shadow-sm"
+                    className={`absolute -top-1 -right-1 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none shadow-sm ${
+                      badge === 'Hot' 
+                        ? 'bg-gradient-to-r from-red-500 to-orange-500' 
+                        : 'bg-gradient-to-r from-amber-500 to-orange-500'
+                    }`}
                   >
                     {badge}
-                  </motion.span>
-                )}
-
-                {/* Count badge for saved items */}
-                {count && count > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold leading-none shadow-sm"
-                  >
-                    {count}
                   </motion.span>
                 )}
 

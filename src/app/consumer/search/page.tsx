@@ -1,17 +1,17 @@
-// src/app/consumer/search/page.tsx - ADVANCED PROPERTY SEARCH
+// src/app/consumer/search/page.tsx - FIXED VERSION
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { Header, BottomNav } from '@/components/consumer';
+import { searchProperties, getPropertyLocations } from '@/lib/supabase/properties';
+import { Header, BottomNav } from '@/components/consumer'; // ADD THIS IMPORT
 
 // Lazy load icons
 const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
 const FilterIcon = dynamic(() => import('lucide-react').then(mod => mod.Filter));
 const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
-const DollarSignIcon = dynamic(() => import('lucide-react').then(mod => mod.DollarSign));
 const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
 const BathIcon = dynamic(() => import('lucide-react').then(mod => mod.Bath));
 const BedIcon = dynamic(() => import('lucide-react').then(mod => mod.Bed));
@@ -34,6 +34,10 @@ function PropertyCard({ property, onFavoriteToggle }: { property: any; onFavorit
     onFavoriteToggle(property.id);
   };
 
+  // Generate random views and rating for demo
+  const views = Math.floor(Math.random() * 500) + 50;
+  const rating = (Math.random() * 1 + 4).toFixed(1); // 4.0 - 5.0
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -47,7 +51,7 @@ function PropertyCard({ property, onFavoriteToggle }: { property: any; onFavorit
         
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-          {property.featured && (
+          {property.is_featured && (
             <span className="bg-amber-500 text-white px-2 py-1 rounded text-xs font-medium">
               Featured
             </span>
@@ -75,7 +79,7 @@ function PropertyCard({ property, onFavoriteToggle }: { property: any; onFavorit
         {/* View Count */}
         <div className="absolute bottom-3 left-3 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
           <EyeIcon className="h-3 w-3" />
-          {property.views} views
+          {views} views
         </div>
       </div>
 
@@ -87,7 +91,7 @@ function PropertyCard({ property, onFavoriteToggle }: { property: any; onFavorit
           </h3>
           <div className="flex items-center gap-1 text-sm text-amber-600">
             <StarIcon className="h-4 w-4 fill-current" />
-            <span>{property.rating}</span>
+            <span>{rating}</span>
           </div>
         </div>
 
@@ -99,29 +103,35 @@ function PropertyCard({ property, onFavoriteToggle }: { property: any; onFavorit
         {/* Property Features */}
         <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <BedIcon className="h-4 w-4" />
-              <span>{property.beds} bed</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <BathIcon className="h-4 w-4" />
-              <span>{property.baths} bath</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <SquareIcon className="h-4 w-4" />
-              <span>{property.area} sqft</span>
-            </div>
+            {property.bedrooms > 0 && (
+              <div className="flex items-center gap-1">
+                <BedIcon className="h-4 w-4" />
+                <span>{property.bedrooms} bed</span>
+              </div>
+            )}
+            {property.bathrooms > 0 && (
+              <div className="flex items-center gap-1">
+                <BathIcon className="h-4 w-4" />
+                <span>{property.bathrooms} bath</span>
+              </div>
+            )}
+            {property.area && (
+              <div className="flex items-center gap-1">
+                <SquareIcon className="h-4 w-4" />
+                <span>{property.area} {property.area_unit || 'sqft'}</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Price */}
         <div className="flex items-center justify-between">
           <div className="text-2xl font-bold text-gray-900">
-            P{property.price.toLocaleString()}
+            P{property.price?.toLocaleString()}
             <span className="text-sm font-normal text-gray-600">/month</span>
           </div>
           <div className="text-xs text-gray-500">
-            Available now
+            {property.status === 'available' ? 'Available now' : property.status}
           </div>
         </div>
       </div>
@@ -134,39 +144,35 @@ function FilterSidebar({
   filters, 
   onFiltersChange, 
   isOpen, 
-  onClose 
+  onClose,
+  locations 
 }: { 
   filters: any;
   onFiltersChange: (filters: any) => void;
   isOpen: boolean;
   onClose: () => void;
+  locations: string[];
 }) {
-  const locations = [
-    'CBD, Gaborone',
-    'Phakalane Estate', 
-    'Broadhurst',
-    'Maitisong',
-    'Tlokweng',
-    'Mogoditshane',
-    'All Areas'
-  ];
-
   const propertyTypes = [
-    'Apartment',
-    'House',
-    'Townhouse',
-    'Studio',
-    'Flat'
+    'apartment',
+    'house',
+    'townhouse',
+    'studio',
+    'flat',
+    'commercial'
   ];
 
   const amenities = [
     'Parking',
     'Security',
     'Furnished',
-    'Pet Friendly',
     'Garden',
     'Pool',
-    'Borehole'
+    'Borehole',
+    'Solar',
+    'Garage',
+    'Gym',
+    'Maid Quarters'
   ];
 
   return (
@@ -206,7 +212,7 @@ function FilterSidebar({
               {/* Location */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Location</h3>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-60 overflow-y-auto">
                   {locations.map((location) => (
                     <label key={location} className="flex items-center">
                       <input
@@ -220,7 +226,7 @@ function FilterSidebar({
                         }}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="ml-2 text-sm text-gray-700">{location}</span>
+                      <span className="ml-2 text-sm text-gray-700 truncate">{location}</span>
                     </label>
                   ))}
                 </div>
@@ -259,7 +265,7 @@ function FilterSidebar({
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Bedrooms</h3>
                 <div className="flex flex-wrap gap-2">
-                  {[1, 2, 3, 4, '5+'].map((beds) => (
+                  {[1, 2, 3, 4, 5].map((beds) => (
                     <button
                       key={beds}
                       onClick={() => onFiltersChange({
@@ -295,7 +301,7 @@ function FilterSidebar({
                         }}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="ml-2 text-sm text-gray-700">{type}</span>
+                      <span className="ml-2 text-sm text-gray-700 capitalize">{type}</span>
                     </label>
                   ))}
                 </div>
@@ -361,94 +367,69 @@ export default function PropertySearch() {
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('relevance');
+  const [properties, setProperties] = useState<any[]>([]);
+  const [locations, setLocations] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample property data
-  const properties = [
-    {
-      id: '1',
-      title: 'CBD Luxury Apartment',
-      location: 'CBD, Gaborone',
-      price: 14500,
-      beds: 2,
-      baths: 2,
-      area: 1200,
-      rating: 4.8,
-      views: 247,
-      featured: true,
-      verified: true,
-      available: true
-    },
-    {
-      id: '2',
-      title: 'Phakalane Executive Home',
-      location: 'Phakalane Estate',
-      price: 25000,
-      beds: 4,
-      baths: 3,
-      area: 2400,
-      rating: 4.9,
-      views: 189,
-      featured: true,
-      verified: true,
-      available: true
-    },
-    {
-      id: '3',
-      title: 'Broadhurst Family House',
-      location: 'Broadhurst, Gaborone',
-      price: 8500,
-      beds: 3,
-      baths: 2,
-      area: 1800,
-      rating: 4.6,
-      views: 156,
-      featured: false,
-      verified: true,
-      available: true
-    },
-    {
-      id: '4',
-      title: 'Maitisong Garden Flat',
-      location: 'Maitisong, Gaborone',
-      price: 6800,
-      beds: 2,
-      baths: 1,
-      area: 950,
-      rating: 4.4,
-      views: 203,
-      featured: false,
-      verified: true,
-      available: true
-    },
-    {
-      id: '5',
-      title: 'Tlokweng Modern Apartment',
-      location: 'Tlokweng, Gaborone',
-      price: 7200,
-      beds: 2,
-      baths: 2,
-      area: 1100,
-      rating: 4.3,
-      views: 134,
-      featured: false,
-      verified: true,
-      available: true
-    },
-    {
-      id: '6',
-      title: 'Mogoditshane Townhouse',
-      location: 'Mogoditshane',
-      price: 9200,
-      beds: 3,
-      baths: 2,
-      area: 1600,
-      rating: 4.5,
-      views: 178,
-      featured: false,
-      verified: true,
-      available: true
+  // Fetch locations and properties on mount
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        setLoading(true);
+        const [locationsData, propertiesData] = await Promise.all([
+          getPropertyLocations(),
+          searchProperties({ searchQuery }, sortBy)
+        ]);
+        
+        setLocations(locationsData);
+        setProperties(propertiesData);
+      } catch (err: any) {
+        console.error('Error initializing data:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeData();
+  }, []);
+
+  // Fetch properties with filters
+  const fetchProperties = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      const filtersToApply = {
+        searchQuery: searchQuery || undefined,
+        locations: filters.locations.length > 0 ? filters.locations : undefined,
+        priceRange: {
+          min: filters.priceRange.min ? parseFloat(filters.priceRange.min) : undefined,
+          max: filters.priceRange.max ? parseFloat(filters.priceRange.max) : undefined,
+        },
+        bedrooms: filters.bedrooms || undefined,
+        propertyTypes: filters.propertyTypes.length > 0 ? filters.propertyTypes : undefined,
+        amenities: filters.amenities.length > 0 ? filters.amenities : undefined,
+      };
+
+      const data = await searchProperties(filtersToApply, sortBy);
+      setProperties(data);
+    } catch (err: any) {
+      console.error('Error fetching properties:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  ];
+  }, [searchQuery, filters, sortBy]);
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchProperties();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [fetchProperties]);
 
   const handleFavoriteToggle = (propertyId: string) => {
     setFavorites(prev =>
@@ -459,8 +440,7 @@ export default function PropertySearch() {
   };
 
   const handleQuickSearch = () => {
-    // In a real app, this would update URL and trigger search
-    console.log('Searching for:', searchQuery);
+    fetchProperties();
   };
 
   const handleSearchChange = (query: string) => {
@@ -475,18 +455,40 @@ export default function PropertySearch() {
     return count + (filter ? 1 : 0);
   }, 0);
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldIcon className="h-8 w-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Properties</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchProperties}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding lg:pb-0">
       {/* Header */}
-      <Header
-        user={null}
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onQuickSearch={handleQuickSearch}
-        notifications={0}
-        showLocationFilter={true}
-        onLocationFilterClick={() => setShowFilters(true)}
-      />
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-40">
+        <Header
+          user={null}
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onQuickSearch={handleQuickSearch}
+          notifications={0}
+          showLocationFilter={true}
+          onLocationFilterClick={() => setShowFilters(true)}
+        />
+      </div>
 
       {/* Main Content */}
       <div className="flex">
@@ -496,6 +498,7 @@ export default function PropertySearch() {
           onFiltersChange={setFilters}
           isOpen={showFilters}
           onClose={() => setShowFilters(false)}
+          locations={locations}
         />
 
         {/* Search Results */}
@@ -504,10 +507,10 @@ export default function PropertySearch() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Properties in Gaborone
+                Properties in Botswana
               </h1>
               <p className="text-gray-600">
-                {properties.length} properties found
+                {loading ? 'Loading...' : `${properties.length} properties found`}
                 {searchQuery && ` for "${searchQuery}"`}
               </p>
             </div>
@@ -537,7 +540,7 @@ export default function PropertySearch() {
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="newest">Newest First</option>
-                <option value="rating">Highest Rated</option>
+                <option value="featured">Featured First</option>
               </select>
             </div>
           </div>
@@ -555,19 +558,38 @@ export default function PropertySearch() {
             </div>
           )}
 
+          {/* Loading State */}
+          {loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
+                  <div className="flex justify-between">
+                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Properties Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {properties.map((property, index) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onFavoriteToggle={handleFavoriteToggle}
-              />
-            ))}
-          </div>
+          {!loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {properties.map((property, index) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  onFavoriteToggle={handleFavoriteToggle}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Empty State */}
-          {properties.length === 0 && (
+          {!loading && properties.length === 0 && (
             <div className="text-center py-12">
               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <SearchIcon className="h-8 w-8 text-gray-400" />
@@ -596,7 +618,9 @@ export default function PropertySearch() {
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNav />
+      <div className="lg:hidden">
+        <BottomNav />
+      </div>
     </div>
   );
 }
