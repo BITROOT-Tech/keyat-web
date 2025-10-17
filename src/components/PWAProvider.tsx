@@ -166,7 +166,7 @@ export default function PWAProvider() {
     <div className="fixed bottom-4 right-4 z-50 animate-fade-in-up">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200/80 backdrop-blur-sm p-4 max-w-xs animate-scale-in">
         <div className="flex items-start space-x-3">
-          {/* 🎯 UPDATED: Exact same blue square with K as homepage */}
+          {/* Clean, branded icon */}
           <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
             <span className="text-white font-bold text-sm">K</span>
           </div>
@@ -175,7 +175,7 @@ export default function PWAProvider() {
               Install Keyat App
             </h3>
             <p className="text-gray-600 text-xs mb-3">
-              Fast, offline, app-like experience
+              Get the full app experience
             </p>
             <div className="flex space-x-2">
               <button
@@ -199,22 +199,6 @@ export default function PWAProvider() {
           >
             ×
           </button>
-        </div>
-        
-        {/* App features badges */}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-          <div className="flex items-center space-x-1">
-            <span className="text-green-500 text-xs">⚡</span>
-            <span className="text-gray-500 text-xs">Fast</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="text-blue-500 text-xs">📱</span>
-            <span className="text-gray-500 text-xs">App-like</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="text-orange-500 text-xs">🔒</span>
-            <span className="text-gray-500 text-xs">Secure</span>
-          </div>
         </div>
       </div>
     </div>
