@@ -1,4 +1,4 @@
-// src/app/auth/login/page.tsx - WITH INITIALLY VISIBLE BUT COLLAPSIBLE DEV TOOLS
+// src/app/auth/login/page.tsx - UPDATED REDIRECT TO HOME
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -128,26 +128,16 @@ export default function LoginPage() {
       if (data.user) {
         const userType = detectedUserType || data.user.user_metadata?.user_type || 'tenant';
         
-        // PROPER REDIRECT PATHS FOR ALL USER TYPES
+        // 🎯 UPDATED: Redirect ALL consumer users to /consumer/home
         let redirectPath = '';
         switch (userType) {
           case 'tenant':
-            redirectPath = '/consumer/dashboard';
-            break;
           case 'landlord':
-            redirectPath = '/landlord/dashboard';
-            break;
           case 'agent':
-            redirectPath = '/agent/dashboard';
-            break;
           case 'service-provider':
-            redirectPath = '/service-provider/dashboard';
-            break;
           case 'admin':
-            redirectPath = '/admin/dashboard';
-            break;
           default:
-            redirectPath = '/consumer/dashboard';
+            redirectPath = '/consumer/home'; // 🚀 ALL USERS GO TO HOME NOW
         }
         
         console.log(`🔐 Redirecting ${userType} to: ${redirectPath}`);
@@ -204,26 +194,8 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data.user) {
-        let redirectPath = '';
-        switch (userType) {
-          case 'tenant':
-            redirectPath = '/consumer/dashboard';
-            break;
-          case 'landlord':
-            redirectPath = '/landlord/dashboard';
-            break;
-          case 'agent':
-            redirectPath = '/agent/dashboard';
-            break;
-          case 'service-provider':
-            redirectPath = '/service-provider/dashboard';
-            break;
-          case 'admin':
-            redirectPath = '/admin/dashboard';
-            break;
-          default:
-            redirectPath = '/consumer/dashboard';
-        }
+        // 🎯 UPDATED: Redirect ALL users to /consumer/home
+        const redirectPath = '/consumer/home'; // 🚀 CONSISTENT REDIRECT
         
         console.log(`🚀 Quick login redirecting ${userType} to: ${redirectPath}`);
         window.location.href = redirectPath;
