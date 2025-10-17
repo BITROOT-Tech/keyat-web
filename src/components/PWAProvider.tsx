@@ -41,7 +41,6 @@ export default function PWAProvider() {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('🔄 New content available, please refresh.');
-                  // You could show a "Update available" toast here
                 }
               });
             }
@@ -167,7 +166,8 @@ export default function PWAProvider() {
     <div className="fixed bottom-4 right-4 z-50 animate-fade-in-up">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200/80 backdrop-blur-sm p-4 max-w-xs animate-scale-in">
         <div className="flex items-start space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+          {/* 🎯 UPDATED: Exact same blue square with K as homepage */}
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
             <span className="text-white font-bold text-sm">K</span>
           </div>
           <div className="flex-1 min-w-0">
