@@ -1,4 +1,4 @@
-// src/components/consumer/BottomNav.tsx - UPDATED WITH MOVING & SERVICES
+// src/components/consumer/BottomNav.tsx - FINAL BATTLE-TESTED VERSION
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
@@ -9,11 +9,10 @@ import { useEffect, useState } from 'react';
 // Lazy load icons
 const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
 const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
-const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
-const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
-const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
 const TruckIcon = dynamic(() => import('lucide-react').then(mod => mod.Truck));
 const WrenchIcon = dynamic(() => import('lucide-react').then(mod => mod.Wrench));
+const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
+const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
 
 export default function ConsumerBottomNav() {
   const pathname = usePathname();
@@ -33,15 +32,9 @@ export default function ConsumerBottomNav() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // UPDATED: Added Moving & Services, removed Explore for Phase 1 focus
+  // 🏆 FINAL BATTLE-TESTED NAVIGATION - OPTIMIZED PLACEMENT & URLs
   const navItems = [
-    { 
-      icon: HomeIcon, 
-      label: 'Home', 
-      href: '/consumer/dashboard',
-      active: pathname === '/consumer/dashboard',
-      description: 'Dashboard'
-    },
+    // 🥇 PRIMARY BUSINESS ACTIONS (Left - Thumb Friendly)
     { 
       icon: SearchIcon, 
       label: 'Search', 
@@ -51,27 +44,40 @@ export default function ConsumerBottomNav() {
       badge: 'New'
     },
     { 
+      icon: CalendarIcon, 
+      label: 'Tours', 
+      href: '/consumer/tours',
+      active: pathname?.startsWith('/consumer/tours'),
+      description: 'Schedule viewings'
+    },
+    
+    // 🥈 ENGAGEMENT & DISCOVERY (Center)
+    { 
+      icon: HomeIcon, 
+      label: 'Home', 
+      href: '/consumer/dashboard',
+      active: pathname === '/consumer/dashboard',
+      description: 'Dashboard'
+    },
+    
+    // 🥉 REVENUE EXPANSION SERVICES (Center-Right)
+    { 
       icon: TruckIcon, 
-      label: 'Moving', 
-      href: '/consumer/moving',
-      active: pathname?.startsWith('/consumer/moving'),
+      label: 'Move-in', 
+      href: '/consumer/move-in',
+      active: pathname?.startsWith('/consumer/move-in'),
       description: 'Moving services',
-      badge: 'Hot' // Highlight new service
+      badge: 'Hot'
     },
     { 
       icon: WrenchIcon, 
       label: 'Services', 
       href: '/consumer/services',
       active: pathname?.startsWith('/consumer/services'),
-      description: 'Maintenance & more'
+      description: 'Home maintenance'
     },
-    { 
-      icon: CalendarIcon, 
-      label: 'Bookings', 
-      href: '/consumer/booking',
-      active: pathname?.startsWith('/consumer/booking'),
-      description: 'Viewings & tours'
-    },
+    
+    // 4️⃣ ACCOUNT MANAGEMENT (Right Edge)
     { 
       icon: UserIcon, 
       label: 'Profile', 
