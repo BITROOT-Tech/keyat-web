@@ -1,4 +1,4 @@
-// src/components/consumer/BottomNav.tsx - FINAL BATTLE-TESTED VERSION
+// src/components/consumer/BottomNav.tsx - FINAL BATTLE-TESTED VERSION (PROFILE REMOVED, SERVICES KEPT)
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
@@ -12,7 +12,6 @@ const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search))
 const TruckIcon = dynamic(() => import('lucide-react').then(mod => mod.Truck));
 const WrenchIcon = dynamic(() => import('lucide-react').then(mod => mod.Wrench));
 const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
-const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
 
 export default function ConsumerBottomNav() {
   const pathname = usePathname();
@@ -32,7 +31,7 @@ export default function ConsumerBottomNav() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // 🏆 FINAL BATTLE-TESTED NAVIGATION - OPTIMIZED PLACEMENT & URLs
+  // 🏆 FINAL BATTLE-TESTED NAVIGATION - OPTIMIZED PLACEMENT & URLs (PROFILE REMOVED)
   const navItems = [
     // 🥇 PRIMARY BUSINESS ACTIONS (Left - Thumb Friendly)
     { 
@@ -57,10 +56,10 @@ export default function ConsumerBottomNav() {
       label: 'Home', 
       href: '/consumer/home',
       active: pathname === '/consumer/home',
-      description: 'Home'
+      description: 'Dashboard'
     },
     
-    // 🥉 REVENUE EXPANSION SERVICES (Center-Right)
+    // 🥉 REVENUE EXPANSION SERVICES (Right)
     { 
       icon: TruckIcon, 
       label: 'Move-in', 
@@ -76,15 +75,7 @@ export default function ConsumerBottomNav() {
       active: pathname?.startsWith('/consumer/services'),
       description: 'Home maintenance'
     },
-    
-    // 4️⃣ ACCOUNT MANAGEMENT (Right Edge)
-    { 
-      icon: UserIcon, 
-      label: 'Profile', 
-      href: '/consumer/profile',
-      active: pathname?.startsWith('/consumer/profile'),
-      description: 'Account & settings'
-    },
+    // 🎯 REMOVED: Profile (now accessible via header avatar)
   ];
 
   const handleNavigation = (href: string) => {
@@ -97,7 +88,7 @@ export default function ConsumerBottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 safe-area-bottom z-50 lg:hidden">
         <div className="px-2 py-3">
           <div className="flex justify-around items-center">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(5)].map((_, i) => (
               <div key={i} className="flex flex-col items-center p-1 min-w-0 flex-1">
                 <div className="w-10 h-10 bg-gray-200 rounded-xl animate-pulse" />
                 <div className="h-3 bg-gray-200 rounded w-8 mt-1 animate-pulse" />
