@@ -1,3 +1,6 @@
+// src/app/offline/page.tsx
+'use client'; // Add this at the top
+
 export default function OfflinePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4 safe-area-padding">
