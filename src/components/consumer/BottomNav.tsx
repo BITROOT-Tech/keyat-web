@@ -55,9 +55,9 @@ export default function ConsumerBottomNav() {
     { 
       icon: HomeIcon, 
       label: 'Home', 
-      href: '/consumer/dashboard',
-      active: pathname === '/consumer/dashboard',
-      description: 'Dashboard'
+      href: '/consumer/home',
+      active: pathname === '/consumer/home',
+      description: 'Home'
     },
     
     // 🥉 REVENUE EXPANSION SERVICES (Center-Right)
