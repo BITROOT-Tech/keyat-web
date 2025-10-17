@@ -1,4 +1,4 @@
-// src/components/consumer/Header.tsx - COMPLETE & ENHANCED
+// src/components/consumer/Header.tsx - OPTIMIZED VERSION
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -16,8 +16,8 @@ const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
 const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
 const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
 const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
-const FilterIcon = dynamic(() => import('lucide-react').then(mod => mod.Filter));
 const TrendingUpIcon = dynamic(() => import('lucide-react').then(mod => mod.TrendingUp));
+const MenuIcon = dynamic(() => import('lucide-react').then(mod => mod.Menu));
 
 interface ConsumerHeaderProps {
   searchQuery: string;
@@ -40,12 +40,14 @@ export default function ConsumerHeader({
 }: ConsumerHeaderProps) {
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Check screen size for desktop user menu
+  // Check screen size
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -56,11 +58,14 @@ export default function ConsumerHeader({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Close user menu on click outside
+  // Close menus on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setShowUserMenu(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setShowMobileMenu(false);
       }
     };
 
@@ -85,8 +90,10 @@ export default function ConsumerHeader({
   const handleQuickAction = (path: string) => {
     router.push(path);
     setShowUserMenu(false);
+    setShowMobileMenu(false);
   };
 
+  // 🎯 OPTIMIZED: User menu options (account management only)
   const userMenuOptions = [
     { 
       icon: UserIcon, 
@@ -103,8 +110,8 @@ export default function ConsumerHeader({
     },
     { 
       icon: CalendarIcon, 
-      label: 'My Bookings', 
-      action: () => handleQuickAction('/consumer/booking'),
+      label: 'My Tours', 
+      action: () => handleQuickAction('/consumer/tours'),
       description: 'Viewing schedule'
     },
     { 
@@ -115,9 +122,9 @@ export default function ConsumerHeader({
     },
     { 
       icon: TrendingUpIcon, 
-      label: 'Search History', 
-      action: () => handleQuickAction('/consumer/history'),
-      description: 'Recent searches'
+      label: 'Trending', 
+      action: () => handleQuickAction('/consumer/trending'),
+      description: 'Popular areas'
     },
     { 
       icon: SettingsIcon, 
@@ -125,12 +132,26 @@ export default function ConsumerHeader({
       action: () => handleQuickAction('/consumer/settings'),
       description: 'Preferences'
     },
+  ];
+
+  // 🎯 OPTIMIZED: Mobile menu (user account actions only - no navigation redundancy)
+  const mobileMenuOptions = [
     { 
-      icon: LogOutIcon, 
-      label: 'Sign Out', 
-      action: handleLogout, 
-      destructive: true 
-    }
+      icon: UserIcon, 
+      label: 'My Profile', 
+      action: () => handleQuickAction('/consumer/profile')
+    },
+    { 
+      icon: BellIcon, 
+      label: 'Notifications', 
+      action: () => handleQuickAction('/consumer/notifications'),
+      badge: notifications > 0 ? notifications.toString() : undefined
+    },
+    { 
+      icon: SettingsIcon, 
+      label: 'Settings', 
+      action: () => handleQuickAction('/consumer/settings')
+    },
   ];
 
   // Quick search suggestions
@@ -166,7 +187,7 @@ export default function ConsumerHeader({
             whileTap={{ scale: 0.98 }}
           >
             <button
-              onClick={() => router.push('/consumer/dashboard')}
+              onClick={() => router.push('/consumer/home')}
               className="flex items-center space-x-3 group"
             >
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
@@ -181,6 +202,93 @@ export default function ConsumerHeader({
 
           {/* USER CONTROLS */}
           <div className="flex items-center space-x-1 flex-shrink-0">
+            {/* MOBILE HAMBURGER MENU */}
+            {isMobile && (
+              <div className="relative" ref={mobileMenuRef}>
+                <motion.button
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
+                  aria-label="Account menu"
+                >
+                  <MenuIcon className="h-5 w-5 text-gray-600" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showMobileMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/80 py-2 z-50"
+                    >
+                      {/* USER INFO HEADER */}
+                      {user && (
+                        <>
+                          <div className="px-4 py-3 border-b border-gray-200/80">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs font-medium">
+                                  {user?.first_name?.[0] || user?.email?.[0] || 'U'}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-gray-900 text-sm truncate">
+                                  {user?.first_name || 'User'}
+                                </p>
+                                <p className="text-gray-600 text-xs truncate">
+                                  {user?.email}
+                                </p>
+                                <p className="text-green-600 text-xs font-medium mt-0.5">
+                                  ● Active now
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 🎯 OPTIMIZED: Mobile menu options (account actions only) */}
+                          <div className="py-1">
+                            {mobileMenuOptions.map(({ icon: Icon, label, action, badge }) => (
+                              <motion.button
+                                key={label}
+                                onClick={action}
+                                whileTap={{ scale: 0.98 }}
+                                className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation group relative"
+                              >
+                                <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
+                                  <Icon className="h-4 w-4 flex-shrink-0" />
+                                </div>
+                                <span className="font-medium truncate">{label}</span>
+                                {badge && (
+                                  <span className="absolute right-4 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
+                                    {badge}
+                                  </span>
+                                )}
+                              </motion.button>
+                            ))}
+                          </div>
+
+                          <div className="border-t border-gray-200/80 my-1" />
+
+                          {/* LOGOUT */}
+                          <motion.button
+                            onClick={handleLogout}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors touch-manipulation group"
+                          >
+                            <div className="p-2 rounded-lg bg-red-100 group-hover:bg-red-200 transition-colors">
+                              <LogOutIcon className="h-4 w-4 flex-shrink-0" />
+                            </div>
+                            <span className="font-medium truncate">Sign Out</span>
+                          </motion.button>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
             {/* MOBILE SEARCH TOGGLE */}
             {isMobile && (
               <motion.button
@@ -210,8 +318,8 @@ export default function ConsumerHeader({
               )}
             </motion.button>
 
-            {/* USER MENU - DESKTOP ONLY */}
-            {!isMobile && user && (
+            {/* USER MENU - DESKTOP & MOBILE PROFILE AVATAR */}
+            {user && (
               <div className="relative" ref={userMenuRef}>
                 <motion.button
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -228,75 +336,86 @@ export default function ConsumerHeader({
                   </div>
                 </motion.button>
 
-                <AnimatePresence>
-                  {showUserMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-80 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/80 py-2 z-50"
-                    >
-                      {/* USER INFO HEADER */}
-                      <div className="px-4 py-3 border-b border-gray-200/80">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-sm font-medium">
-                              {user?.first_name?.[0] || user?.email?.[0] || 'U'}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 text-sm truncate">
-                              {user?.first_name || 'User'}
-                            </p>
-                            <p className="text-gray-600 text-xs truncate">
-                              {user?.email}
-                            </p>
-                            <p className="text-green-600 text-xs font-medium mt-0.5">
-                              ● Active now
-                            </p>
+                {/* DESKTOP USER MENU */}
+                {!isMobile && (
+                  <AnimatePresence>
+                    {showUserMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 top-full mt-2 w-80 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/80 py-2 z-50"
+                      >
+                        {/* USER INFO HEADER */}
+                        <div className="px-4 py-3 border-b border-gray-200/80">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-sm font-medium">
+                                {user?.first_name?.[0] || user?.email?.[0] || 'U'}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-gray-900 text-sm truncate">
+                                {user?.first_name || 'User'}
+                              </p>
+                              <p className="text-gray-600 text-xs truncate">
+                                {user?.email}
+                              </p>
+                              <p className="text-green-600 text-xs font-medium mt-0.5">
+                                ● Active now
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* MENU OPTIONS */}
-                      <div className="py-1 max-h-96 overflow-y-auto">
-                        {userMenuOptions.map(({ icon: Icon, label, action, description, badge, destructive }) => (
-                          <motion.button
-                            key={label}
-                            onClick={action}
-                            whileTap={{ scale: 0.98 }}
-                            className={`w-full flex items-center space-x-3 px-4 py-3 text-sm transition-colors touch-manipulation group ${
-                              destructive 
-                                ? 'text-red-600 hover:bg-red-50' 
-                                : 'text-gray-700 hover:bg-gray-50'
-                            }`}
-                          >
-                            <div className={`p-2 rounded-lg ${
-                              destructive ? 'bg-red-100' : 'bg-gray-100 group-hover:bg-white'
-                            } transition-colors`}>
-                              <Icon className="h-4 w-4 flex-shrink-0" />
-                            </div>
-                            <div className="flex-1 min-w-0 text-left">
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium truncate">{label}</span>
-                                {badge && (
-                                  <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
-                                    {badge}
-                                  </span>
+                        {/* 🎯 OPTIMIZED: User menu options */}
+                        <div className="py-1 max-h-96 overflow-y-auto">
+                          {userMenuOptions.map(({ icon: Icon, label, action, description, badge }) => (
+                            <motion.button
+                              key={label}
+                              onClick={action}
+                              whileTap={{ scale: 0.98 }}
+                              className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation group"
+                            >
+                              <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
+                                <Icon className="h-4 w-4 flex-shrink-0" />
+                              </div>
+                              <div className="flex-1 min-w-0 text-left">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium truncate">{label}</span>
+                                  {badge && (
+                                    <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
+                                      {badge}
+                                    </span>
+                                  )}
+                                </div>
+                                {description && (
+                                  <p className="text-gray-500 text-xs truncate mt-0.5">
+                                    {description}
+                                  </p>
                                 )}
                               </div>
-                              {description && (
-                                <p className="text-gray-500 text-xs truncate mt-0.5">
-                                  {description}
-                                </p>
-                              )}
+                            </motion.button>
+                          ))}
+                        </div>
+
+                        {/* LOGOUT */}
+                        <div className="border-t border-gray-200/80 mt-1">
+                          <motion.button
+                            onClick={handleLogout}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors touch-manipulation group"
+                          >
+                            <div className="p-2 rounded-lg bg-red-100 group-hover:bg-red-200 transition-colors">
+                              <LogOutIcon className="h-4 w-4 flex-shrink-0" />
                             </div>
+                            <span className="font-medium truncate">Sign Out</span>
                           </motion.button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
               </div>
             )}
           </div>
