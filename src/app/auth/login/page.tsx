@@ -1,4 +1,4 @@
-// src/app/auth/login/page.tsx - FIXED WITH PROPER REDIRECTS
+// src/app/auth/login/page.tsx - FIXED SERVICE PROVIDER BUG
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -59,7 +59,7 @@ export default function LoginPage() {
     emailRef.current?.focus();
   }, []);
 
-  // SMART USER TYPE DETECTION
+  // 🎯 FIXED: SERVICE PROVIDER BUG - Changed from 'service-provider' to 'service_provider'
   useEffect(() => {
     if (!formData.email) {
       setDetectedUserType('');
@@ -74,7 +74,7 @@ export default function LoginPage() {
     } else if (email.includes('agent') || email.includes('realtor')) {
       setDetectedUserType('agent');
     } else if (email.includes('service') || email.includes('repair') || email.includes('provider') || email.includes('maintenance')) {
-      setDetectedUserType('service-provider');
+      setDetectedUserType('service_provider'); // 🚨 CRITICAL FIX: Changed to underscore
     } else if (email.includes('admin') || email.includes('administrator')) {
       setDetectedUserType('admin');
     } else {
@@ -105,7 +105,7 @@ export default function LoginPage() {
       'tenant': '/consumer/home',
       'landlord': '/landlord/dashboard', 
       'agent': '/agent/dashboard',
-      'service-provider': '/service-provider/dashboard',
+      'service_provider': '/service-provider/dashboard', // 🚨 FIXED: Matches middleware
       'admin': '/admin/dashboard'
     };
     return paths[userType] || '/consumer/home';
@@ -234,7 +234,7 @@ export default function LoginPage() {
       redirectPath: '/agent/dashboard'
     },
     { 
-      value: 'service-provider',
+      value: 'service_provider', // 🚨 FIXED: Changed to underscore
       label: 'Service', 
       icon: WrenchIcon,
       testAccount: 'service@keyat.co.bw',
@@ -422,7 +422,7 @@ export default function LoginPage() {
                 <BadgeCheckIcon className="w-3 h-3 text-blue-600" />
               </div>
               <p className="text-sm text-blue-700 font-medium">
-                Detected: <span className="capitalize">{detectedUserType.replace('-', ' ')}</span> account
+                Detected: <span className="capitalize">{detectedUserType.replace('_', ' ')}</span> account
               </p>
               <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
                 → {getDashboardPath(detectedUserType)}

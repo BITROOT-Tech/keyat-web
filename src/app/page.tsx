@@ -1,34 +1,74 @@
-// src/app/page.tsx - FINAL BATTLE-TESTED VERSION
+// src/app/page.tsx - FIXED WITH AUTO-REDIRECT
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isReducedMotion, setIsReducedMotion] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // BATTLE-TESTED: Check for reduced motion preference
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setIsReducedMotion(mediaQuery.matches);
-    
-    // BATTLE-TESTED: Simple and reliable mount
-    setMounted(true);
-    
-    // BATTLE-TESTED: Smart auto-rotate that respects users
-    if (mediaQuery.matches) return; // No auto-rotate for reduced motion
-    
-    const isTouchDevice = 'ontouchstart' in window;
-    if (isTouchDevice) return; // No auto-rotate on mobile
-    
-    const interval = setInterval(() => {
-      setActiveSlide(prev => (prev + 1) % 3);
-    }, 7000); // Longer interval for better UX
-    
-    return () => clearInterval(interval);
-  }, []);
+    // Check authentication first
+    const checkAuthAndRedirect = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        console.log('🎯 ROOT PAGE: Session exists?', !!session);
+        console.log('🎯 ROOT PAGE: User email:', session?.user?.email);
+        
+        if (session?.user) {
+          const email = session.user.email?.toLowerCase() || '';
+          let userType = 'tenant';
+          
+          if (email.includes('admin')) userType = 'admin';
+          else if (email.includes('landlord')) userType = 'landlord';
+          else if (email.includes('agent')) userType = 'agent';
+          else if (email.includes('service')) userType = 'service_provider';
+          
+          const redirectPath = 
+            userType === 'admin' ? '/admin/dashboard' :
+            userType === 'landlord' ? '/landlord/dashboard' :
+            userType === 'agent' ? '/agent/dashboard' :
+            userType === 'service_provider' ? '/service-provider/dashboard' :
+            '/consumer/home';
+          
+          console.log('🚀 ROOT PAGE: Redirecting', userType, 'to', redirectPath);
+          window.location.href = redirectPath;
+          return; // Stop execution here
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+
+    checkAuthAndRedirect();
+
+    // Only setup landing page if user is not logged in
+    if (!checkingAuth) {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      setIsReducedMotion(mediaQuery.matches);
+      
+      setMounted(true);
+      
+      if (mediaQuery.matches) return;
+      
+      const isTouchDevice = 'ontouchstart' in window;
+      if (isTouchDevice) return;
+      
+      const interval = setInterval(() => {
+        setActiveSlide(prev => (prev + 1) % 3);
+      }, 7000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [checkingAuth]);
 
   // BATTLE-TESTED: Real content with clear user paths
   const heroSlides = [
@@ -85,6 +125,26 @@ export default function Home() {
       setActiveSlide(index);
     }
   };
+
+  // Show loading while checking auth
+  if (checkingAuth) {
+    return (
+      <div 
+        className="min-h-screen bg-gray-50 flex items-center justify-center px-4"
+        role="status"
+        aria-label="Checking authentication"
+      >
+        <div className="text-center">
+          <div 
+            className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"
+            aria-hidden="true"
+          ></div>
+          <p className="text-gray-600 font-medium">Checking authentication...</p>
+          <p className="text-gray-400 text-sm mt-2">Redirecting to your dashboard</p>
+        </div>
+      </div>
+    );
+  }
 
   // BATTLE-TESTED: Loading with performance consideration
   if (!mounted) {
