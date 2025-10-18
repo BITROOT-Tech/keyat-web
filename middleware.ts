@@ -1,4 +1,4 @@
-// middleware.ts - UPDATED VERSION
+// middleware.ts - FIXED VERSION (Updated Dashboard Paths)
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -115,17 +115,17 @@ function detectUserTypeFromEmail(email: string): string {
   return 'tenant';
 }
 
-// BATTLE-TESTED: Get proper dashboard path based on user type
+// 🚨 CRITICAL FIX: Updated dashboard paths to match our new structure
 function getDashboardPath(userType: string): string {
   const paths: Record<string, string> = {
-    'tenant': '/consumer/dashboard',
+    'tenant': '/consumer/home',           // ✅ CHANGED: /consumer/home
     'landlord': '/landlord/dashboard', 
     'agent': '/agent/dashboard',
     'service_provider': '/service-provider/dashboard',
-    'admin': '/admin/dashboard'
+    'admin': '/admin/dashboard'           // ✅ KEPT: /admin/dashboard
   };
   
-  return paths[userType] || '/consumer/dashboard';
+  return paths[userType] || '/consumer/home'; // ✅ CHANGED: Default to /consumer/home
 }
 
 export const config = {

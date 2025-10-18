@@ -1,4 +1,4 @@
-// src/app/auth/login/page.tsx - UPDATED REDIRECT TO HOME
+// src/app/auth/login/page.tsx - FIXED WITH PROPER REDIRECTS
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -99,6 +99,18 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // 🎯 FIXED: PROPER REDIRECT LOGIC FOR ALL USER TYPES
+  const getDashboardPath = (userType: string): string => {
+    const paths: Record<string, string> = {
+      'tenant': '/consumer/home',
+      'landlord': '/landlord/dashboard', 
+      'agent': '/agent/dashboard',
+      'service-provider': '/service-provider/dashboard',
+      'admin': '/admin/dashboard'
+    };
+    return paths[userType] || '/consumer/home';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
@@ -126,28 +138,18 @@ export default function LoginPage() {
       }
 
       if (data.user) {
+        // 🎯 FIXED: Use consistent redirect logic
         const userType = detectedUserType || data.user.user_metadata?.user_type || 'tenant';
+        const redirectPath = getDashboardPath(userType);
         
-        // 🎯 UPDATED: Redirect ALL consumer users to /consumer/home
-        let redirectPath = '';
-        switch (userType) {
-          case 'tenant':
-          case 'landlord':
-          case 'agent':
-          case 'service-provider':
-          case 'admin':
-          default:
-            redirectPath = '/consumer/home'; // 🚀 ALL USERS GO TO HOME NOW
-        }
+        console.log(`🔐 Login successful! Redirecting ${userType} to: ${redirectPath}`);
         
-        console.log(`🔐 Redirecting ${userType} to: ${redirectPath}`);
-        router.push(redirectPath);
-        router.refresh();
+        // 🚀 HARD REDIRECT - NO REACT ROUTER ISSUES
+        window.location.href = redirectPath;
       }
 
     } catch (error: any) {
       setSubmitError(error.message || 'Failed to sign in');
-    } finally {
       setLoading(false);
     }
   };
@@ -166,7 +168,7 @@ export default function LoginPage() {
     setTouched(prev => ({ ...prev, [field]: true }));
   };
 
-  // SIMPLE ONE-CLICK LOGIN
+  // 🎯 FIXED: PROPER QUICK LOGIN REDIRECTS
   const handleQuickLogin = async (email: string, userType: string) => {
     if (autoFillInProgress) return;
     
@@ -194,8 +196,8 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data.user) {
-        // 🎯 UPDATED: Redirect ALL users to /consumer/home
-        const redirectPath = '/consumer/home'; // 🚀 CONSISTENT REDIRECT
+        // 🎯 FIXED: Use proper redirect logic for quick login too
+        const redirectPath = getDashboardPath(userType);
         
         console.log(`🚀 Quick login redirecting ${userType} to: ${redirectPath}`);
         window.location.href = redirectPath;
@@ -212,35 +214,40 @@ export default function LoginPage() {
       label: 'Tenant', 
       icon: HomeIcon,
       testAccount: 'tenant@keyat.co.bw',
-      badgeColor: 'bg-blue-500'
+      badgeColor: 'bg-blue-500',
+      redirectPath: '/consumer/home'
     },
     { 
       value: 'landlord',
       label: 'Landlord', 
       icon: BuildingIcon,
       testAccount: 'landlord@keyat.co.bw',
-      badgeColor: 'bg-green-500'
+      badgeColor: 'bg-green-500',
+      redirectPath: '/landlord/dashboard'
     },
     { 
       value: 'agent',
       label: 'Agent', 
       icon: UserCheckIcon,
       testAccount: 'agent@keyat.co.bw',
-      badgeColor: 'bg-purple-500'
+      badgeColor: 'bg-purple-500',
+      redirectPath: '/agent/dashboard'
     },
     { 
       value: 'service-provider',
       label: 'Service', 
       icon: WrenchIcon,
       testAccount: 'service@keyat.co.bw',
-      badgeColor: 'bg-orange-500'
+      badgeColor: 'bg-orange-500',
+      redirectPath: '/service-provider/dashboard'
     },
     { 
       value: 'admin',
       label: 'Admin', 
       icon: UserCogIcon,
       testAccount: 'admin@keyat.co.bw',
-      badgeColor: 'bg-red-500'
+      badgeColor: 'bg-red-500',
+      redirectPath: '/admin/dashboard'
     }
   ];
 
@@ -318,6 +325,7 @@ export default function LoginPage() {
                             <div className="text-left">
                               <h4 className="font-medium text-gray-900 text-sm">{type.label}</h4>
                               <p className="text-gray-500 text-xs">{type.testAccount}</p>
+                              <p className="text-gray-400 text-xs">→ {type.redirectPath}</p>
                             </div>
                           </div>
                           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors">
@@ -416,6 +424,9 @@ export default function LoginPage() {
               <p className="text-sm text-blue-700 font-medium">
                 Detected: <span className="capitalize">{detectedUserType.replace('-', ' ')}</span> account
               </p>
+              <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                → {getDashboardPath(detectedUserType)}
+              </span>
             </motion.div>
           )}
 

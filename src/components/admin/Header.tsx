@@ -1,4 +1,4 @@
-//src\components\admin\Header.tsx
+// src/components/admin/Header.tsx
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -11,60 +11,47 @@ const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search))
 const BellIcon = dynamic(() => import('lucide-react').then(mod => mod.Bell));
 const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
 const SettingsIcon = dynamic(() => import('lucide-react').then(mod => mod.Settings));
-const UsersIcon = dynamic(() => import('lucide-react').then(mod => mod.Users));
-const ShieldIcon = dynamic(() => import('lucide-react').then(mod => mod.Shield));
-const BarChartIcon = dynamic(() => import('lucide-react').then(mod => mod.BarChart3));
-const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Building2));
 const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
+const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
+const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Building2));
+const UsersIcon = dynamic(() => import('lucide-react').then(mod => mod.Users));
+const BarChart3Icon = dynamic(() => import('lucide-react').then(mod => mod.BarChart3));
+const MenuIcon = dynamic(() => import('lucide-react').then(mod => mod.Menu));
 
 interface AdminHeaderProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  onQuickSearch: () => void;
-  notifications?: number;
   user?: any;
+  notifications?: number;
 }
 
-export default function AdminHeader({ 
-  searchQuery, 
-  onSearchChange, 
-  onQuickSearch, 
-  notifications = 0,
-  user 
-}: AdminHeaderProps) {
+export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProps) {
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Check screen size for desktop user menu
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 1024);
     };
-
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Close user menu on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setShowUserMenu(false);
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setShowMobileMenu(false);
+      }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      onQuickSearch();
-    }
-  };
 
   const handleLogout = async () => {
     const { createClient } = await import('@/lib/supabase/client');
@@ -73,41 +60,152 @@ export default function AdminHeader({
     router.push('/auth/login');
   };
 
-  const userMenuOptions = [
-    { icon: UserIcon, label: 'Admin Profile', action: () => router.push('/admin/profile') },
-    { icon: UsersIcon, label: 'User Management', action: () => router.push('/admin/users') },
-    { icon: BuildingIcon, label: 'Properties', action: () => router.push('/admin/properties') },
-    { icon: BarChartIcon, label: 'Analytics', action: () => router.push('/admin/analytics') },
-    { icon: ShieldIcon, label: 'Security', action: () => router.push('/admin/security') },
-    { icon: SettingsIcon, label: 'System Settings', action: () => router.push('/admin/settings') },
-    { icon: LogOutIcon, label: 'Sign Out', action: handleLogout, destructive: true }
+  const handleQuickAction = (path: string) => {
+    router.push(path);
+    setShowUserMenu(false);
+    setShowMobileMenu(false);
+  };
+
+  // Admin-specific menu options
+  const adminMenuOptions = [
+    { 
+      icon: BarChart3Icon, 
+      label: 'Dashboard', 
+      action: () => handleQuickAction('/admin/dashboard'),
+      description: 'Analytics overview'
+    },
+    { 
+      icon: BuildingIcon, 
+      label: 'Properties', 
+      action: () => handleQuickAction('/admin/properties'),
+      description: 'Manage all listings'
+    },
+    { 
+      icon: UsersIcon, 
+      label: 'Users', 
+      action: () => handleQuickAction('/admin/users'),
+      description: 'User management'
+    },
+    { 
+      icon: BellIcon, 
+      label: 'Notifications', 
+      action: () => handleQuickAction('/admin/notifications'),
+      description: `${notifications} pending`,
+      badge: notifications > 0 ? notifications.toString() : undefined
+    },
+  ];
+
+  const mobileMenuOptions = [
+    { 
+      icon: BarChart3Icon, 
+      label: 'Dashboard', 
+      action: () => handleQuickAction('/admin/dashboard')
+    },
+    { 
+      icon: BuildingIcon, 
+      label: 'Properties', 
+      action: () => handleQuickAction('/admin/properties')
+    },
+    { 
+      icon: UsersIcon, 
+      label: 'Users', 
+      action: () => handleQuickAction('/admin/users')
+    },
   ];
 
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/95 backdrop-blur-sm border-b border-gray-200/80 sticky top-0 z-30 safe-area-top"
+      className="bg-white/95 backdrop-blur-sm border-b border-gray-200/80 sticky top-0 z-40 safe-area-top"
     >
-      <div className="px-4 py-3">
-        <div className="flex items-center justify-between mb-3">
-          {/* BRAND/LOGO */}
-          <div className="flex-shrink-0">
-            <motion.h1 
-              className="text-xl font-bold text-gray-900"
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Left: Brand & Mobile Menu */}
+          <div className="flex items-center">
+            {/* Mobile menu button */}
+            {isMobile && (
+              <div className="relative mr-2" ref={mobileMenuRef}>
+                <motion.button
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Admin menu"
+                >
+                  <MenuIcon className="h-5 w-5 text-gray-600" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showMobileMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute left-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/80 py-2 z-50"
+                    >
+                      {user && (
+                        <>
+                          <div className="px-4 py-3 border-b border-gray-200/80">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs font-medium">A</span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-gray-900 text-sm truncate">
+                                  {user?.first_name || 'Admin'}
+                                </p>
+                                <p className="text-gray-600 text-xs truncate">Administrator</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="py-1">
+                            {mobileMenuOptions.map(({ icon: Icon, label, action }) => (
+                              <motion.button
+                                key={label}
+                                onClick={action}
+                                whileTap={{ scale: 0.98 }}
+                                className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              >
+                                <div className="p-2 rounded-lg bg-gray-100">
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <span className="font-medium">{label}</span>
+                              </motion.button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* Brand */}
+            <motion.button
+              onClick={() => router.push('/admin/dashboard')}
               whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center space-x-3 group"
             >
-              Keyat
-            </motion.h1>
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-sm">A</span>
+              </div>
+              <div className="text-left">
+                <h1 className="text-xl font-bold text-gray-900 leading-none">Keyat</h1>
+                <p className="text-gray-500 text-xs leading-none mt-0.5">Admin</p>
+              </div>
+            </motion.button>
           </div>
 
-          {/* DESKTOP: User Menu | MOBILE: Notifications Only */}
-          <div className="flex items-center space-x-2 flex-shrink-0">
+          {/* Right: User Controls */}
+          <div className="flex items-center space-x-4">
+            {/* Notifications */}
             <motion.button
               onClick={() => router.push('/admin/notifications')}
               whileTap={{ scale: 0.95 }}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
+              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Notifications"
             >
               <BellIcon className="h-5 w-5 text-gray-600" />
@@ -120,20 +218,26 @@ export default function AdminHeader({
               )}
             </motion.button>
 
-            {/* DESKTOP USER MENU */}
-            {!isMobile && user && (
+            {/* User Menu */}
+            {user && (
               <div className="relative" ref={userMenuRef}>
                 <motion.button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
+                  className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   aria-label="Admin menu"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full flex items-center justify-center shadow-sm">
-                    <span className="text-white text-sm font-medium">
-                      {user?.first_name?.[0] || user?.email?.[0] || 'A'}
-                    </span>
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-sm">
+                    <span className="text-white text-sm font-medium">A</span>
                   </div>
+                  {!isMobile && (
+                    <div className="text-left hidden sm:block">
+                      <p className="text-sm font-medium text-gray-900">
+                        {user?.first_name || 'Admin'}
+                      </p>
+                      <p className="text-xs text-gray-500">Administrator</p>
+                    </div>
+                  )}
                 </motion.button>
 
                 <AnimatePresence>
@@ -144,37 +248,69 @@ export default function AdminHeader({
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       className="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/80 py-2 z-50"
                     >
+                      {/* User Info */}
                       <div className="px-4 py-3 border-b border-gray-200/80">
-                        <p className="font-semibold text-gray-900 text-sm truncate">
-                          {user?.first_name || 'Admin'}
-                        </p>
-                        <p className="text-gray-600 text-xs truncate">
-                          {user?.email}
-                        </p>
-                        <p className="text-gray-500 text-xs mt-1">
-                          System Administrator
-                        </p>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-medium">A</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 text-sm truncate">
+                              {user?.first_name || 'Administrator'}
+                            </p>
+                            <p className="text-gray-600 text-xs truncate">
+                              {user?.email}
+                            </p>
+                            <p className="text-green-600 text-xs font-medium mt-0.5">
+                              ● Super Admin
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
+                      {/* Admin Menu Options */}
                       <div className="py-1">
-                        {userMenuOptions.map(({ icon: Icon, label, action, destructive }) => (
+                        {adminMenuOptions.map(({ icon: Icon, label, action, description, badge }) => (
                           <motion.button
                             key={label}
-                            onClick={() => {
-                              action();
-                              setShowUserMenu(false);
-                            }}
+                            onClick={action}
                             whileTap={{ scale: 0.98 }}
-                            className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors touch-manipulation ${
-                              destructive 
-                                ? 'text-red-600 hover:bg-red-50' 
-                                : 'text-gray-700 hover:bg-gray-50'
-                            }`}
+                            className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group"
                           >
-                            <Icon className="h-4 w-4 flex-shrink-0" />
-                            <span className="truncate">{label}</span>
+                            <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
+                              <Icon className="h-4 w-4 flex-shrink-0" />
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium truncate">{label}</span>
+                                {badge && (
+                                  <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
+                                    {badge}
+                                  </span>
+                                )}
+                              </div>
+                              {description && (
+                                <p className="text-gray-500 text-xs truncate mt-0.5">
+                                  {description}
+                                </p>
+                              )}
+                            </div>
                           </motion.button>
                         ))}
+                      </div>
+
+                      {/* Logout */}
+                      <div className="border-t border-gray-200/80 mt-1">
+                        <motion.button
+                          onClick={handleLogout}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors group"
+                        >
+                          <div className="p-2 rounded-lg bg-red-100 group-hover:bg-red-200 transition-colors">
+                            <LogOutIcon className="h-4 w-4 flex-shrink-0" />
+                          </div>
+                          <span className="font-medium truncate">Sign Out</span>
+                        </motion.button>
                       </div>
                     </motion.div>
                   )}
@@ -183,24 +319,6 @@ export default function AdminHeader({
             )}
           </div>
         </div>
-
-        {/* SEARCH BAR - PRIMARY ACTION */}
-        <motion.div 
-          className="relative"
-          whileFocus={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        >
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search users, properties, reports..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onKeyDown={handleKeyPress}
-            className="w-full pl-10 pr-4 py-3 bg-gray-100/80 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all placeholder-gray-500 touch-manipulation shadow-sm"
-            aria-label="Search platform"
-          />
-        </motion.div>
       </div>
     </motion.header>
   );
