@@ -1,4 +1,4 @@
-// src/app/auth/login/page.tsx - FIXED SERVICE PROVIDER BUG
+// src/app/auth/login/page.tsx - FIXED COLORS
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -208,13 +208,14 @@ export default function LoginPage() {
     }
   };
 
+  // 🎨 FIXED: CORRECT COLORS MATCHING DASHBOARD SYSTEM
   const userTypes = [
     { 
       value: 'tenant',
       label: 'Tenant', 
       icon: HomeIcon,
       testAccount: 'tenant@keyat.co.bw',
-      badgeColor: 'bg-blue-500',
+      badgeColor: 'bg-blue-500', // 🔵 Consumer Blue
       redirectPath: '/consumer/home'
     },
     { 
@@ -222,7 +223,7 @@ export default function LoginPage() {
       label: 'Landlord', 
       icon: BuildingIcon,
       testAccount: 'landlord@keyat.co.bw',
-      badgeColor: 'bg-green-500',
+      badgeColor: 'bg-green-500', // 🟢 Landlord Green
       redirectPath: '/landlord/dashboard'
     },
     { 
@@ -230,7 +231,7 @@ export default function LoginPage() {
       label: 'Agent', 
       icon: UserCheckIcon,
       testAccount: 'agent@keyat.co.bw',
-      badgeColor: 'bg-purple-500',
+      badgeColor: 'bg-cyan-500', // 🟦 Agent Cyan (FIXED: was purple)
       redirectPath: '/agent/dashboard'
     },
     { 
@@ -238,7 +239,7 @@ export default function LoginPage() {
       label: 'Service', 
       icon: WrenchIcon,
       testAccount: 'service@keyat.co.bw',
-      badgeColor: 'bg-orange-500',
+      badgeColor: 'bg-indigo-500', // 🟪 Service Provider Indigo (FIXED: was orange)
       redirectPath: '/service-provider/dashboard'
     },
     { 
@@ -246,7 +247,7 @@ export default function LoginPage() {
       label: 'Admin', 
       icon: UserCogIcon,
       testAccount: 'admin@keyat.co.bw',
-      badgeColor: 'bg-red-500',
+      badgeColor: 'bg-purple-500', // 🟣 Admin Purple
       redirectPath: '/admin/dashboard'
     }
   ];
@@ -272,7 +273,8 @@ export default function LoginPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setDevToolsCollapsed(!devToolsCollapsed)}
-              className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
+              // 🎨 FIXED: Admin purple for dev tools header
+              className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 transition-all duration-200"
             >
               <div className="flex items-center space-x-2">
                 <ZapIcon className="w-4 h-4" />
@@ -283,7 +285,7 @@ export default function LoginPage() {
                     className="text-left"
                   >
                     <h3 className="font-semibold text-sm">Dev Tools</h3>
-                    <p className="text-blue-100 text-xs">Quick login access</p>
+                    <p className="text-purple-100 text-xs">Quick login access</p>
                   </motion.div>
                 )}
               </div>
