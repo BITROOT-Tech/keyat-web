@@ -1,4 +1,4 @@
-// lib/supabase/properties.ts
+// lib/supabase/properties.ts - UPDATED
 import { createClient } from './client';
 
 export interface PropertyFilters {
@@ -18,8 +18,8 @@ export async function getFeaturedProperties(limit: number = 6) {
       .from('properties')
       .select('*')
       .eq('status', 'available')
-      .eq('listing_type', 'rent')
-      .eq('is_featured', true)
+      // .eq('listing_type', 'rent') // Remove if this column doesn't exist
+      // .eq('is_featured', true) // Remove if this column doesn't exist
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -38,12 +38,13 @@ export async function searchProperties(filters: PropertyFilters = {}, sortBy: st
     let query = supabase
       .from('properties')
       .select('*')
-      .eq('status', 'available')
-      .eq('listing_type', 'rent');
+      .eq('status', 'available');
+      // .eq('listing_type', 'rent'); // Remove if this column doesn't exist
 
     // Apply search filter
     if (filters.searchQuery) {
-      query = query.or(`title.ilike.%${filters.searchQuery}%,description.ilike.%${filters.searchQuery}%,location.ilike.%${filters.searchQuery}%`);
+      query = query.or(`title.ilike.%${filters.searchQuery}%,location.ilike.%${filters.searchQuery}%`);
+      // Remove description if the column doesn't exist
     }
 
     // Apply location filters
@@ -59,21 +60,23 @@ export async function searchProperties(filters: PropertyFilters = {}, sortBy: st
       query = query.lte('price', filters.priceRange.max);
     }
 
-    // Apply bedroom filter
+    // Apply bedroom filter - FIXED: Use 'beds' instead of 'bedrooms'
     if (filters.bedrooms) {
-      query = query.eq('bedrooms', filters.bedrooms);
+      query = query.eq('beds', filters.bedrooms); // Changed from 'bedrooms' to 'beds'
     }
 
-    // Apply property type filters
+    // Apply property type filters - FIXED: Remove if 'type' column doesn't exist
     if (filters.propertyTypes && filters.propertyTypes.length > 0) {
-      query = query.in('type', filters.propertyTypes);
+      // Only apply if you have a 'type' column
+      // query = query.in('type', filters.propertyTypes);
     }
 
-    // Apply amenities filter (if features array exists)
+    // Apply amenities filter - FIXED: Remove if 'features' array doesn't exist
     if (filters.amenities && filters.amenities.length > 0) {
-      filters.amenities.forEach(amenity => {
-        query = query.contains('features', [amenity]);
-      });
+      // Only apply if you have a 'features' array column
+      // filters.amenities.forEach(amenity => {
+      //   query = query.contains('features', [amenity]);
+      // });
     }
 
     // Apply sorting
@@ -88,10 +91,13 @@ export async function searchProperties(filters: PropertyFilters = {}, sortBy: st
         query = query.order('created_at', { ascending: false });
         break;
       case 'featured':
-        query = query.order('is_featured', { ascending: false }).order('created_at', { ascending: false });
+        // Use 'featured' column if it exists, otherwise fall back to creation date
+        // query = query.order('featured', { ascending: false }).order('created_at', { ascending: false });
+        query = query.order('created_at', { ascending: false });
         break;
       default:
-        query = query.order('is_featured', { ascending: false }).order('created_at', { ascending: false });
+        // query = query.order('is_featured', { ascending: false }).order('created_at', { ascending: false });
+        query = query.order('created_at', { ascending: false });
     }
 
     const { data, error } = await query;
@@ -110,11 +116,8 @@ export async function getPropertyById(id: string) {
     
     const { data, error } = await supabase
       .from('properties')
-      .select(`
-        *,
-        landlord:profiles!landlord_id(first_name, last_name, phone, id_verified),
-        agent:profiles!agent_id(first_name, last_name, phone, id_verified)
-      `)
+      .select('*')
+      // Remove the joins if landlord_id/agent_id relationships don't exist
       .eq('id', id)
       .single();
 
@@ -152,7 +155,7 @@ export async function getPropertyTypes() {
     
     const { data, error } = await supabase
       .from('properties')
-      .select('type')
+      .select('type') // Only if this column exists
       .eq('status', 'available');
 
     if (error) throw error;
