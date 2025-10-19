@@ -36,6 +36,27 @@
   }
 }
 
+/* ===== CORE ANIMATIONS ===== */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ===== PREMIUM SKELETON ANIMATIONS ===== */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* ===== TARGETED HORIZONTAL SCROLL FIX ===== */
 /* Only applied to mobile devices */
 @media (max-width: 768px) {
@@ -214,6 +235,29 @@
       background-position: -200% 0;
     }
   }
+
+  /* Premium shimmer effect for modern loading */
+  .shimmer-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.6),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite;
+  }
 }
 
 /* Bottom navigation safe area fix for mobile browsers */
@@ -299,5 +343,99 @@
   /* Flexbox children protection */
   .flex-mobile-safe {
     min-width: 0;
+  }
+
+  /* Enhanced touch targets for mobile */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Optimize scrolling performance */
+  .optimize-scrolling {
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
+  }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+/* Focus visible polyfill */
+.js-focus-visible :focus:not(.focus-visible) {
+  outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .contrast-high {
+    border-width: 2px;
+  }
+}
+
+/* ===== PWA ENHANCEMENTS ===== */
+/* Prevent pull-to-refresh on mobile */
+@media (max-width: 768px) {
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* ===== CUSTOM UTILITIES ===== */
+@layer utilities {
+  /* Text truncation with ellipsis */
+  .text-ellipsis-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .text-ellipsis-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Backdrop blur support */
+  .backdrop-blur-support {
+    @supports (backdrop-filter: blur(10px)) {
+      backdrop-filter: blur(10px);
+    }
+    
+    @supports not (backdrop-filter: blur(10px)) {
+      background: rgba(255, 255, 255, 0.95);
+    }
+  }
+}
+
+/* ===== BROWSER SPECIFIC FIXES ===== */
+/* Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .safari-fix {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Firefox specific fixes */
+@-moz-document url-prefix() {
+  .firefox-fix {
+    scrollbar-width: thin;
   }
 }

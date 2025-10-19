@@ -1,10 +1,25 @@
-// src/app/consumer/layout.tsx - FIXED VERSION
+// src/app/consumer/layout.tsx - CLEAN VERSION WITH SIMPLE LOADER
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Sidebar, BottomNav } from '@/components/consumer';
+
+// SIMPLE PROFESSIONAL LOADER COMPONENT
+function SimpleLoader() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center safe-area-padding">
+      <div className="text-center">
+        <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p className="text-gray-600 font-medium">Loading your dashboard</p>
+        <p className="text-gray-400 text-sm mt-1">Preparing your experience</p>
+      </div>
+    </div>
+  );
+}
 
 export default function ConsumerLayout({
   children,
@@ -28,7 +43,6 @@ export default function ConsumerLayout({
           return;
         }
 
-        // Get user profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -39,7 +53,6 @@ export default function ConsumerLayout({
         setLoading(false);
       } catch (err: any) {
         console.error('Consumer layout error:', err);
-        // Don't redirect on error during development
         setLoading(false);
       }
     };
@@ -47,32 +60,21 @@ export default function ConsumerLayout({
     checkAuth();
   }, [router]);
 
+  // SIMPLE LOADER: Show while checking auth
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg animate-pulse" />
-          </div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <SimpleLoader />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 consumer-dashboard">
-      {/* Desktop Sidebar */}
       <Sidebar user={user} />
       
-      {/* Main Content Area with proper BottomNav spacing */}
       <div className="lg:pl-64">
-        <main className="min-h-screen pb-20 lg:pb-0"> {/* CRITICAL: Add bottom padding */}
+        <main className="min-h-screen pb-20 lg:pb-0">
           {children}
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation */}
       <div className="lg:hidden">
         <BottomNav />
       </div>

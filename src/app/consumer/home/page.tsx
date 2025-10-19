@@ -1,4 +1,4 @@
-// src/app/consumer/home/page.tsx - COMPLETE WITH HEADER
+// src/app/consumer/home/page.tsx - REFINED ELEGANT SKELETONS
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -43,18 +43,33 @@ function DashboardError({ error, onRetry }: { error: string; onRetry: () => void
   );
 }
 
-// SKELETON LOADERS
+// ELEGANT SKELETON LOADERS WITH SUBTLE SHIMMER
 function PropertySkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse w-full">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 w-full">
       <div className="flex space-x-4 w-full">
-        <div className="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0" />
-        <div className="flex-1 space-y-2 min-w-0">
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-          <div className="h-3 bg-gray-200 rounded w-1/2" />
-          <div className="flex justify-between">
-            <div className="h-3 bg-gray-200 rounded w-1/4" />
-            <div className="h-4 bg-gray-200 rounded w-1/3" />
+        {/* Image skeleton with subtle shimmer */}
+        <div className="relative w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        </div>
+        
+        {/* Content skeleton */}
+        <div className="flex-1 space-y-3 min-w-0">
+          <div className="h-4 bg-gray-100 rounded w-3/4 relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.3s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          </div>
+          
+          <div className="h-3 bg-gray-100 rounded w-1/2 relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.6s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="h-3 bg-gray-100 rounded w-1/4 relative overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.9s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
+            <div className="h-4 bg-gray-100 rounded w-1/3 relative overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_1.2s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
           </div>
         </div>
       </div>
@@ -64,12 +79,19 @@ function PropertySkeleton() {
 
 function QuickActionSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse w-full">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 w-full">
       <div className="flex items-center space-x-3 w-full">
-        <div className="w-8 h-8 bg-gray-200 rounded-lg flex-shrink-0" />
+        <div className="w-8 h-8 bg-gray-100 rounded-lg flex-shrink-0 relative overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        </div>
+        
         <div className="flex-1 space-y-2 min-w-0">
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-          <div className="h-3 bg-gray-200 rounded w-1/2" />
+          <div className="h-4 bg-gray-100 rounded w-3/4 relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.4s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          </div>
+          <div className="h-3 bg-gray-100 rounded w-1/2 relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.8s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          </div>
         </div>
       </div>
     </div>
@@ -80,8 +102,101 @@ function StatsSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-3 w-full">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-24 bg-white rounded-2xl animate-pulse" />
+        <div key={i} className="h-24 bg-white rounded-2xl border border-gray-200 p-4 relative overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          
+          <div className="flex items-center justify-between h-full">
+            <div className="space-y-2">
+              <div className="h-6 bg-gray-100 rounded w-16 relative overflow-hidden">
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.4s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+              </div>
+              <div className="h-4 bg-gray-100 rounded w-20 relative overflow-hidden">
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.8s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+              </div>
+            </div>
+            <div className="w-10 h-10 bg-gray-100 rounded-lg relative overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_1.2s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
+          </div>
+        </div>
       ))}
+    </div>
+  );
+}
+
+function WelcomeSkeleton() {
+  return (
+    <div className="bg-gray-200 rounded-2xl p-6 mb-6 relative overflow-hidden">
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_4s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+      
+      <div className="text-center space-y-3 relative z-10">
+        <div className="h-8 bg-gray-300 rounded w-3/4 mx-auto relative overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_4s_ease-in-out_infinite_0.5s] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+        <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto relative overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_4s_ease-in-out_infinite_1s] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeaderSkeleton() {
+  return (
+    <div className="flex items-center justify-between mb-4 w-full">
+      <div className="h-6 bg-gray-100 rounded w-1/3 relative overflow-hidden">
+        <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+      </div>
+      <div className="w-5 h-5 bg-gray-100 rounded relative overflow-hidden">
+        <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.6s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+      </div>
+    </div>
+  );
+}
+
+function RecentActivitySkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="flex items-center space-x-3 p-3">
+          <div className="w-8 h-8 bg-gray-100 rounded-full relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          </div>
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-gray-100 rounded w-3/4 relative overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.4s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
+            <div className="h-3 bg-gray-100 rounded w-1/2 relative overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.8s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function HeaderSkeleton() {
+  return (
+    <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-30 p-4">
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gray-100 rounded-full relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-100 rounded w-20 relative overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.4s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
+            <div className="h-3 bg-gray-100 rounded w-16 relative overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.8s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            </div>
+          </div>
+        </div>
+        <div className="w-8 h-8 bg-gray-100 rounded-lg relative overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_1.2s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -327,22 +442,24 @@ export default function ConsumerHome() {
     return <DashboardError error={error} onRetry={checkAuth} />;
   }
 
-  // LOADING STATE
+  // ELEGANT LOADING STATE WITH SUBTLE SHIMMER
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pb-20 safe-area-padding lg:pb-0 w-full overflow-hidden">
+        {/* Header Skeleton */}
+        <HeaderSkeleton />
+
         {/* Content */}
         <div className="p-4 space-y-6 lg:max-w-4xl lg:mx-auto w-full overflow-hidden">
           {/* Welcome Skeleton */}
-          <div className="text-center">
-            <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto mb-2" />
-            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto" />
-          </div>
+          <WelcomeSkeleton />
           
           {/* Stats Skeleton */}
+          <SectionHeaderSkeleton />
           <StatsSkeleton />
           
           {/* Quick Actions Skeleton */}
+          <SectionHeaderSkeleton />
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 w-full">
             {[...Array(4)].map((_, i) => (
               <QuickActionSkeleton key={i} />
@@ -350,11 +467,16 @@ export default function ConsumerHome() {
           </div>
           
           {/* Properties Skeleton */}
+          <SectionHeaderSkeleton />
           <div className="space-y-4 w-full">
             {[...Array(4)].map((_, i) => (
               <PropertySkeleton key={i} />
             ))}
           </div>
+
+          {/* Recent Activity Skeleton */}
+          <SectionHeaderSkeleton />
+          <RecentActivitySkeleton />
         </div>
       </div>
     );
