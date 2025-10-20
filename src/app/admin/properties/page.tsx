@@ -1,4 +1,4 @@
-// src/app/admin/properties/page.tsx - COMPLETE WITH INTELLIGENT PRIORITY
+// src/app/admin/properties/page.tsx - FIXED MOBILE LAYOUT
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -216,9 +216,9 @@ export default function AdminPropertiesPage() {
                 className="bg-white rounded-xl border border-gray-200 overflow-hidden active:scale-[0.998] transition-transform hover:shadow-sm"
               >
                 <div className="p-4">
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
                     {/* Property Image */}
-                    <div className="flex-shrink-0 relative">
+                    <div className="flex-shrink-0 relative self-start">
                       <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
                         {property.images && property.images.length > 0 ? (
                           <img 
@@ -241,7 +241,7 @@ export default function AdminPropertiesPage() {
 
                     {/* Property Details */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 space-y-2 sm:space-y-0">
                         <div className="flex-1 min-w-0 pr-2">
                           <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 leading-tight mb-1">
                             {property.title}
@@ -251,7 +251,7 @@ export default function AdminPropertiesPage() {
                             <span className="truncate">{property.location}</span>
                           </p>
                         </div>
-                        <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.color}`}>
+                        <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.color} self-start`}>
                           <span className="text-xs">{statusConfig.icon}</span>
                           <span className="capitalize">{property.status}</span>
                         </div>
@@ -273,8 +273,8 @@ export default function AdminPropertiesPage() {
                         </div>
                       </div>
 
-                      {/* Price & Actions */}
-                      <div className="flex items-center justify-between">
+                      {/* Price & Actions - Stack on mobile, row on larger screens */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                         <div>
                           <p className="text-base font-bold text-blue-600">
                             P{property.price?.toLocaleString()}
@@ -282,10 +282,11 @@ export default function AdminPropertiesPage() {
                           </p>
                         </div>
                         
-                        <div className="flex space-x-2">
+                        {/* Action Buttons - Full width on mobile, auto width on larger screens */}
+                        <div className="flex space-x-2 w-full sm:w-auto">
                           <button
                             onClick={() => handleOpenUploadModal(property)}
-                            className="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium active:scale-95 transition-transform hover:bg-blue-700 flex items-center space-x-1.5 shadow-sm"
+                            className="flex-1 sm:flex-none bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium active:scale-95 transition-transform hover:bg-blue-700 flex items-center justify-center space-x-1.5 shadow-sm"
                           >
                             <span>📤</span>
                             <span>Upload</span>
@@ -293,7 +294,7 @@ export default function AdminPropertiesPage() {
                           
                           <button 
                             onClick={() => window.open(`/consumer/property/${property.id}`, '_blank')}
-                            className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-xs font-medium active:scale-95 transition-transform hover:bg-gray-200 flex items-center space-x-1.5"
+                            className="flex-1 sm:flex-none bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-xs font-medium active:scale-95 transition-transform hover:bg-gray-200 flex items-center justify-center space-x-1.5"
                           >
                             <span>👁️</span>
                             <span>View</span>
