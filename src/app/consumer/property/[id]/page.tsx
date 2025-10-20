@@ -1,4 +1,4 @@
-// src/app/consumer/property/[id]/page.tsx - CLEAN CLICKABLE VERSION
+// src/app/consumer/property/[id]/page.tsx - COMPLETE FIXED VERSION
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -54,8 +54,13 @@ export default function PropertyDetailsPage() {
     }
   };
 
+  // FIXED: Add missing touch move handler
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = () => {
@@ -114,9 +119,19 @@ export default function PropertyDetailsPage() {
     }
   };
 
+  // FIXED: Reliable back button navigation
+  const handleBackClick = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      // Navigate to consumer home page (properties listing)
+      router.push('/consumer/home');
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center safe-area-padding">
         <div className="text-center">
           <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
             <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -129,13 +144,13 @@ export default function PropertyDetailsPage() {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center safe-area-padding">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Not Found</h1>
           <p className="text-gray-600 mb-4">This property doesn't exist or was removed.</p>
           <button
-            onClick={() => router.back()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={handleBackClick}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors active:scale-95"
           >
             Go Back
           </button>
@@ -146,18 +161,20 @@ export default function PropertyDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+      {/* FIXED: Reliable back button with proper safe area */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-20 safe-area-padding-top">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <button
-            onClick={() => router.back()}
-            className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+            onClick={handleBackClick}
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium active:scale-95 transition-transform"
           >
-            ← Back to Properties
+            <span className="text-lg">←</span>
+            <span>Back to Properties</span>
           </button>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto safe-area-padding-bottom">
         <div className="bg-white">
           {property.images && property.images.length > 0 ? (
             <div className="relative">
@@ -165,6 +182,7 @@ export default function PropertyDetailsPage() {
                 ref={scrollContainerRef}
                 className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
                 onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove} {/* FIXED: Added missing handler */}
                 onTouchEnd={handleTouchEnd}
                 onScroll={handleScroll}
               >
@@ -206,13 +224,13 @@ export default function PropertyDetailsPage() {
 
                   <button
                     onClick={handlePrevImage}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all active:scale-95"
                   >
                     ←
                   </button>
                   <button
                     onClick={handleNextImage}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all active:scale-95"
                   >
                     →
                   </button>
@@ -229,7 +247,7 @@ export default function PropertyDetailsPage() {
                           setSelectedImage(index);
                           scrollToImage(index);
                         }}
-                        className={`flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all ${
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg border-2 transition-all active:scale-95 ${
                           selectedImage === index ? 'border-blue-500' : 'border-gray-300'
                         }`}
                       >
@@ -304,10 +322,10 @@ export default function PropertyDetailsPage() {
             <div className="border-t pt-6">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Interested?</h3>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button className="flex-1 bg-blue-600 text-white py-3 px-4 sm:px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium text-center text-sm sm:text-base">
+                <button className="flex-1 bg-blue-600 text-white py-3 px-4 sm:px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium text-center text-sm sm:text-base active:scale-95">
                   Contact Landlord
                 </button>
-                <button className="flex-1 bg-white text-blue-600 py-3 px-4 sm:px-6 rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors font-medium text-center text-sm sm:text-base">
+                <button className="flex-1 bg-white text-blue-600 py-3 px-4 sm:px-6 rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors font-medium text-center text-sm sm:text-base active:scale-95">
                   Schedule Viewing
                 </button>
               </div>
@@ -315,6 +333,29 @@ export default function PropertyDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Add CSS for hide-scrollbar and safe area padding */}
+      <style jsx>{`
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .safe-area-padding {
+          padding-top: env(safe-area-inset-top);
+          padding-bottom: env(safe-area-inset-bottom);
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
+        }
+        .safe-area-padding-top {
+          padding-top: env(safe-area-inset-top);
+        }
+        .safe-area-padding-bottom {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      `}</style>
     </div>
   );
 }
