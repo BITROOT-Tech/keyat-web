@@ -1,8 +1,8 @@
-// src/components/admin/Header.tsx
+// src/components/admin/Header.tsx - COMPLETE PRODUCTION VERSION
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 
@@ -17,6 +17,7 @@ const BuildingIcon = dynamic(() => import('lucide-react').then(mod => mod.Buildi
 const UsersIcon = dynamic(() => import('lucide-react').then(mod => mod.Users));
 const BarChart3Icon = dynamic(() => import('lucide-react').then(mod => mod.BarChart3));
 const MenuIcon = dynamic(() => import('lucide-react').then(mod => mod.Menu));
+const RefreshCwIcon = dynamic(() => import('lucide-react').then(mod => mod.RefreshCw));
 
 interface AdminHeaderProps {
   user?: any;
@@ -25,9 +26,11 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -66,32 +69,47 @@ export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProp
     setShowMobileMenu(false);
   };
 
+  const handleRefresh = () => {
+    setRefreshing(true);
+    // Dispatch custom event for dashboard to refresh
+    window.dispatchEvent(new CustomEvent('refreshDashboard'));
+    // Also do a hard refresh if on current page
+    if (pathname === '/admin/dashboard') {
+      window.location.reload();
+    }
+    setTimeout(() => setRefreshing(false), 1000);
+  };
+
   // Admin-specific menu options
   const adminMenuOptions = [
     { 
       icon: BarChart3Icon, 
       label: 'Dashboard', 
       action: () => handleQuickAction('/admin/dashboard'),
-      description: 'Analytics overview'
+      description: 'Analytics overview',
+      active: pathname === '/admin/dashboard'
     },
     { 
       icon: BuildingIcon, 
       label: 'Properties', 
       action: () => handleQuickAction('/admin/properties'),
-      description: 'Manage all listings'
+      description: 'Manage all listings',
+      active: pathname?.startsWith('/admin/properties')
     },
     { 
       icon: UsersIcon, 
       label: 'Users', 
       action: () => handleQuickAction('/admin/users'),
-      description: 'User management'
+      description: 'User management',
+      active: pathname?.startsWith('/admin/users')
     },
     { 
       icon: BellIcon, 
       label: 'Notifications', 
       action: () => handleQuickAction('/admin/notifications'),
       description: `${notifications} pending`,
-      badge: notifications > 0 ? notifications.toString() : undefined
+      badge: notifications > 0 ? notifications.toString() : undefined,
+      active: pathname?.startsWith('/admin/notifications')
     },
   ];
 
@@ -99,17 +117,20 @@ export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProp
     { 
       icon: BarChart3Icon, 
       label: 'Dashboard', 
-      action: () => handleQuickAction('/admin/dashboard')
+      action: () => handleQuickAction('/admin/dashboard'),
+      active: pathname === '/admin/dashboard'
     },
     { 
       icon: BuildingIcon, 
       label: 'Properties', 
-      action: () => handleQuickAction('/admin/properties')
+      action: () => handleQuickAction('/admin/properties'),
+      active: pathname?.startsWith('/admin/properties')
     },
     { 
       icon: UsersIcon, 
       label: 'Users', 
-      action: () => handleQuickAction('/admin/users')
+      action: () => handleQuickAction('/admin/users'),
+      active: pathname?.startsWith('/admin/users')
     },
   ];
 
@@ -117,7 +138,7 @@ export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProp
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/95 backdrop-blur-sm border-b border-gray-200/80 sticky top-0 z-40 safe-area-top"
+      className="bg-white/95 backdrop-blur-sm border-b border-gray-200/80 sticky top-0 z-50 safe-area-top"
     >
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -160,19 +181,39 @@ export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProp
                           </div>
 
                           <div className="py-1">
-                            {mobileMenuOptions.map(({ icon: Icon, label, action }) => (
+                            {mobileMenuOptions.map(({ icon: Icon, label, action, active }) => (
                               <motion.button
                                 key={label}
                                 onClick={action}
                                 whileTap={{ scale: 0.98 }}
-                                className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                className={`w-full flex items-center space-x-3 px-4 py-3 text-sm transition-colors ${
+                                  active 
+                                    ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-500' 
+                                    : 'text-gray-700 hover:bg-gray-50'
+                                }`}
                               >
-                                <div className="p-2 rounded-lg bg-gray-100">
+                                <div className={`p-2 rounded-lg ${
+                                  active ? 'bg-purple-100' : 'bg-gray-100'
+                                }`}>
                                   <Icon className="h-4 w-4" />
                                 </div>
                                 <span className="font-medium">{label}</span>
                               </motion.button>
                             ))}
+                          </div>
+
+                          {/* Mobile Logout */}
+                          <div className="border-t border-gray-200/80 mt-1 pt-1">
+                            <motion.button
+                              onClick={handleLogout}
+                              whileTap={{ scale: 0.98 }}
+                              className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                              <div className="p-2 rounded-lg bg-red-100">
+                                <LogOutIcon className="h-4 w-4" />
+                              </div>
+                              <span className="font-medium">Sign Out</span>
+                            </motion.button>
                           </div>
                         </>
                       )}
@@ -200,7 +241,18 @@ export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProp
           </div>
 
           {/* Right: User Controls */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            {/* Refresh Button */}
+            <motion.button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              whileTap={{ scale: 0.95 }}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              aria-label="Refresh data"
+            >
+              <RefreshCwIcon className={`h-5 w-5 text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
+            </motion.button>
+
             {/* Notifications */}
             <motion.button
               onClick={() => router.push('/admin/notifications')}
@@ -270,19 +322,27 @@ export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProp
 
                       {/* Admin Menu Options */}
                       <div className="py-1">
-                        {adminMenuOptions.map(({ icon: Icon, label, action, description, badge }) => (
+                        {adminMenuOptions.map(({ icon: Icon, label, action, description, badge, active }) => (
                           <motion.button
                             key={label}
                             onClick={action}
                             whileTap={{ scale: 0.98 }}
-                            className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group"
+                            className={`w-full flex items-center space-x-3 px-4 py-3 text-sm transition-colors group ${
+                              active ? 'bg-purple-50' : 'hover:bg-gray-50'
+                            }`}
                           >
-                            <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
+                            <div className={`p-2 rounded-lg transition-colors ${
+                              active 
+                                ? 'bg-purple-100 group-hover:bg-purple-200' 
+                                : 'bg-gray-100 group-hover:bg-white'
+                            }`}>
                               <Icon className="h-4 w-4 flex-shrink-0" />
                             </div>
                             <div className="flex-1 min-w-0 text-left">
                               <div className="flex items-center justify-between">
-                                <span className="font-medium truncate">{label}</span>
+                                <span className={`font-medium truncate ${active ? 'text-purple-700' : 'text-gray-700'}`}>
+                                  {label}
+                                </span>
                                 {badge && (
                                   <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
                                     {badge}
@@ -290,7 +350,9 @@ export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProp
                                 )}
                               </div>
                               {description && (
-                                <p className="text-gray-500 text-xs truncate mt-0.5">
+                                <p className={`text-xs truncate mt-0.5 ${
+                                  active ? 'text-purple-600' : 'text-gray-500'
+                                }`}>
                                   {description}
                                 </p>
                               )}
@@ -299,8 +361,19 @@ export default function AdminHeader({ user, notifications = 0 }: AdminHeaderProp
                         ))}
                       </div>
 
-                      {/* Logout */}
-                      <div className="border-t border-gray-200/80 mt-1">
+                      {/* Settings & Logout */}
+                      <div className="border-t border-gray-200/80 mt-1 space-y-1">
+                        <motion.button
+                          onClick={() => handleQuickAction('/admin/settings')}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group"
+                        >
+                          <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
+                            <SettingsIcon className="h-4 w-4 flex-shrink-0" />
+                          </div>
+                          <span className="font-medium truncate">Settings</span>
+                        </motion.button>
+
                         <motion.button
                           onClick={handleLogout}
                           whileTap={{ scale: 0.98 }}

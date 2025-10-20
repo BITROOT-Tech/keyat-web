@@ -1,4 +1,4 @@
-// src/app/consumer/home/page.tsx - REFINED ELEGANT SKELETONS
+// src/app/consumer/home/page.tsx - COMPLETE WITH OPTIMIZED MOBILE ACTIVITY
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -156,17 +156,17 @@ function SectionHeaderSkeleton() {
 
 function RecentActivitySkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="flex items-center space-x-3 p-3">
-          <div className="w-8 h-8 bg-gray-100 rounded-full relative overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-200 p-3 space-y-2">
+      {[...Array(2)].map((_, i) => (
+        <div key={i} className="flex items-center space-x-2 p-2">
+          <div className="w-6 h-6 bg-gray-100 rounded-full relative overflow-hidden">
             <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
           </div>
-          <div className="flex-1 space-y-2">
-            <div className="h-4 bg-gray-100 rounded w-3/4 relative overflow-hidden">
+          <div className="flex-1 space-y-1">
+            <div className="h-3 bg-gray-100 rounded w-3/4 relative overflow-hidden">
               <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.4s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             </div>
-            <div className="h-3 bg-gray-100 rounded w-1/2 relative overflow-hidden">
+            <div className="h-2 bg-gray-100 rounded w-1/2 relative overflow-hidden">
               <div className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite_0.8s] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
             </div>
           </div>
@@ -415,25 +415,19 @@ export default function ConsumerHome() {
     }
   ];
 
-  // RECENT ACTIVITY
+  // RECENT ACTIVITY - OPTIMIZED FOR MOBILE
   const recentActivity = [
     {
       id: '1',
       type: 'view',
       property_title: 'CBD Luxury Apartment',
-      timestamp: '2 hours ago'
+      timestamp: '2h ago'
     },
     {
       id: '2',
       type: 'search',
-      query: '3 bedroom houses in Gaborone',
-      timestamp: '1 day ago'
-    },
-    {
-      id: '3',
-      type: 'favorite',
-      property_title: 'Phakalane Executive Home',
-      timestamp: '2 days ago'
+      query: '3 bedroom houses',
+      timestamp: '1d ago'
     }
   ];
 
@@ -720,35 +714,43 @@ export default function ConsumerHome() {
               </div>
             </section>
 
-            {/* RECENT ACTIVITY */}
+            {/* RECENT ACTIVITY - OPTIMIZED FOR MOBILE */}
             <section aria-labelledby="recent-activity-heading" className="w-full">
-              <h2 id="recent-activity-heading" className="text-lg font-semibold text-gray-900 mb-4 lg:text-xl">
-                Recent Activity
-              </h2>
-              <div className="bg-white rounded-2xl border border-gray-200 p-4 lg:p-6">
-                <div className="space-y-3">
+              <div className="flex items-center justify-between mb-3 w-full">
+                <h2 id="recent-activity-heading" className="text-sm font-semibold text-gray-900 lg:text-lg">
+                  Recent Activity
+                </h2>
+                <button 
+                  onClick={() => router.push('/consumer/activity')}
+                  className="text-blue-600 text-xs hover:underline font-medium flex items-center space-x-1 touch-manipulation lg:text-sm"
+                >
+                  <span>View all</span>
+                  <ChevronRightIcon className="h-3 w-3 flex-shrink-0" />
+                </button>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-3 lg:p-4">
+                <div className="space-y-2">
                   {recentActivity.map((activity, index) => (
                     <motion.div
                       key={activity.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        {activity.type === 'view' && <EyeIcon className="h-4 w-4 text-blue-600" />}
-                        {activity.type === 'search' && <SearchIcon className="h-4 w-4 text-blue-600" />}
-                        {activity.type === 'favorite' && <HeartIcon className="h-4 w-4 text-rose-600" />}
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        {activity.type === 'view' && <EyeIcon className="h-3 w-3 text-blue-600" />}
+                        {activity.type === 'search' && <SearchIcon className="h-3 w-3 text-blue-600" />}
+                        {activity.type === 'favorite' && <HeartIcon className="h-3 w-3 text-rose-600" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 truncate">
+                        <p className="text-xs text-gray-900 truncate lg:text-sm">
                           {activity.type === 'view' && `Viewed ${activity.property_title}`}
-                          {activity.type === 'search' && `Searched for "${activity.query}"`}
-                          {activity.type === 'favorite' && `Added ${activity.property_title} to favorites`}
+                          {activity.type === 'search' && `Searched "${activity.query}"`}
+                          {activity.type === 'favorite' && `Favorited ${activity.property_title}`}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">{activity.timestamp}</p>
                       </div>
-                      <ClockIcon className="h-3 w-3 text-gray-400 flex-shrink-0" />
                     </motion.div>
                   ))}
                 </div>
