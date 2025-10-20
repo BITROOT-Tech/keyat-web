@@ -54,7 +54,6 @@ export default function PropertyDetailsPage() {
     }
   };
 
-  // FIXED: Add missing touch move handler
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -119,12 +118,10 @@ export default function PropertyDetailsPage() {
     }
   };
 
-  // FIXED: Reliable back button navigation
   const handleBackClick = () => {
     if (window.history.length > 1) {
       router.back();
     } else {
-      // Navigate to consumer home page (properties listing)
       router.push('/consumer/home');
     }
   };
@@ -161,7 +158,6 @@ export default function PropertyDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* FIXED: Reliable back button with proper safe area */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-20 safe-area-padding-top">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <button
@@ -182,7 +178,7 @@ export default function PropertyDetailsPage() {
                 ref={scrollContainerRef}
                 className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
                 onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove} {/* FIXED: Added missing handler */}
+                onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
                 onScroll={handleScroll}
               >
@@ -334,7 +330,6 @@ export default function PropertyDetailsPage() {
         </div>
       </div>
 
-      {/* Add CSS for hide-scrollbar and safe area padding */}
       <style jsx>{`
         .hide-scrollbar {
           -ms-overflow-style: none;
