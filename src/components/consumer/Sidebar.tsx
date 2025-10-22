@@ -1,4 +1,4 @@
-// src/components/consumer/Sidebar.tsx - COMPLETE MOBILE VERSION
+// src/components/consumer/Sidebar.tsx - COMPLETE MOBILE VERSION (FIXED)
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
@@ -356,8 +356,7 @@ export default function Sidebar({ user }: SidebarProps) {
         </motion.button>
       )}
 
-      {/* Add padding for desktop sidebar */}
-      {!isMobile && <div className="hidden lg:block lg:w-64 flex-shrink-0" />}
+      {/* REMOVED: The extra spacer div that was causing double sidebar */}
     </>
   );
 }

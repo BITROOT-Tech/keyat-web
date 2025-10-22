@@ -1,4 +1,4 @@
-// src/app/consumer/search/page.tsx - COMPLETE FIXED MOBILE LAYOUT
+// src/app/consumer/search/page.tsx - FIXED SYNTAX
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -37,7 +37,7 @@ const ShieldIcon = dynamic(() => import('lucide-react').then(mod => mod.Shield))
 const XIcon = dynamic(() => import('lucide-react').then(mod => mod.X));
 const SlidersIcon = dynamic(() => import('lucide-react').then(mod => mod.SlidersHorizontal));
 
-// Property Card Component - FIXED MOBILE LAYOUT
+// Property Card Component
 function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFavoriteToggle: (id: string) => void }) {
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -48,18 +48,16 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
     onFavoriteToggle(property.id);
   };
 
-  // Generate random views and rating for demo
   const views = Math.floor(Math.random() * 500) + 50;
-  const rating = (Math.random() * 1 + 4).toFixed(1); // 4.0 - 5.0
+  const rating = (Math.random() * 1 + 4).toFixed(1);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       onClick={() => router.push(`/consumer/property/${property.id}`)}
-      className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all cursor-pointer group active:scale-[0.98] w-full max-w-full" // ADDED: w-full max-w-full
+      className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all cursor-pointer group active:scale-[0.98] w-full max-w-full"
     >
-      {/* Property Image */}
       <div className="relative h-48 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
         {property.images && property.images.length > 0 ? (
           <img 
@@ -74,8 +72,7 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
         )}
         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors" />
         
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[70%]"> {/* ADDED: max-w constraint */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[70%]">
           {property.status === 'available' && (
             <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-medium truncate">
               Available
@@ -88,7 +85,6 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
           )}
         </div>
 
-        {/* Favorite Button */}
         <button
           onClick={handleFavoriteClick}
           className={`absolute top-3 right-3 p-2 rounded-full transition-all active:scale-95 ${
@@ -100,23 +96,20 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
           <HeartIcon className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
         </button>
 
-        {/* View Count */}
-        <div className="absolute bottom-3 left-3 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1 max-w-[60%] truncate"> {/* ADDED: max-w and truncate */}
+        <div className="absolute bottom-3 left-3 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1 max-w-[60%] truncate">
           <EyeIcon className="h-3 w-3 flex-shrink-0" />
           <span className="truncate">{views} views</span>
         </div>
       </div>
 
-      {/* Property Details */}
       <div className="p-4">
-        {/* FIXED: Title and rating row with proper spacing */}
-        <div className="flex items-start justify-between mb-2 gap-2 min-w-0"> {/* ADDED: gap and min-w-0 */}
-          <h3 className="font-semibold text-gray-900 text-lg leading-tight flex-1 min-w-0 pr-2"> {/* ADDED: min-w-0 and pr-2 */}
-            <span className="line-clamp-2 break-words">{property.title}</span> {/* ADDED: line-clamp and break-words */}
+        <div className="flex items-start justify-between mb-2 gap-2 min-w-0">
+          <h3 className="font-semibold text-gray-900 text-lg leading-tight flex-1 min-w-0 pr-2">
+            <span className="line-clamp-2 break-words">{property.title}</span>
           </h3>
-          <div className="flex items-center gap-1 text-sm text-amber-600 flex-shrink-0 pl-2"> {/* ADDED: flex-shrink-0 and pl-2 */}
+          <div className="flex items-center gap-1 text-sm text-amber-600 flex-shrink-0 pl-2">
             <StarIcon className="h-4 w-4 fill-current flex-shrink-0" />
-            <span className="whitespace-nowrap">{rating}</span> {/* ADDED: whitespace-nowrap */}
+            <span className="whitespace-nowrap">{rating}</span>
           </div>
         </div>
 
@@ -125,9 +118,8 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
           <span className="truncate">{property.location}</span>
         </div>
 
-        {/* Property Features */}
-        <div className="flex items-center justify-between text-sm text-gray-600 mb-3 gap-2"> {/* ADDED: gap */}
-          <div className="flex items-center gap-2 flex-wrap min-w-0"> {/* ADDED: flex-wrap and min-w-0 */}
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-3 gap-2">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
             {property.beds > 0 && (
               <div className="flex items-center gap-1 whitespace-nowrap">
                 <BedIcon className="h-4 w-4 flex-shrink-0" />
@@ -149,9 +141,8 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
           </div>
         </div>
 
-        {/* Price - FIXED: Better mobile layout */}
-        <div className="flex items-center justify-between gap-2 min-w-0"> {/* ADDED: gap and min-w-0 */}
-          <div className="text-2xl font-bold text-gray-900 min-w-0 flex-1"> {/* ADDED: min-w-0 and flex-1 */}
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="text-2xl font-bold text-gray-900 min-w-0 flex-1">
             <span className="whitespace-nowrap truncate">
               P{property.price?.toLocaleString()}
               <span className="text-sm font-normal text-gray-600">/month</span>
@@ -170,7 +161,7 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
   );
 }
 
-// Filter Sidebar Component (keep as is)
+// Filter Sidebar Component
 function FilterSidebar({ 
   filters, 
   onFiltersChange, 
@@ -210,7 +201,6 @@ function FilterSidebar({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -219,7 +209,6 @@ function FilterSidebar({
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           />
           
-          {/* Sidebar */}
           <motion.div
             initial={{ x: -320 }}
             animate={{ x: 0 }}
@@ -227,7 +216,6 @@ function FilterSidebar({
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className="fixed left-0 top-0 bottom-0 w-80 bg-white z-50 lg:relative lg:z-auto lg:w-64 lg:flex flex-col border-r border-gray-200 overflow-y-auto"
           >
-            {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
               <button
@@ -238,9 +226,7 @@ function FilterSidebar({
               </button>
             </div>
 
-            {/* Filter Content */}
             <div className="flex-1 p-4 space-y-6">
-              {/* Location */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Location</h3>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -263,7 +249,6 @@ function FilterSidebar({
                 </div>
               </div>
 
-              {/* Price Range */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Price Range (P/month)</h3>
                 <div className="space-y-3">
@@ -292,7 +277,6 @@ function FilterSidebar({
                 </div>
               </div>
 
-              {/* Bedrooms */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Bedrooms</h3>
                 <div className="flex flex-wrap gap-2">
@@ -315,7 +299,6 @@ function FilterSidebar({
                 </div>
               </div>
 
-              {/* Property Type */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Property Type</h3>
                 <div className="space-y-2">
@@ -338,7 +321,6 @@ function FilterSidebar({
                 </div>
               </div>
 
-              {/* Amenities */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Amenities</h3>
                 <div className="space-y-2">
@@ -362,7 +344,6 @@ function FilterSidebar({
               </div>
             </div>
 
-            {/* Footer */}
             <div className="p-4 border-t border-gray-200">
               <button
                 onClick={() => onFiltersChange({
@@ -392,7 +373,6 @@ const fetchPropertiesFromSupabase = async (filters: any = {}, sortBy: string = '
     .from('properties')
     .select('*');
 
-  // Apply filters - FIXED: Add proper null checks
   if (filters?.searchQuery) {
     query = query.or(`title.ilike.%${filters.searchQuery}%,location.ilike.%${filters.searchQuery}%`);
   }
@@ -401,7 +381,6 @@ const fetchPropertiesFromSupabase = async (filters: any = {}, sortBy: string = '
     query = query.in('location', filters.locations);
   }
 
-  // FIXED: Add proper null checks for priceRange
   if (filters?.priceRange?.min) {
     query = query.gte('price', parseFloat(filters.priceRange.min));
   }
@@ -414,7 +393,6 @@ const fetchPropertiesFromSupabase = async (filters: any = {}, sortBy: string = '
     query = query.eq('beds', filters.bedrooms);
   }
 
-  // Apply sorting
   switch (sortBy) {
     case 'price-low':
       query = query.order('price', { ascending: true });
@@ -445,7 +423,6 @@ const fetchLocationsFromSupabase = async () => {
 
   if (error) throw error;
   
-  // Get unique locations
   const locations = [...new Set(data.map(item => item.location))].filter(Boolean);
   return locations as string[];
 };
@@ -471,31 +448,43 @@ export default function PropertySearch() {
   const [locations, setLocations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const [user, setUser] = useState<any>(null);
 
-  // Fetch locations and properties on mount
   useEffect(() => {
-    const initializeData = async () => {
+    const checkAuth = async () => {
       try {
-        setLoading(true);
-        const [locationsData, propertiesData] = await Promise.all([
-          fetchLocationsFromSupabase(),
-          fetchPropertiesFromSupabase({ searchQuery }, sortBy)
-        ]);
+        const supabase = createClient();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        setLocations(locationsData);
-        setProperties(propertiesData);
+        if (sessionError) throw new Error('Authentication failed');
+        if (!session) {
+          router.push('/auth/login');
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError) {
+          setUser({
+            first_name: session.user.email?.split('@')[0] || 'User',
+            email: session.user.email
+          });
+        } else {
+          setUser(profile);
+        }
       } catch (err: any) {
-        console.error('Error initializing data:', err);
-        setError(err.message || 'Failed to load properties');
-      } finally {
-        setLoading(false);
+        console.error('Auth error in search:', err);
       }
     };
 
-    initializeData();
-  }, []);
+    checkAuth();
+  }, [router]);
 
-  // Fetch properties with filters
   const fetchProperties = useCallback(async () => {
     try {
       setLoading(true);
@@ -522,7 +511,28 @@ export default function PropertySearch() {
     }
   }, [searchQuery, filters, sortBy]);
 
-  // Debounced search effect
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        setLoading(true);
+        const [locationsData, propertiesData] = await Promise.all([
+          fetchLocationsFromSupabase(),
+          fetchPropertiesFromSupabase({ searchQuery }, sortBy)
+        ]);
+        
+        setLocations(locationsData);
+        setProperties(propertiesData);
+      } catch (err: any) {
+        console.error('Error initializing data:', err);
+        setError(err.message || 'Failed to load properties');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeData();
+  }, []);
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       fetchProperties();
@@ -577,22 +587,19 @@ export default function PropertySearch() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding lg:pb-0">
-      {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-40">
         <Header
-          user={null}
+          user={user}
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           onQuickSearch={handleQuickSearch}
-          notifications={0}
+          notifications={3}
           showLocationFilter={true}
           onLocationFilterClick={() => setShowFilters(true)}
         />
       </div>
 
-      {/* Main Content - FIXED: Better mobile container */}
-      <div className="flex min-w-0"> {/* ADDED: min-w-0 */}
-        {/* Filter Sidebar */}
+      <div className="flex min-w-0">
         <FilterSidebar
           filters={filters}
           onFiltersChange={setFilters}
@@ -601,12 +608,10 @@ export default function PropertySearch() {
           locations={locations}
         />
 
-        {/* Search Results - FIXED: Better mobile layout */}
-        <main className="flex-1 min-w-0"> {/* ADDED: min-w-0 */}
-          <div className="p-4 lg:p-6 w-full max-w-full overflow-x-hidden"> {/* ADDED: max-w-full and overflow-x-hidden */}
+        <main className="flex-1 min-w-0">
+          <div className="p-4 lg:p-6 w-full max-w-full overflow-x-hidden">
             
-            {/* Search Header - FIXED: Better mobile header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 w-full max-w-full"> {/* CHANGED: flex-col on mobile */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 w-full max-w-full">
               <div className="min-w-0 flex-1">
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 truncate">
                   {searchQuery ? `Search Results for "${searchQuery}"` : 'All Properties in Botswana'}
@@ -617,8 +622,7 @@ export default function PropertySearch() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 flex-shrink-0 self-end sm:self-auto"> {/* CHANGED: self-end on mobile */}
-                {/* Filter Toggle for Mobile */}
+              <div className="flex items-center gap-3 flex-shrink-0 self-end sm:self-auto">
                 <button
                   onClick={() => setShowFilters(true)}
                   className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors active:scale-95 flex-shrink-0"
@@ -632,11 +636,10 @@ export default function PropertySearch() {
                   )}
                 </button>
 
-                {/* Sort Dropdown */}
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-shrink-0 min-w-[140px]" // ADDED: min-width
+                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-shrink-0 min-w-[140px]"
                 >
                   <option value="newest">Newest First</option>
                   <option value="price-low">Price: Low to High</option>
@@ -646,7 +649,6 @@ export default function PropertySearch() {
               </div>
             </div>
 
-            {/* Active Filters */}
             {activeFilterCount > 0 && (
               <div className="flex flex-wrap gap-2 mb-6 w-full max-w-full">
                 <button
@@ -659,7 +661,6 @@ export default function PropertySearch() {
               </div>
             )}
 
-            {/* Loading State - FIXED: Better mobile grid */}
             {loading && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 w-full max-w-full overflow-hidden">
                 {[...Array(6)].map((_, index) => (
@@ -676,7 +677,6 @@ export default function PropertySearch() {
               </div>
             )}
 
-            {/* Properties Grid - FIXED: Better mobile grid */}
             {!loading && properties.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 w-full max-w-full overflow-hidden">
                 {properties.map((property, index) => (
@@ -689,7 +689,6 @@ export default function PropertySearch() {
               </div>
             )}
 
-            {/* Empty State */}
             {!loading && properties.length === 0 && (
               <div className="text-center py-12 w-full max-w-full">
                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -721,7 +720,6 @@ export default function PropertySearch() {
         </main>
       </div>
 
-      {/* Bottom Navigation */}
       <div className="lg:hidden">
         <BottomNav />
       </div>
