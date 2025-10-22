@@ -1,4 +1,4 @@
-//src\app\service-provider\dashboard\page.tsx
+// src/app/service-provider/dashboard/page.tsx - COMPLETE WITH ORANGE COLOR SCHEME
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -35,7 +35,7 @@ function DashboardError({ error, onRetry }: { error: string; onRetry: () => void
         <p className="text-gray-600 mb-4 text-sm">{error}</p>
         <button
           onClick={onRetry}
-          className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          className="w-full bg-orange-600 text-white py-3 px-4 rounded-lg hover:bg-orange-700 transition-colors font-medium"
         >
           Try Again
         </button>
@@ -167,7 +167,7 @@ export default function ServiceProviderDashboard() {
       label: 'New Service', 
       description: 'Create service offer',
       action: () => router.push('/service-provider/services/new'),
-      color: 'bg-indigo-50 text-indigo-700 border-indigo-200'
+      color: 'bg-orange-50 text-orange-700 border-orange-200'
     },
     { 
       icon: CalendarIcon, 
@@ -188,7 +188,7 @@ export default function ServiceProviderDashboard() {
       label: 'Clients', 
       description: 'Manage clients',
       action: () => router.push('/service-provider/clients'),
-      color: 'bg-orange-50 text-orange-700 border-orange-200'
+      color: 'bg-blue-50 text-blue-700 border-blue-200'
     }
   ];
 
@@ -310,7 +310,7 @@ export default function ServiceProviderDashboard() {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className="fixed top-0 left-0 right-0 bg-indigo-600 text-white py-3 text-center text-sm z-50 font-medium safe-area-padding"
+            className="fixed top-0 left-0 right-0 bg-orange-600 text-white py-3 text-center text-sm z-50 font-medium safe-area-padding"
           >
             🔄 Refreshing...
           </motion.div>
@@ -334,10 +334,10 @@ export default function ServiceProviderDashboard() {
             <h2 id="quick-stats-heading" className="text-lg font-semibold text-gray-900">
               Business Overview
             </h2>
-            <TrendingUpIcon className="h-5 w-5 text-indigo-500 flex-shrink-0" />
+            <TrendingUpIcon className="h-5 w-5 text-orange-500 flex-shrink-0" />
           </div>
           <div className="grid grid-cols-2 gap-3 w-full">
-            <div className="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl p-4">
+            <div className="bg-orange-50 text-orange-700 border border-orange-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium opacity-80">Active Requests</p>
@@ -373,7 +373,7 @@ export default function ServiceProviderDashboard() {
                 </div>
               </div>
             </div>
-            <div className="bg-orange-50 text-orange-700 border border-orange-200 rounded-xl p-4">
+            <div className="bg-blue-50 text-blue-700 border border-blue-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium opacity-80">Response Time</p>
@@ -417,7 +417,7 @@ export default function ServiceProviderDashboard() {
             <h2 id="quick-actions-heading" className="text-lg font-semibold text-gray-900">
               Quick Actions
             </h2>
-            <PlusIcon className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+            <PlusIcon className="h-5 w-5 text-orange-500 flex-shrink-0" />
           </div>
           <div className="grid grid-cols-2 gap-3 w-full">
             {quickActions.map(({ icon: Icon, label, description, color, action }) => (
@@ -449,7 +449,7 @@ export default function ServiceProviderDashboard() {
             </h2>
             <button 
               onClick={() => router.push('/service-provider/requests')}
-              className="text-indigo-600 text-sm hover:underline font-medium flex items-center space-x-1 touch-manipulation flex-shrink-0"
+              className="text-orange-600 text-sm hover:underline font-medium flex items-center space-x-1 touch-manipulation flex-shrink-0"
             >
               <span>View all</span>
               <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />
@@ -483,7 +483,7 @@ export default function ServiceProviderDashboard() {
                       </h3>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize flex-shrink-0 ${
                         request.status === 'completed' ? 'bg-green-100 text-green-700' :
-                        request.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
+                        request.status === 'assigned' ? 'bg-orange-100 text-orange-700' :
                         'bg-orange-100 text-orange-700'
                       }`}>
                         {request.status}

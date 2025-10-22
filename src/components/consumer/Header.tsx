@@ -1,4 +1,4 @@
-// src/components/consumer/Header.tsx - OPTIMIZED VERSION
+// src/components/consumer/Header.tsx - WITH K LOGO
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -14,10 +14,8 @@ const SettingsIcon = dynamic(() => import('lucide-react').then(mod => mod.Settin
 const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
 const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
 const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
-const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
 const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
 const TrendingUpIcon = dynamic(() => import('lucide-react').then(mod => mod.TrendingUp));
-const MenuIcon = dynamic(() => import('lucide-react').then(mod => mod.Menu));
 
 interface ConsumerHeaderProps {
   searchQuery: string;
@@ -40,17 +38,15 @@ export default function ConsumerHeader({
 }: ConsumerHeaderProps) {
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Check screen size
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 1024);
     };
 
     checkScreenSize();
@@ -63,9 +59,6 @@ export default function ConsumerHeader({
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setShowUserMenu(false);
-      }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
-        setShowMobileMenu(false);
       }
     };
 
@@ -90,16 +83,21 @@ export default function ConsumerHeader({
   const handleQuickAction = (path: string) => {
     router.push(path);
     setShowUserMenu(false);
-    setShowMobileMenu(false);
   };
 
-  // 🎯 OPTIMIZED: User menu options (account management only)
+  // 🎯 UPDATED: User menu options (complementary to BottomNav)
   const userMenuOptions = [
     { 
       icon: UserIcon, 
       label: 'My Profile', 
       action: () => handleQuickAction('/consumer/profile'),
       description: 'Personal information'
+    },
+    { 
+      icon: HeartIcon, 
+      label: 'Favorites', 
+      action: () => handleQuickAction('/consumer/saved'),
+      description: 'Saved properties'
     },
     { 
       icon: BellIcon, 
@@ -109,48 +107,10 @@ export default function ConsumerHeader({
       badge: notifications > 0 ? notifications.toString() : undefined
     },
     { 
-      icon: CalendarIcon, 
-      label: 'My Tours', 
-      action: () => handleQuickAction('/consumer/tours'),
-      description: 'Viewing schedule'
-    },
-    { 
-      icon: HeartIcon, 
-      label: 'Favorites', 
-      action: () => handleQuickAction('/consumer/saved'),
-      description: 'Saved properties'
-    },
-    { 
-      icon: TrendingUpIcon, 
-      label: 'Trending', 
-      action: () => handleQuickAction('/consumer/trending'),
-      description: 'Popular areas'
-    },
-    { 
       icon: SettingsIcon, 
       label: 'Settings', 
       action: () => handleQuickAction('/consumer/settings'),
       description: 'Preferences'
-    },
-  ];
-
-  // 🎯 OPTIMIZED: Mobile menu (user account actions only - no navigation redundancy)
-  const mobileMenuOptions = [
-    { 
-      icon: UserIcon, 
-      label: 'My Profile', 
-      action: () => handleQuickAction('/consumer/profile')
-    },
-    { 
-      icon: BellIcon, 
-      label: 'Notifications', 
-      action: () => handleQuickAction('/consumer/notifications'),
-      badge: notifications > 0 ? notifications.toString() : undefined
-    },
-    { 
-      icon: SettingsIcon, 
-      label: 'Settings', 
-      action: () => handleQuickAction('/consumer/settings')
     },
   ];
 
@@ -177,10 +137,10 @@ export default function ConsumerHeader({
       animate={{ opacity: 1, y: 0 }}
       className="bg-white/95 backdrop-blur-sm border-b border-gray-200/80 sticky top-0 z-40 safe-area-top"
     >
-      <div className="px-4 py-3">
+      <div className="px-4 py-3 lg:px-6">
         {/* TOP ROW - BRAND & USER CONTROLS */}
         <div className="flex items-center justify-between mb-3">
-          {/* BRAND/LOGO */}
+          {/* BRAND/LOGO - ALWAYS VISIBLE ON MOBILE, HIDDEN ON DESKTOP (sidebar has branding) */}
           <motion.div 
             className="flex-shrink-0"
             whileHover={{ scale: 1.02 }}
@@ -190,117 +150,27 @@ export default function ConsumerHeader({
               onClick={() => router.push('/consumer/home')}
               className="flex items-center space-x-3 group"
             >
+              {/* 🎯 CHANGED: HomeIcon replaced with Keyat "K" logo */}
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                <HomeIcon className="h-4 w-4 text-white" />
+                <span className="text-white font-bold text-sm">K</span>
               </div>
-              <div className="text-left">
+              <div className={`text-left ${isMobile ? 'block' : 'lg:hidden'}`}>
                 <h1 className="text-xl font-bold text-gray-900 leading-none">Keyat</h1>
                 <p className="text-gray-500 text-xs leading-none mt-0.5">Rentals</p>
               </div>
             </button>
           </motion.div>
 
+          {/* DESKTOP PAGE TITLE - ONLY SHOWS ON DESKTOP */}
+          {!isMobile && (
+            <div className="flex-1 ml-6">
+              <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600 text-sm">Welcome back, {user?.first_name || 'User'}</p>
+            </div>
+          )}
+
           {/* USER CONTROLS */}
-          <div className="flex items-center space-x-1 flex-shrink-0">
-            {/* MOBILE HAMBURGER MENU */}
-            {isMobile && (
-              <div className="relative" ref={mobileMenuRef}>
-                <motion.button
-                  onClick={() => setShowMobileMenu(!showMobileMenu)}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
-                  aria-label="Account menu"
-                >
-                  <MenuIcon className="h-5 w-5 text-gray-600" />
-                </motion.button>
-
-                <AnimatePresence>
-                  {showMobileMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/80 py-2 z-50"
-                    >
-                      {/* USER INFO HEADER */}
-                      {user && (
-                        <>
-                          <div className="px-4 py-3 border-b border-gray-200/80">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                                <span className="text-white text-xs font-medium">
-                                  {user?.first_name?.[0] || user?.email?.[0] || 'U'}
-                                </span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-gray-900 text-sm truncate">
-                                  {user?.first_name || 'User'}
-                                </p>
-                                <p className="text-gray-600 text-xs truncate">
-                                  {user?.email}
-                                </p>
-                                <p className="text-green-600 text-xs font-medium mt-0.5">
-                                  ● Active now
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* 🎯 OPTIMIZED: Mobile menu options (account actions only) */}
-                          <div className="py-1">
-                            {mobileMenuOptions.map(({ icon: Icon, label, action, badge }) => (
-                              <motion.button
-                                key={label}
-                                onClick={action}
-                                whileTap={{ scale: 0.98 }}
-                                className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation group relative"
-                              >
-                                <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
-                                  <Icon className="h-4 w-4 flex-shrink-0" />
-                                </div>
-                                <span className="font-medium truncate">{label}</span>
-                                {badge && (
-                                  <span className="absolute right-4 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
-                                    {badge}
-                                  </span>
-                                )}
-                              </motion.button>
-                            ))}
-                          </div>
-
-                          <div className="border-t border-gray-200/80 my-1" />
-
-                          {/* LOGOUT */}
-                          <motion.button
-                            onClick={handleLogout}
-                            whileTap={{ scale: 0.98 }}
-                            className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors touch-manipulation group"
-                          >
-                            <div className="p-2 rounded-lg bg-red-100 group-hover:bg-red-200 transition-colors">
-                              <LogOutIcon className="h-4 w-4 flex-shrink-0" />
-                            </div>
-                            <span className="font-medium truncate">Sign Out</span>
-                          </motion.button>
-                        </>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
-
-            {/* MOBILE SEARCH TOGGLE */}
-            {isMobile && (
-              <motion.button
-                onClick={() => searchRef.current?.focus()}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
-                aria-label="Search"
-              >
-                <SearchIcon className="h-5 w-5 text-gray-600" />
-              </motion.button>
-            )}
-
+          <div className="flex items-center space-x-2 flex-shrink-0">
             {/* NOTIFICATIONS */}
             <motion.button
               onClick={() => router.push('/consumer/notifications')}
@@ -318,7 +188,7 @@ export default function ConsumerHeader({
               )}
             </motion.button>
 
-            {/* USER MENU - DESKTOP & MOBILE PROFILE AVATAR */}
+            {/* USER MENU */}
             {user && (
               <div className="relative" ref={userMenuRef}>
                 <motion.button
@@ -334,94 +204,104 @@ export default function ConsumerHeader({
                     {/* Online indicator */}
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
                   </div>
+                  
+                  {/* DESKTOP USER NAME - HIDDEN ON MOBILE */}
+                  {!isMobile && (
+                    <div className="hidden sm:block text-left">
+                      <p className="text-sm font-medium text-gray-900 leading-none">
+                        {user?.first_name || 'User'}
+                      </p>
+                      <p className="text-xs text-gray-500 leading-none mt-0.5">
+                        {user?.email?.split('@')[0]}
+                      </p>
+                    </div>
+                  )}
                 </motion.button>
 
-                {/* DESKTOP USER MENU */}
-                {!isMobile && (
-                  <AnimatePresence>
-                    {showUserMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute right-0 top-full mt-2 w-80 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/80 py-2 z-50"
-                      >
-                        {/* USER INFO HEADER */}
-                        <div className="px-4 py-3 border-b border-gray-200/80">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-sm font-medium">
-                                {user?.first_name?.[0] || user?.email?.[0] || 'U'}
-                              </span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-gray-900 text-sm truncate">
-                                {user?.first_name || 'User'}
-                              </p>
-                              <p className="text-gray-600 text-xs truncate">
-                                {user?.email}
-                              </p>
-                              <p className="text-green-600 text-xs font-medium mt-0.5">
-                                ● Active now
-                              </p>
-                            </div>
+                {/* USER MENU DROPDOWN */}
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/80 py-2 z-50"
+                    >
+                      {/* USER INFO HEADER */}
+                      <div className="px-4 py-3 border-b border-gray-200/80">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-medium">
+                              {user?.first_name?.[0] || user?.email?.[0] || 'U'}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 text-sm truncate">
+                              {user?.first_name || 'User'}
+                            </p>
+                            <p className="text-gray-600 text-xs truncate">
+                              {user?.email}
+                            </p>
+                            <p className="text-green-600 text-xs font-medium mt-0.5">
+                              ● Active now
+                            </p>
                           </div>
                         </div>
+                      </div>
 
-                        {/* 🎯 OPTIMIZED: User menu options */}
-                        <div className="py-1 max-h-96 overflow-y-auto">
-                          {userMenuOptions.map(({ icon: Icon, label, action, description, badge }) => (
-                            <motion.button
-                              key={label}
-                              onClick={action}
-                              whileTap={{ scale: 0.98 }}
-                              className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation group"
-                            >
-                              <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
-                                <Icon className="h-4 w-4 flex-shrink-0" />
-                              </div>
-                              <div className="flex-1 min-w-0 text-left">
-                                <div className="flex items-center justify-between">
-                                  <span className="font-medium truncate">{label}</span>
-                                  {badge && (
-                                    <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
-                                      {badge}
-                                    </span>
-                                  )}
-                                </div>
-                                {description && (
-                                  <p className="text-gray-500 text-xs truncate mt-0.5">
-                                    {description}
-                                  </p>
+                      {/* 🎯 UPDATED: User menu options (complementary to BottomNav) */}
+                      <div className="py-1">
+                        {userMenuOptions.map(({ icon: Icon, label, action, description, badge }) => (
+                          <motion.button
+                            key={label}
+                            onClick={action}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation group relative"
+                          >
+                            <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-white transition-colors">
+                              <Icon className="h-4 w-4 flex-shrink-0" />
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium truncate">{label}</span>
+                                {badge && (
+                                  <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
+                                    {badge}
+                                  </span>
                                 )}
                               </div>
-                            </motion.button>
-                          ))}
-                        </div>
-
-                        {/* LOGOUT */}
-                        <div className="border-t border-gray-200/80 mt-1">
-                          <motion.button
-                            onClick={handleLogout}
-                            whileTap={{ scale: 0.98 }}
-                            className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors touch-manipulation group"
-                          >
-                            <div className="p-2 rounded-lg bg-red-100 group-hover:bg-red-200 transition-colors">
-                              <LogOutIcon className="h-4 w-4 flex-shrink-0" />
+                              {description && (
+                                <p className="text-gray-500 text-xs truncate mt-0.5">
+                                  {description}
+                                </p>
+                              )}
                             </div>
-                            <span className="font-medium truncate">Sign Out</span>
                           </motion.button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                )}
+                        ))}
+                      </div>
+
+                      {/* LOGOUT */}
+                      <div className="border-t border-gray-200/80 mt-1">
+                        <motion.button
+                          onClick={handleLogout}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors touch-manipulation group"
+                        >
+                          <div className="p-2 rounded-lg bg-red-100 group-hover:bg-red-200 transition-colors">
+                            <LogOutIcon className="h-4 w-4 flex-shrink-0" />
+                          </div>
+                          <span className="font-medium truncate">Sign Out</span>
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>
         </div>
 
-        {/* SEARCH BAR WITH SUGGESTIONS */}
+        {/* SEARCH BAR - ALWAYS VISIBLE NOW */}
         <div className="relative">
           <motion.div 
             className="relative"
@@ -432,7 +312,7 @@ export default function ConsumerHeader({
             <input
               ref={searchRef}
               type="text"
-              placeholder="Search apartments, locations, amenities..."
+              placeholder={isMobile ? "Search properties..." : "Search apartments, locations, amenities..."}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               onKeyDown={handleKeyPress}
