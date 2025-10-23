@@ -1,4 +1,4 @@
-// src/app/consumer/search/page.tsx - FIXED SYNTAX
+// src/app/consumer/search/page.tsx - MOBILE FIRST COMPLETE
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -36,8 +36,9 @@ const EyeIcon = dynamic(() => import('lucide-react').then(mod => mod.Eye));
 const ShieldIcon = dynamic(() => import('lucide-react').then(mod => mod.Shield));
 const XIcon = dynamic(() => import('lucide-react').then(mod => mod.X));
 const SlidersIcon = dynamic(() => import('lucide-react').then(mod => mod.SlidersHorizontal));
+const ChevronDownIcon = dynamic(() => import('lucide-react').then(mod => mod.ChevronDown));
 
-// Property Card Component
+// Property Card Component - MOBILE OPTIMIZED
 function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFavoriteToggle: (id: string) => void }) {
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -56,7 +57,7 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       onClick={() => router.push(`/consumer/property/${property.id}`)}
-      className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all cursor-pointer group active:scale-[0.98] w-full max-w-full"
+      className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all cursor-pointer active:scale-[0.98] w-full"
     >
       <div className="relative h-48 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
         {property.images && property.images.length > 0 ? (
@@ -72,19 +73,21 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
         )}
         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors" />
         
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[70%]">
+        {/* Status Badge */}
+        <div className="absolute top-3 left-3">
           {property.status === 'available' && (
-            <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-medium truncate">
+            <span className="bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-medium">
               Available
             </span>
           )}
           {property.status === 'rented' && (
-            <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium truncate">
+            <span className="bg-blue-500 text-white px-2 py-1 rounded-lg text-xs font-medium">
               Rented
             </span>
           )}
         </div>
 
+        {/* Favorite Button */}
         <button
           onClick={handleFavoriteClick}
           className={`absolute top-3 right-3 p-2 rounded-full transition-all active:scale-95 ${
@@ -96,59 +99,61 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
           <HeartIcon className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
         </button>
 
-        <div className="absolute bottom-3 left-3 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1 max-w-[60%] truncate">
+        {/* Views Counter */}
+        <div className="absolute bottom-3 left-3 bg-black/50 text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1">
           <EyeIcon className="h-3 w-3 flex-shrink-0" />
-          <span className="truncate">{views} views</span>
+          <span>{views} views</span>
         </div>
       </div>
 
+      {/* Property Details */}
       <div className="p-4">
-        <div className="flex items-start justify-between mb-2 gap-2 min-w-0">
-          <h3 className="font-semibold text-gray-900 text-lg leading-tight flex-1 min-w-0 pr-2">
-            <span className="line-clamp-2 break-words">{property.title}</span>
+        {/* Title and Rating */}
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="font-semibold text-gray-900 text-lg leading-tight flex-1 pr-2 line-clamp-2">
+            {property.title}
           </h3>
           <div className="flex items-center gap-1 text-sm text-amber-600 flex-shrink-0 pl-2">
             <StarIcon className="h-4 w-4 fill-current flex-shrink-0" />
-            <span className="whitespace-nowrap">{rating}</span>
+            <span>{rating}</span>
           </div>
         </div>
 
+        {/* Location */}
         <div className="flex items-center text-gray-600 text-sm mb-3">
           <MapPinIcon className="h-4 w-4 mr-1 flex-shrink-0" />
           <span className="truncate">{property.location}</span>
         </div>
 
-        <div className="flex items-center justify-between text-sm text-gray-600 mb-3 gap-2">
-          <div className="flex items-center gap-2 flex-wrap min-w-0">
-            {property.beds > 0 && (
-              <div className="flex items-center gap-1 whitespace-nowrap">
-                <BedIcon className="h-4 w-4 flex-shrink-0" />
-                <span>{property.beds} bed</span>
-              </div>
-            )}
-            {property.baths > 0 && (
-              <div className="flex items-center gap-1 whitespace-nowrap">
-                <BathIcon className="h-4 w-4 flex-shrink-0" />
-                <span>{property.baths} bath</span>
-              </div>
-            )}
-            {property.area && (
-              <div className="flex items-center gap-1 whitespace-nowrap">
-                <SquareIcon className="h-4 w-4 flex-shrink-0" />
-                <span>{property.area?.toLocaleString()} sqft</span>
-              </div>
-            )}
-          </div>
+        {/* Property Features */}
+        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+          {property.beds > 0 && (
+            <div className="flex items-center gap-1">
+              <BedIcon className="h-4 w-4 flex-shrink-0" />
+              <span>{property.beds} bed</span>
+            </div>
+          )}
+          {property.baths > 0 && (
+            <div className="flex items-center gap-1">
+              <BathIcon className="h-4 w-4 flex-shrink-0" />
+              <span>{property.baths} bath</span>
+            </div>
+          )}
+          {property.area && (
+            <div className="flex items-center gap-1">
+              <SquareIcon className="h-4 w-4 flex-shrink-0" />
+              <span>{property.area?.toLocaleString()} sqft</span>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center justify-between gap-2 min-w-0">
-          <div className="text-2xl font-bold text-gray-900 min-w-0 flex-1">
-            <span className="whitespace-nowrap truncate">
-              P{property.price?.toLocaleString()}
-              <span className="text-sm font-normal text-gray-600">/month</span>
-            </span>
+        {/* Price and Status */}
+        <div className="flex items-center justify-between">
+          <div className="text-2xl font-bold text-gray-900">
+            P{property.price?.toLocaleString()}
+            <span className="text-sm font-normal text-gray-600">/month</span>
           </div>
-          <div className={`text-xs px-2 py-1 rounded-full flex-shrink-0 whitespace-nowrap ${
+          <div className={`text-xs px-2 py-1 rounded-full ${
             property.status === 'available' ? 'bg-green-100 text-green-800' :
             property.status === 'rented' ? 'bg-blue-100 text-blue-800' :
             'bg-orange-100 text-orange-800'
@@ -161,7 +166,7 @@ function PropertyCard({ property, onFavoriteToggle }: { property: Property; onFa
   );
 }
 
-// Filter Sidebar Component
+// Filter Sidebar Component - MOBILE FIRST
 function FilterSidebar({ 
   filters, 
   onFiltersChange, 
@@ -201,37 +206,42 @@ function FilterSidebar({
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Mobile Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden touch-manipulation"
           />
           
+          {/* Filter Panel */}
           <motion.div
-            initial={{ x: -320 }}
+            initial={{ x: '100%' }}
             animate={{ x: 0 }}
-            exit={{ x: -320 }}
+            exit={{ x: '100%' }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed left-0 top-0 bottom-0 w-80 bg-white z-50 lg:relative lg:z-auto lg:w-64 lg:flex flex-col border-r border-gray-200 overflow-y-auto"
+            className="fixed inset-y-0 right-0 w-full max-w-sm bg-white z-50 lg:relative lg:z-auto lg:w-64 lg:flex flex-col border-l border-gray-200 overflow-y-auto safe-area-padding"
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0">
               <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg lg:hidden active:scale-95"
+                className="p-2 hover:bg-gray-100 rounded-lg active:scale-95 touch-manipulation"
               >
                 <XIcon className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="flex-1 p-4 space-y-6">
+            {/* Filter Content */}
+            <div className="flex-1 p-4 space-y-6 pb-24">
+              {/* Location */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Location</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
+                <div className="space-y-2 max-h-48 overflow-y-auto">
                   {locations.map((location) => (
-                    <label key={location} className="flex items-center">
+                    <label key={location} className="flex items-center py-2">
                       <input
                         type="checkbox"
                         checked={filters.locations.includes(location)}
@@ -241,14 +251,15 @@ function FilterSidebar({
                             : filters.locations.filter((l: string) => l !== location);
                           onFiltersChange({ ...filters, locations: newLocations });
                         }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
-                      <span className="ml-2 text-sm text-gray-700 truncate">{location}</span>
+                      <span className="ml-3 text-sm text-gray-700 truncate">{location}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
+              {/* Price Range */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Price Range (P/month)</h3>
                 <div className="space-y-3">
@@ -261,7 +272,7 @@ function FilterSidebar({
                         ...filters,
                         priceRange: { ...filters.priceRange, min: e.target.value }
                       })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <input
                       type="number"
@@ -271,12 +282,13 @@ function FilterSidebar({
                         ...filters,
                         priceRange: { ...filters.priceRange, max: e.target.value }
                       })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Bedrooms */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Bedrooms</h3>
                 <div className="flex flex-wrap gap-2">
@@ -287,7 +299,7 @@ function FilterSidebar({
                         ...filters,
                         bedrooms: filters.bedrooms === beds ? null : beds
                       })}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors active:scale-95 ${
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors active:scale-95 touch-manipulation ${
                         filters.bedrooms === beds
                           ? 'bg-blue-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -299,11 +311,12 @@ function FilterSidebar({
                 </div>
               </div>
 
+              {/* Property Type */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Property Type</h3>
                 <div className="space-y-2">
                   {propertyTypes.map((type) => (
-                    <label key={type} className="flex items-center">
+                    <label key={type} className="flex items-center py-2">
                       <input
                         type="checkbox"
                         checked={filters.propertyTypes.includes(type)}
@@ -313,19 +326,20 @@ function FilterSidebar({
                             : filters.propertyTypes.filter((t: string) => t !== type);
                           onFiltersChange({ ...filters, propertyTypes: newTypes });
                         }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
-                      <span className="ml-2 text-sm text-gray-700 capitalize">{type}</span>
+                      <span className="ml-3 text-sm text-gray-700 capitalize">{type}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
+              {/* Amenities */}
               <div>
                 <h3 className="font-medium text-gray-900 mb-3">Amenities</h3>
                 <div className="space-y-2">
                   {amenities.map((amenity) => (
-                    <label key={amenity} className="flex items-center">
+                    <label key={amenity} className="flex items-center py-2">
                       <input
                         type="checkbox"
                         checked={filters.amenities.includes(amenity)}
@@ -335,28 +349,37 @@ function FilterSidebar({
                             : filters.amenities.filter((a: string) => a !== amenity);
                           onFiltersChange({ ...filters, amenities: newAmenities });
                         }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
-                      <span className="ml-2 text-sm text-gray-700">{amenity}</span>
+                      <span className="ml-3 text-sm text-gray-700">{amenity}</span>
                     </label>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-200">
-              <button
-                onClick={() => onFiltersChange({
-                  locations: [],
-                  priceRange: { min: '', max: '' },
-                  bedrooms: null,
-                  propertyTypes: [],
-                  amenities: []
-                })}
-                className="w-full py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium active:scale-95"
-              >
-                Clear All Filters
-              </button>
+            {/* Footer Actions */}
+            <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 safe-area-bottom">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => onFiltersChange({
+                    locations: [],
+                    priceRange: { min: '', max: '' },
+                    bedrooms: null,
+                    propertyTypes: [],
+                    amenities: []
+                  })}
+                  className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium active:scale-95 touch-manipulation"
+                >
+                  Clear All
+                </button>
+                <button
+                  onClick={onClose}
+                  className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium active:scale-95 touch-manipulation"
+                >
+                  Apply
+                </button>
+              </div>
             </div>
           </motion.div>
         </>
@@ -365,7 +388,7 @@ function FilterSidebar({
   );
 }
 
-// Fetch properties from Supabase
+// Fetch functions remain the same
 const fetchPropertiesFromSupabase = async (filters: any = {}, sortBy: string = 'newest') => {
   const supabase = createClient();
   
@@ -413,7 +436,6 @@ const fetchPropertiesFromSupabase = async (filters: any = {}, sortBy: string = '
   return data || [];
 };
 
-// Fetch locations from Supabase
 const fetchLocationsFromSupabase = async () => {
   const supabase = createClient();
   const { data, error } = await supabase
@@ -448,6 +470,7 @@ export default function PropertySearch() {
   const [locations, setLocations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSortMenu, setShowSortMenu] = useState(false);
   
   const [user, setUser] = useState<any>(null);
 
@@ -565,10 +588,17 @@ export default function PropertySearch() {
     return count + (filter ? 1 : 0);
   }, 0);
 
+  const sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'price-low', label: 'Price: Low to High' },
+    { value: 'price-high', label: 'Price: High to Low' },
+    { value: 'relevance', label: 'Relevance' }
+  ];
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center safe-area-padding">
-        <div className="text-center">
+        <div className="text-center p-4">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldIcon className="h-8 w-8 text-red-600" />
           </div>
@@ -576,7 +606,7 @@ export default function PropertySearch() {
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={fetchProperties}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors active:scale-95"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors active:scale-95 touch-manipulation"
           >
             Try Again
           </button>
@@ -586,7 +616,8 @@ export default function PropertySearch() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 safe-area-padding lg:pb-0">
+    <div className="min-h-screen bg-gray-50 safe-area-padding">
+      {/* Clean Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-40">
         <Header
           user={user}
@@ -600,6 +631,7 @@ export default function PropertySearch() {
       </div>
 
       <div className="flex min-w-0">
+        {/* Filter Sidebar - Hidden on mobile by default */}
         <FilterSidebar
           filters={filters}
           onFiltersChange={setFilters}
@@ -608,77 +640,138 @@ export default function PropertySearch() {
           locations={locations}
         />
 
+        {/* Main Content */}
         <main className="flex-1 min-w-0">
-          <div className="p-4 lg:p-6 w-full max-w-full overflow-x-hidden">
+          <div className="p-4 w-full max-w-full overflow-x-hidden">
             
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 w-full max-w-full">
-              <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 truncate">
-                  {searchQuery ? `Search Results for "${searchQuery}"` : 'All Properties in Botswana'}
-                </h1>
-                <p className="text-gray-600 truncate">
-                  {loading ? 'Loading...' : `${properties.length} properties found`}
-                  {searchQuery && ` for "${searchQuery}"`}
-                </p>
+            {/* IMPROVED MOBILE-FIRST HEADER */}
+            <div className="mb-6">
+              {/* Main Title Row */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    {searchQuery ? (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span>Search Results</span>
+                        <span className="text-blue-600 bg-blue-50 px-3 py-1 rounded-full text-sm font-medium">
+                          "{searchQuery}"
+                        </span>
+                      </div>
+                    ) : (
+                      'Properties in Botswana'
+                    )}
+                  </h1>
+                  
+                  {/* Results Summary */}
+                  <div className="flex items-center gap-3 text-sm text-gray-600 flex-wrap">
+                    <span className="font-medium text-gray-900">
+                      {loading ? 'Searching...' : `${properties.length} properties`}
+                    </span>
+                    
+                    {activeFilterCount > 0 && (
+                      <>
+                        <span className="text-gray-300">•</span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                          {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3 flex-shrink-0 self-end sm:self-auto">
+              {/* Action Buttons - Mobile Optimized */}
+              <div className="flex items-center gap-2">
+                {/* Filter Button */}
                 <button
                   onClick={() => setShowFilters(true)}
-                  className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors active:scale-95 flex-shrink-0"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors active:scale-95 touch-manipulation flex-1 justify-center"
                 >
                   <FilterIcon className="h-4 w-4 flex-shrink-0" />
-                  Filters
+                  <span>Filters</span>
                   {activeFilterCount > 0 && (
-                    <span className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full flex-shrink-0">
+                    <span className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 text-center">
                       {activeFilterCount}
                     </span>
                   )}
                 </button>
 
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-shrink-0 min-w-[140px]"
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="relevance">Relevance</option>
-                </select>
+                {/* Sort Button */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowSortMenu(!showSortMenu)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors active:scale-95 touch-manipulation w-full min-w-[140px]"
+                  >
+                    <span>Sort</span>
+                    <ChevronDownIcon className="h-4 w-4 flex-shrink-0" />
+                  </button>
+
+                  {/* Sort Dropdown */}
+                  <AnimatePresence>
+                    {showSortMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-200 py-2 z-30"
+                      >
+                        {sortOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => {
+                              setSortBy(option.value);
+                              setShowSortMenu(false);
+                            }}
+                            className={`w-full flex items-center px-4 py-2.5 text-sm transition-colors touch-manipulation ${
+                              sortBy === option.value
+                                ? 'bg-blue-50 text-blue-600'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
+
+              {/* Active Filters Indicator */}
+              {activeFilterCount > 0 && (
+                <div className="mt-3">
+                  <button
+                    onClick={() => setShowFilters(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-100 transition-colors active:scale-95 touch-manipulation"
+                  >
+                    <SlidersIcon className="h-3 w-3" />
+                    {activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}
+                  </button>
+                </div>
+              )}
             </div>
 
-            {activeFilterCount > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6 w-full max-w-full">
-                <button
-                  onClick={() => setShowFilters(true)}
-                  className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium active:scale-95 flex-shrink-0"
-                >
-                  <SlidersIcon className="h-3 w-3 flex-shrink-0" />
-                  {activeFilterCount} active filters
-                </button>
-              </div>
-            )}
-
+            {/* Loading State */}
             {loading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 w-full max-w-full overflow-hidden">
-                {[...Array(6)].map((_, index) => (
-                  <div key={index} className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse w-full">
-                    <div className="h-48 bg-gray-200 rounded-lg mb-4 w-full"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
-                    <div className="flex justify-between w-full">
-                      <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              <div className="grid grid-cols-1 gap-4">
+                {[...Array(4)].map((_, index) => (
+                  <div key={index} className="bg-white rounded-2xl border border-gray-200 p-4 animate-pulse">
+                    <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                    <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
+                    <div className="flex justify-between">
+                      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                      <div className="h-5 bg-gray-200 rounded w-1/3"></div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
+            {/* Properties Grid */}
             {!loading && properties.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 w-full max-w-full overflow-hidden">
+              <div className="grid grid-cols-1 gap-4">
                 {properties.map((property, index) => (
                   <PropertyCard
                     key={property.id}
@@ -689,15 +782,16 @@ export default function PropertySearch() {
               </div>
             )}
 
+            {/* Empty State */}
             {!loading && properties.length === 0 && (
-              <div className="text-center py-12 w-full max-w-full">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <SearchIcon className="h-8 w-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   No properties found
                 </h3>
-                <p className="text-gray-600 mb-4 max-w-md mx-auto">
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
                   {searchQuery || activeFilterCount > 0 
                     ? 'Try adjusting your search criteria or filters'
                     : 'No properties available at the moment. Check back later!'
@@ -709,7 +803,7 @@ export default function PropertySearch() {
                       setSearchQuery('');
                       setFilters(defaultFilters);
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors active:scale-95"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors active:scale-95 touch-manipulation"
                   >
                     Clear all filters
                   </button>
@@ -720,6 +814,7 @@ export default function PropertySearch() {
         </main>
       </div>
 
+      {/* Bottom Navigation - Mobile Only */}
       <div className="lg:hidden">
         <BottomNav />
       </div>

@@ -1,4 +1,4 @@
-﻿// src/app/consumer/tours/page.tsx - COMPLETE WITH NAVIGATION
+﻿// src/app/consumer/tours/page.tsx - MOBILE FIRST WITH CLEAN HEADER
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { createClient } from '@/lib/supabase/client';
-import { Header } from '@/components/consumer';
+import { Header, BottomNav } from '@/components/consumer';
 
 // Lazy load icons
 const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
@@ -221,10 +221,22 @@ export default function ToursPage() {
     }
   };
 
+  const handleQuickSearch = () => {
+    // Search functionality for tours
+    console.log('Searching tours:', searchQuery);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const upcomingToursCount = tours.filter(t => ['scheduled', 'confirmed'].includes(t.status)).length;
+  const pastToursCount = tours.filter(t => ['completed', 'cancelled'].includes(t.status)).length;
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-20">
-        <div className="bg-white border-b border-gray-200">
+      <div className="min-h-screen bg-gray-50 safe-area-padding">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-40">
           <Header
             user={user}
             searchQuery=""
@@ -257,14 +269,14 @@ export default function ToursPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 lg:pb-0">
-      {/* HEADER */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <div className="min-h-screen bg-gray-50 safe-area-padding">
+      {/* CLEAN HEADER */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-40">
         <Header
           user={user}
           searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onQuickSearch={() => {}}
+          onSearchChange={handleSearchChange}
+          onQuickSearch={handleQuickSearch}
           notifications={0}
           showLocationFilter={false}
           onLocationFilterClick={() => {}}
@@ -272,41 +284,52 @@ export default function ToursPage() {
       </div>
 
       <div className="p-4 max-w-6xl mx-auto">
-        {/* PAGE HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Tours</h1>
-            <p className="text-gray-600">Schedule and manage your property viewings</p>
+        {/* IMPROVED PAGE HEADER */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Tours</h1>
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <span className="font-medium text-gray-900">
+                  {upcomingToursCount + pastToursCount} total tours
+                </span>
+                <span className="text-gray-300">•</span>
+                <span>{upcomingToursCount} upcoming</span>
+                <span className="text-gray-300">•</span>
+                <span>{pastToursCount} past</span>
+              </div>
+            </div>
+            
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowScheduleForm(true)}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium active:scale-95 touch-manipulation"
+            >
+              <PlusIcon className="h-5 w-5" />
+              <span className="hidden sm:inline">Schedule Tour</span>
+              <span className="sm:hidden">New</span>
+            </motion.button>
           </div>
-          
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowScheduleForm(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium"
-          >
-            <PlusIcon className="h-5 w-5" />
-            Schedule Tour
-          </motion.button>
         </div>
 
-        {/* TABS */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-6 max-w-md">
+        {/* TABS - MOBILE OPTIMIZED */}
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-6">
           {[
-            { key: 'upcoming', label: 'Upcoming Tours', count: tours.filter(t => ['scheduled', 'confirmed'].includes(t.status)).length },
-            { key: 'past', label: 'Past Tours', count: tours.filter(t => ['completed', 'cancelled'].includes(t.status)).length }
+            { key: 'upcoming', label: 'Upcoming', count: upcomingToursCount },
+            { key: 'past', label: 'Past', count: pastToursCount }
           ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as 'upcoming' | 'past')}
-              className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 py-3 px-2 sm:px-4 rounded-lg text-sm font-medium transition-all active:scale-95 touch-manipulation ${
                 activeTab === tab.key
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span>{tab.label}</span>
-                <span className={`px-2 py-1 rounded-full text-xs ${
+                <span className="truncate">{tab.label}</span>
+                <span className={`px-2 py-1 rounded-full text-xs min-w-6 ${
                   activeTab === tab.key ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-600'
                 }`}>
                   {tab.count}
@@ -316,6 +339,26 @@ export default function ToursPage() {
           ))}
         </div>
 
+        {/* SEARCH SUMMARY - Only show when searching */}
+        {searchQuery && (
+          <div className="mb-4 p-3 bg-blue-50 rounded-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <SearchIcon className="h-4 w-4 text-blue-600" />
+                <span className="text-sm text-blue-700">
+                  Showing {filteredTours.length} tours for "{searchQuery}"
+                </span>
+              </div>
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium active:scale-95 touch-manipulation"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* SCHEDULE TOUR MODAL */}
         <AnimatePresence>
           {showScheduleForm && (
@@ -323,14 +366,14 @@ export default function ToursPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 safe-area-padding"
               onClick={() => setShowScheduleForm(false)}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white rounded-2xl p-6 w-full max-w-md"
+                className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Schedule New Tour</h2>
@@ -401,13 +444,13 @@ export default function ToursPage() {
                     <button
                       type="button"
                       onClick={() => setShowScheduleForm(false)}
-                      className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors active:scale-95 touch-manipulation"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium active:scale-95 touch-manipulation"
                     >
                       Schedule Tour
                     </button>
@@ -434,7 +477,7 @@ export default function ToursPage() {
             {activeTab === 'upcoming' && (
               <button
                 onClick={() => setShowScheduleForm(true)}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors active:scale-95 touch-manipulation"
               >
                 Schedule a Tour
               </button>
@@ -448,12 +491,12 @@ export default function ToursPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                onClick={() => router.push(`/consumer/tours/${tour.id}`)} // NAVIGATION LINK ADDED
-                className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-all cursor-pointer group" // cursor-pointer added
+                onClick={() => router.push(`/consumer/tours/${tour.id}`)}
+                className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all cursor-pointer group active:scale-95 touch-manipulation"
               >
-                <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                   {/* Property Image */}
-                  <div className="w-full lg:w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-full sm:w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
                     {tour.property_image ? (
                       <img 
                         src={tour.property_image} 
@@ -461,7 +504,7 @@ export default function ToursPage() {
                         className="w-full h-full object-cover rounded-xl"
                       />
                     ) : (
-                      <HomeIcon className="h-8 w-8 text-blue-600" />
+                      <HomeIcon className="h-6 w-6 text-blue-600" />
                     )}
                   </div>
 
@@ -469,7 +512,7 @@ export default function ToursPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-2">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-lg mb-1 group-hover:text-blue-600 transition-colors">
+                        <h3 className="font-semibold text-gray-900 text-lg mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
                           {tour.property_title}
                         </h3>
                         <div className="flex items-center text-gray-600 text-sm mb-2">
@@ -484,8 +527,8 @@ export default function ToursPage() {
                       </div>
                     </div>
 
-                    {/* Tour Schedule */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    {/* Tour Schedule - Mobile Optimized */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
                       <div className="flex items-center gap-2 text-sm">
                         <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         <span className="text-gray-900 font-medium">
@@ -515,22 +558,22 @@ export default function ToursPage() {
 
                     {/* Notes */}
                     {tour.notes && (
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm text-gray-700">{tour.notes}</p>
+                      <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                        <p className="text-sm text-gray-700 line-clamp-2">{tour.notes}</p>
                       </div>
                     )}
 
                     {/* Actions */}
                     {tour.status === 'scheduled' && (
-                      <div className="flex gap-3 mt-4 pt-4 border-t border-gray-200">
-                        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                      <div className="flex gap-3 pt-3 border-t border-gray-200">
+                        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium active:scale-95 touch-manipulation">
                           Reschedule
                         </button>
-                        <button className="text-red-600 hover:text-red-700 text-sm font-medium">
-                          Cancel Tour
+                        <button className="text-red-600 hover:text-red-700 text-sm font-medium active:scale-95 touch-manipulation">
+                          Cancel
                         </button>
-                        <button className="text-green-600 hover:text-green-700 text-sm font-medium ml-auto">
-                          Confirm Attendance
+                        <button className="text-green-600 hover:text-green-700 text-sm font-medium ml-auto active:scale-95 touch-manipulation">
+                          Confirm
                         </button>
                       </div>
                     )}
@@ -540,6 +583,11 @@ export default function ToursPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* BOTTOM NAVIGATION */}
+      <div className="lg:hidden">
+        <BottomNav />
       </div>
     </div>
   );
