@@ -1,17 +1,11 @@
-// src/components/consumer/BottomNav.tsx - FINAL BATTLE-TESTED VERSION (PROFILE REMOVED, SERVICES KEPT)
+// src/components/consumer/BottomNav.tsx - UPDATED WITH CONFIG
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-
-// Lazy load icons
-const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
-const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
-const TruckIcon = dynamic(() => import('lucide-react').then(mod => mod.Truck));
-const WrenchIcon = dynamic(() => import('lucide-react').then(mod => mod.Wrench));
-const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
+import { CONSUMER_NAV_CONFIG, getActiveState } from '@/lib/constants/navigation-consumer';
 
 export default function ConsumerBottomNav() {
   const pathname = usePathname();
@@ -31,53 +25,6 @@ export default function ConsumerBottomNav() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // 🏆 FINAL BATTLE-TESTED NAVIGATION - OPTIMIZED PLACEMENT & URLs (PROFILE REMOVED)
-  const navItems = [
-    // 🥇 PRIMARY BUSINESS ACTIONS (Left - Thumb Friendly)
-    { 
-      icon: SearchIcon, 
-      label: 'Search', 
-      href: '/consumer/search',
-      active: pathname?.startsWith('/consumer/search') || pathname?.startsWith('/consumer/property'),
-      description: 'Find properties',
-      badge: 'New'
-    },
-    { 
-      icon: CalendarIcon, 
-      label: 'Tours', 
-      href: '/consumer/tours',
-      active: pathname?.startsWith('/consumer/tours'),
-      description: 'Schedule viewings'
-    },
-    
-    // 🥈 ENGAGEMENT & DISCOVERY (Center)
-    { 
-      icon: HomeIcon, 
-      label: 'Home', 
-      href: '/consumer/home',
-      active: pathname === '/consumer/home',
-      description: 'Dashboard'
-    },
-    
-    // 🥉 REVENUE EXPANSION SERVICES (Right)
-    { 
-      icon: TruckIcon, 
-      label: 'Move-in', 
-      href: '/consumer/move-in',
-      active: pathname?.startsWith('/consumer/move-in'),
-      description: 'Moving services',
-      badge: 'Hot'
-    },
-    { 
-      icon: WrenchIcon, 
-      label: 'Services', 
-      href: '/consumer/services',
-      active: pathname?.startsWith('/consumer/services'),
-      description: 'Home maintenance'
-    },
-    // 🎯 REMOVED: Profile (now accessible via header avatar)
-  ];
-
   const handleNavigation = (href: string) => {
     router.push(href);
   };
@@ -88,7 +35,7 @@ export default function ConsumerBottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 safe-area-bottom z-50 lg:hidden">
         <div className="px-2 py-3">
           <div className="flex justify-around items-center">
-            {[...Array(5)].map((_, i) => (
+            {CONSUMER_NAV_CONFIG.CORE_NAV_ITEMS.map((_, i) => (
               <div key={i} className="flex flex-col items-center p-1 min-w-0 flex-1">
                 <div className="w-10 h-10 bg-gray-200 rounded-xl animate-pulse" />
                 <div className="h-3 bg-gray-200 rounded w-8 mt-1 animate-pulse" />
@@ -126,96 +73,86 @@ export default function ConsumerBottomNav() {
         
         <div className="px-1 py-2">
           <div className="flex justify-around items-center">
-            {navItems.map(({ icon: Icon, label, href, active, badge }) => (
-              <motion.button
-                key={label}
-                onClick={() => handleNavigation(href)}
-                whileTap={{ scale: 0.85 }}
-                whileHover={{ scale: 1.05 }}
-                className={`flex flex-col items-center p-1 transition-all duration-200 min-w-0 flex-1 touch-manipulation relative ${
-                  active 
-                    ? 'text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                aria-label={label}
-                aria-current={active ? 'page' : undefined}
-              >
-                {/* Badge for new/hot features */}
-                {badge && (
-                  <motion.span
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    className={`absolute -top-1 -right-1 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold leading-none shadow-sm ${
-                      badge === 'Hot' 
-                        ? 'bg-gradient-to-r from-red-500 to-orange-500' 
-                        : 'bg-gradient-to-r from-amber-500 to-orange-500'
-                    }`}
-                  >
-                    {badge}
-                  </motion.span>
-                )}
-
-                {/* Icon container with enhanced styling */}
-                <motion.div
-                  className={`relative p-2 rounded-xl transition-all duration-200 border-2 ${
+            {CONSUMER_NAV_CONFIG.CORE_NAV_ITEMS.map((item) => {
+              const active = getActiveState(pathname, item);
+              const Icon = item.icon;
+              
+              return (
+                <motion.button
+                  key={item.label}
+                  onClick={() => handleNavigation(item.href)}
+                  whileTap={{ scale: 0.85 }}
+                  whileHover={{ scale: 1.05 }}
+                  className={`flex flex-col items-center p-1 transition-all duration-200 min-w-0 flex-1 touch-manipulation relative ${
                     active 
-                      ? 'bg-blue-50 border-blue-200 shadow-md shadow-blue-500/20' 
-                      : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
+                      ? 'text-blue-600' 
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
-                  whileHover={{ 
-                    scale: 1.1,
-                    transition: { type: "spring", stiffness: 400, damping: 10 }
-                  }}
+                  aria-label={item.label}
+                  aria-current={active ? 'page' : undefined}
                 >
-                  <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-600'}`} />
+                  {/* Icon container with enhanced styling */}
+                  <motion.div
+                    className={`relative p-2 rounded-xl transition-all duration-200 border-2 ${
+                      active 
+                        ? 'bg-blue-50 border-blue-200 shadow-md shadow-blue-500/20' 
+                        : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
+                    }`}
+                    whileHover={{ 
+                      scale: 1.1,
+                      transition: { type: "spring", stiffness: 400, damping: 10 }
+                    }}
+                  >
+                    <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-600'}`} />
+                    
+                    {/* Active indicator pulse */}
+                    {active && (
+                      <motion.div
+                        className="absolute inset-0 rounded-xl border-2 border-blue-400"
+                        initial={{ opacity: 0, scale: 1 }}
+                        animate={{ 
+                          opacity: [0, 0.3, 0],
+                          scale: [1, 1.1, 1]
+                        }}
+                        transition={{ 
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatType: "loop"
+                        }}
+                      />
+                    )}
+                  </motion.div>
+
+                  {/* Label with better typography */}
+                  <motion.span
+                    className={`text-xs mt-1 font-semibold truncate max-w-[70px] px-1 ${
+                      active ? 'text-blue-600' : 'text-gray-600'
+                    }`}
+                    initial={{ opacity: 0.8 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {item.label}
+                  </motion.span>
                   
-                  {/* Active indicator pulse */}
+                  {/* Active indicator bar */}
                   {active && (
                     <motion.div
-                      className="absolute inset-0 rounded-xl border-2 border-blue-400"
-                      initial={{ opacity: 0, scale: 1 }}
-                      animate={{ 
-                        opacity: [0, 0.3, 0],
-                        scale: [1, 1.1, 1]
-                      }}
+                      layoutId="activeBottomNav"
+                      className="h-1 w-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mt-1 shadow-sm shadow-blue-500/30"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
                       transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatType: "loop"
+                        type: "spring", 
+                        stiffness: 500, 
+                        damping: 30,
+                        delay: 0.1 
                       }}
                     />
                   )}
-                </motion.div>
-
-                {/* Label with better typography */}
-                <motion.span
-                  className={`text-xs mt-1 font-semibold truncate max-w-[70px] px-1 ${
-                    active ? 'text-blue-600' : 'text-gray-600'
-                  }`}
-                  initial={{ opacity: 0.8 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {label}
-                </motion.span>
-                
-                {/* Active indicator bar */}
-                {active && (
-                  <motion.div
-                    layoutId="activeBottomNav"
-                    className="h-1 w-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mt-1 shadow-sm shadow-blue-500/30"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 500, 
-                      damping: 30,
-                      delay: 0.1 
-                    }}
-                  />
-                )}
-              </motion.button>
-            ))}
+                </motion.button>
+              );
+            })}
           </div>
         </div>
 

@@ -1,23 +1,17 @@
-// src/components/consumer/Sidebar.tsx - COMPLETE MOBILE VERSION (FIXED)
+// src/components/consumer/Sidebar.tsx - FIXED
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { CONSUMER_NAV_CONFIG, getActiveState } from '@/lib/constants/navigation-consumer';
 
 // Lazy load icons
 const HomeIcon = dynamic(() => import('lucide-react').then(mod => mod.Home));
-const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
-const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
-const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
 const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
-const MapIcon = dynamic(() => import('lucide-react').then(mod => mod.Map));
 const SettingsIcon = dynamic(() => import('lucide-react').then(mod => mod.Settings));
-const TrendingUpIcon = dynamic(() => import('lucide-react').then(mod => mod.TrendingUp));
 const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
-const TruckIcon = dynamic(() => import('lucide-react').then(mod => mod.Truck));
-const WrenchIcon = dynamic(() => import('lucide-react').then(mod => mod.Wrench));
 const MenuIcon = dynamic(() => import('lucide-react').then(mod => mod.Menu));
 const XIcon = dynamic(() => import('lucide-react').then(mod => mod.X));
 
@@ -34,7 +28,7 @@ export default function Sidebar({ user }: SidebarProps) {
   // Check screen size
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+      setIsMobile(window.innerWidth < 1024);
     };
 
     checkScreenSize();
@@ -59,73 +53,21 @@ export default function Sidebar({ user }: SidebarProps) {
     };
   }, [mobileSidebarOpen]);
 
+  // 🎯 USING CONFIG: Navigation items
   const navItems = [
-    {
-      icon: HomeIcon,
-      label: 'Home',
-      href: '/consumer/home',
-      active: pathname === '/consumer/home',
-      description: 'Dashboard overview'
-    },
-    {
-      icon: SearchIcon,
-      label: 'Search',
-      href: '/consumer/search',
-      active: pathname?.startsWith('/consumer/search') || pathname?.startsWith('/consumer/property'),
-      description: 'Find properties',
-      badge: 'New'
-    },
-    {
-      icon: CalendarIcon,
-      label: 'Tours',
-      href: '/consumer/tours',
-      active: pathname?.startsWith('/consumer/tours'),
-      description: 'Schedule viewings'
-    },
-    {
-      icon: TruckIcon,
-      label: 'Move-in',
-      href: '/consumer/move-in',
-      active: pathname?.startsWith('/consumer/move-in'),
-      description: 'Moving services',
-      badge: 'Hot'
-    },
-    {
-      icon: WrenchIcon,
-      label: 'Services',
-      href: '/consumer/services',
-      active: pathname?.startsWith('/consumer/services'),
-      description: 'Home maintenance'
-    },
-    {
-      icon: HeartIcon,
-      label: 'Favorites',
-      href: '/consumer/saved',
-      active: pathname?.startsWith('/consumer/saved'),
-      description: 'Saved properties'
-    },
-    {
-      icon: MapIcon,
-      label: 'Explore',
-      href: '/consumer/explore',
-      active: pathname?.startsWith('/consumer/explore'),
-      description: 'Map view'
-    },
-    {
-      icon: TrendingUpIcon,
-      label: 'Trending',
-      href: '/consumer/trending',
-      active: pathname?.startsWith('/consumer/trending'),
-      description: 'Popular areas'
-    },
-  ];
+    ...CONSUMER_NAV_CONFIG.CORE_NAV_ITEMS,
+    ...CONSUMER_NAV_CONFIG.SIDEBAR_EXTENSIONS
+  ].map(item => ({
+    ...item,
+    active: getActiveState(pathname, item)
+  }));
 
   const secondaryItems = [
     {
       icon: UserIcon,
       label: 'Profile',
       href: '/consumer/profile',
-      active: pathname?.startsWith('/consumer/profile'),
+      active: getActiveState(pathname, { activePaths: ['/consumer/profile'] } as any),
       description: 'Account settings'
     },
   ];
@@ -143,7 +85,7 @@ export default function Sidebar({ user }: SidebarProps) {
     setMobileSidebarOpen(false);
   };
 
-  // Sidebar content component (reusable for both desktop and mobile)
+  // Sidebar content component
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <div className={`flex flex-col h-full bg-white/95 backdrop-blur-sm border-r border-gray-200/80 ${
       isMobile ? 'w-80' : ''
@@ -198,7 +140,7 @@ export default function Sidebar({ user }: SidebarProps) {
             Main Navigation
           </h3>
           <div className="space-y-2">
-            {navItems.map(({ icon: Icon, label, href, active, description, badge }) => (
+            {navItems.map(({ icon: Icon, label, href, active, description }) => (
               <motion.button
                 key={label}
                 onClick={() => handleNavigation(href)}
@@ -218,15 +160,6 @@ export default function Sidebar({ user }: SidebarProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <p className="font-medium text-sm">{label}</p>
-                    {badge && (
-                      <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                        badge === 'Hot' 
-                          ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white' 
-                          : 'bg-amber-500 text-white'
-                      }`}>
-                        {badge}
-                      </span>
-                    )}
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5">{description}</p>
                 </div>
@@ -273,7 +206,7 @@ export default function Sidebar({ user }: SidebarProps) {
           <button
             onClick={() => handleNavigation('/consumer/settings')}
             className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200 ${
-              pathname?.startsWith('/consumer/settings')
+              getActiveState(pathname, { activePaths: ['/consumer/settings'] } as any)
                 ? 'bg-gray-100 text-gray-700 border border-gray-200'
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
@@ -355,8 +288,6 @@ export default function Sidebar({ user }: SidebarProps) {
           <MenuIcon className="h-6 w-6" />
         </motion.button>
       )}
-
-      {/* REMOVED: The extra spacer div that was causing double sidebar */}
     </>
   );
 }

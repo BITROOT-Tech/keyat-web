@@ -1,21 +1,20 @@
-// src/components/consumer/Header.tsx - WITH K LOGO
+// src/components/consumer/Header.tsx - UPDATED WITH CONFIG
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import { CONSUMER_NAV_CONFIG } from '@/lib/constants/navigation-consumer';
 
-// Lazy load icons
+// Lazy load icons from config
 const SearchIcon = dynamic(() => import('lucide-react').then(mod => mod.Search));
 const BellIcon = dynamic(() => import('lucide-react').then(mod => mod.Bell));
 const UserIcon = dynamic(() => import('lucide-react').then(mod => mod.User));
 const SettingsIcon = dynamic(() => import('lucide-react').then(mod => mod.Settings));
-const CalendarIcon = dynamic(() => import('lucide-react').then(mod => mod.Calendar));
 const HeartIcon = dynamic(() => import('lucide-react').then(mod => mod.Heart));
 const LogOutIcon = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
 const MapPinIcon = dynamic(() => import('lucide-react').then(mod => mod.MapPin));
-const TrendingUpIcon = dynamic(() => import('lucide-react').then(mod => mod.TrendingUp));
 
 interface ConsumerHeaderProps {
   searchQuery: string;
@@ -85,43 +84,15 @@ export default function ConsumerHeader({
     setShowUserMenu(false);
   };
 
-  // 🎯 UPDATED: User menu options (complementary to BottomNav)
-  const userMenuOptions = [
-    { 
-      icon: UserIcon, 
-      label: 'My Profile', 
-      action: () => handleQuickAction('/consumer/profile'),
-      description: 'Personal information'
-    },
-    { 
-      icon: HeartIcon, 
-      label: 'Favorites', 
-      action: () => handleQuickAction('/consumer/saved'),
-      description: 'Saved properties'
-    },
-    { 
-      icon: BellIcon, 
-      label: 'Notifications', 
-      action: () => handleQuickAction('/consumer/notifications'),
-      description: `${notifications} new alerts`,
-      badge: notifications > 0 ? notifications.toString() : undefined
-    },
-    { 
-      icon: SettingsIcon, 
-      label: 'Settings', 
-      action: () => handleQuickAction('/consumer/settings'),
-      description: 'Preferences'
-    },
-  ];
+  // 🎯 USING CONFIG: User menu options
+  const userMenuOptions = CONSUMER_NAV_CONFIG.USER_MENU_ITEMS.map(item => ({
+    ...item,
+    action: () => handleQuickAction(item.href),
+    badge: item.label === 'Notifications' && notifications > 0 ? notifications.toString() : undefined
+  }));
 
-  // Quick search suggestions
-  const searchSuggestions = [
-    { label: 'Apartments in CBD', query: 'apartment CBD Gaborone' },
-    { label: 'Houses in Phakalane', query: 'house Phakalane' },
-    { label: '2 Bedroom flats', query: '2 bedroom flat' },
-    { label: 'Pet friendly', query: 'pet friendly' },
-    { label: 'With parking', query: 'parking included' }
-  ];
+  // 🎯 USING CONFIG: Search suggestions
+  const searchSuggestions = CONSUMER_NAV_CONFIG.SEARCH_SUGGESTIONS;
 
   const handleSuggestionClick = (query: string) => {
     onSearchChange(query);
@@ -140,7 +111,7 @@ export default function ConsumerHeader({
       <div className="px-4 py-3 lg:px-6">
         {/* TOP ROW - BRAND & USER CONTROLS */}
         <div className="flex items-center justify-between mb-3">
-          {/* BRAND/LOGO - ALWAYS VISIBLE ON MOBILE, HIDDEN ON DESKTOP (sidebar has branding) */}
+          {/* BRAND/LOGO */}
           <motion.div 
             className="flex-shrink-0"
             whileHover={{ scale: 1.02 }}
@@ -150,7 +121,6 @@ export default function ConsumerHeader({
               onClick={() => router.push('/consumer/home')}
               className="flex items-center space-x-3 group"
             >
-              {/* 🎯 CHANGED: HomeIcon replaced with Keyat "K" logo */}
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
                 <span className="text-white font-bold text-sm">K</span>
               </div>
@@ -161,7 +131,7 @@ export default function ConsumerHeader({
             </button>
           </motion.div>
 
-          {/* DESKTOP PAGE TITLE - ONLY SHOWS ON DESKTOP */}
+          {/* DESKTOP PAGE TITLE */}
           {!isMobile && (
             <div className="flex-1 ml-6">
               <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
@@ -201,11 +171,9 @@ export default function ConsumerHeader({
                     <span className="text-white text-sm font-medium">
                       {user?.first_name?.[0] || user?.email?.[0] || 'U'}
                     </span>
-                    {/* Online indicator */}
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
                   </div>
                   
-                  {/* DESKTOP USER NAME - HIDDEN ON MOBILE */}
                   {!isMobile && (
                     <div className="hidden sm:block text-left">
                       <p className="text-sm font-medium text-gray-900 leading-none">
@@ -249,7 +217,7 @@ export default function ConsumerHeader({
                         </div>
                       </div>
 
-                      {/* 🎯 UPDATED: User menu options (complementary to BottomNav) */}
+                      {/* USER MENU OPTIONS FROM CONFIG */}
                       <div className="py-1">
                         {userMenuOptions.map(({ icon: Icon, label, action, description, badge }) => (
                           <motion.button
@@ -301,7 +269,7 @@ export default function ConsumerHeader({
           </div>
         </div>
 
-        {/* SEARCH BAR - ALWAYS VISIBLE NOW */}
+        {/* SEARCH BAR */}
         <div className="relative">
           <motion.div 
             className="relative"
@@ -346,7 +314,7 @@ export default function ConsumerHeader({
             </div>
           </motion.div>
 
-          {/* SEARCH SUGGESTIONS */}
+          {/* SEARCH SUGGESTIONS FROM CONFIG */}
           <AnimatePresence>
             {searchFocused && searchQuery.length === 0 && (
               <motion.div
