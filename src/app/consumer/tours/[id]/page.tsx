@@ -1,4 +1,4 @@
-// src/app/consumer/tours/[id]/page.tsx - COMPLETE TOUR DETAIL PAGE
+// src/app/consumer/tours/[id]/page.tsx - UPDATED WITH REAL DATA
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,6 +23,8 @@ const MessageCircleIcon = dynamic(() => import('lucide-react').then(mod => mod.M
 const NavigationIcon = dynamic(() => import('lucide-react').then(mod => mod.Navigation));
 const StarIcon = dynamic(() => import('lucide-react').then(mod => mod.Star));
 const MapIcon = dynamic(() => import('lucide-react').then(mod => mod.Map));
+const BedIcon = dynamic(() => import('lucide-react').then(mod => mod.Bed));
+const BathIcon = dynamic(() => import('lucide-react').then(mod => mod.Bath));
 
 interface Tour {
   id: string;
@@ -33,16 +35,18 @@ interface Tour {
   property_price: number;
   property_beds: number;
   property_baths: number;
-  property_area: number;
+  property_area?: number;
   scheduled_date: string;
   scheduled_time: string;
   status: 'scheduled' | 'completed' | 'cancelled' | 'confirmed';
   agent_name: string;
   agent_phone: string;
-  agent_email: string;
-  agent_photo: string;
-  agent_rating: number;
+  agent_email?: string;
+  agent_photo?: string;
+  agent_rating?: number;
   notes?: string;
+  meeting_point?: string;
+  duration?: number;
   created_at: string;
 }
 
@@ -83,36 +87,82 @@ export default function TourDetailPage() {
     checkAuth();
   }, []);
 
-  // Fetch tour details
+  // Fetch tour details from database
   useEffect(() => {
     const fetchTour = async () => {
       try {
         setLoading(true);
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        // Mock tour data - replace with actual API call
-        const mockTour: Tour = {
-          id: tourId,
-          property_id: '1',
-          property_title: 'Modern 3-Bedroom Apartment with City View',
-          property_location: 'Block 9, Gaborone, Botswana',
-          property_image: '',
-          property_price: 8500,
-          property_beds: 3,
-          property_baths: 2,
-          property_area: 1200,
-          scheduled_date: '2024-01-15',
-          scheduled_time: '10:00',
-          status: 'confirmed',
-          agent_name: 'Sarah Johnson',
-          agent_phone: '+267 71 123 456',
-          agent_email: 'sarah.johnson@keyat.com',
-          agent_photo: '',
-          agent_rating: 4.8,
-          notes: 'Please bring valid ID for security clearance. Parking available in visitor bay #12. The property manager will meet you at the main entrance 10 minutes before the scheduled time.',
-          created_at: '2024-01-10T10:00:00Z'
+        if (!session) {
+          setError('Please log in to view tour details');
+          setLoading(false);
+          return;
+        }
+
+        // Fetch real tour data from database
+        const { data: tourData, error } = await supabase
+          .from('tours')
+          .select(`
+            *,
+            properties (
+              title,
+              location,
+              images,
+              price,
+              bedrooms,
+              bathrooms,
+              area
+            ),
+            agent_profiles (
+              first_name,
+              last_name,
+              phone,
+              email,
+              photo_url,
+              rating
+            )
+          `)
+          .eq('id', tourId)
+          .eq('tenant_id', session.user.id)
+          .single();
+
+        if (error) throw error;
+        if (!tourData) {
+          setError('Tour not found');
+          setLoading(false);
+          return;
+        }
+
+        // Transform the data
+        const formattedTour: Tour = {
+          id: tourData.id,
+          property_id: tourData.property_id,
+          property_title: tourData.properties?.title || 'Unknown Property',
+          property_location: tourData.properties?.location || 'Location not specified',
+          property_image: tourData.properties?.images?.[0] || '',
+          property_price: tourData.properties?.price || 0,
+          property_beds: tourData.properties?.bedrooms || 0,
+          property_baths: tourData.properties?.bathrooms || 0,
+          property_area: tourData.properties?.area,
+          scheduled_date: tourData.preferred_date.split('T')[0],
+          scheduled_time: tourData.viewing_time,
+          status: tourData.status,
+          agent_name: tourData.agent_profiles ? 
+            `${tourData.agent_profiles.first_name} ${tourData.agent_profiles.last_name}` : 
+            'Agent TBA',
+          agent_phone: tourData.agent_profiles?.phone || '+267 70 000 000',
+          agent_email: tourData.agent_profiles?.email,
+          agent_photo: tourData.agent_profiles?.photo_url,
+          agent_rating: tourData.agent_profiles?.rating || 4.5,
+          notes: tourData.notes,
+          meeting_point: tourData.meeting_point,
+          duration: tourData.duration,
+          created_at: tourData.created_at
         };
 
-        setTour(mockTour);
+        setTour(formattedTour);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching tour:', err);
@@ -148,6 +198,32 @@ export default function TourDetailPage() {
     if (tour) {
       const encodedLocation = encodeURIComponent(tour.property_location);
       window.open(`https://maps.google.com/?q=${encodedLocation}`);
+    }
+  };
+
+  const handleReschedule = () => {
+    if (tour) {
+      router.push(`/consumer/tours/${tour.id}/reschedule`);
+    }
+  };
+
+  const handleCancelTour = async () => {
+    if (tour && confirm('Are you sure you want to cancel this tour?')) {
+      try {
+        const supabase = createClient();
+        const { error } = await supabase
+          .from('tours')
+          .update({ status: 'cancelled' })
+          .eq('id', tour.id);
+
+        if (error) throw error;
+        
+        setTour(prev => prev ? { ...prev, status: 'cancelled' } : null);
+        alert('Tour cancelled successfully');
+      } catch (err) {
+        console.error('Error cancelling tour:', err);
+        alert('Failed to cancel tour');
+      }
     }
   };
 
@@ -271,6 +347,21 @@ export default function TourDetailPage() {
                   <div className="flex items-center text-gray-600 mb-4">
                     <MapPinIcon className="h-5 w-5 mr-2 flex-shrink-0" />
                     <span>{tour.property_location}</span>
+                  </div>
+                  
+                  {/* Property Details */}
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                    <div className="flex items-center gap-1">
+                      <BedIcon className="h-4 w-4" />
+                      <span>{tour.property_beds} beds</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <BathIcon className="h-4 w-4" />
+                      <span>{tour.property_baths} baths</span>
+                    </div>
+                    <div className="font-semibold text-green-600">
+                      P{tour.property_price?.toLocaleString()}/month
+                    </div>
                   </div>
                 </div>
                 
@@ -414,7 +505,9 @@ export default function TourDetailPage() {
                       <div className="flex gap-4 text-sm text-gray-600">
                         <span>{tour.property_beds} beds</span>
                         <span>{tour.property_baths} baths</span>
-                        <span>{tour.property_area?.toLocaleString()} sqft</span>
+                        {tour.property_area && (
+                          <span>{tour.property_area.toLocaleString()} sqft</span>
+                        )}
                         <span className="font-medium text-gray-900">P{tour.property_price?.toLocaleString()}/mo</span>
                       </div>
                     </div>
@@ -425,7 +518,9 @@ export default function TourDetailPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Agent</label>
                       <p className="text-gray-900 font-medium">{tour.agent_name}</p>
                       <p className="text-gray-600 text-sm">{tour.agent_phone}</p>
-                      <p className="text-gray-600 text-sm">{tour.agent_email}</p>
+                      {tour.agent_email && (
+                        <p className="text-gray-600 text-sm">{tour.agent_email}</p>
+                      )}
                     </div>
                     
                     <div>
@@ -435,6 +530,20 @@ export default function TourDetailPage() {
                         <span className="capitalize">{tour.status}</span>
                       </div>
                     </div>
+
+                    {tour.meeting_point && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Point</label>
+                        <p className="text-gray-900">{tour.meeting_point}</p>
+                      </div>
+                    )}
+
+                    {tour.duration && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                        <p className="text-gray-900">{tour.duration} minutes</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -456,10 +565,16 @@ export default function TourDetailPage() {
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                       Confirm Attendance
                     </button>
-                    <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    <button 
+                      onClick={handleReschedule}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
                       Reschedule
                     </button>
-                    <button className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                    <button 
+                      onClick={handleCancelTour}
+                      className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                    >
                       Cancel Tour
                     </button>
                   </div>
@@ -506,7 +621,7 @@ export default function TourDetailPage() {
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-1">
                       <StarIcon className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="text-sm font-medium text-gray-900">{tour.agent_rating}</span>
+                      <span className="text-sm font-medium text-gray-900">{tour.agent_rating || '4.5'}</span>
                     </div>
                     <span className="text-sm text-gray-600">• Licensed Real Estate Agent</span>
                   </div>
@@ -518,7 +633,9 @@ export default function TourDetailPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Contact</label>
                     <p className="text-gray-900">{tour.agent_phone}</p>
-                    <p className="text-gray-900">{tour.agent_email}</p>
+                    {tour.agent_email && (
+                      <p className="text-gray-900">{tour.agent_email}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -544,7 +661,7 @@ export default function TourDetailPage() {
                 <h4 className="text-md font-semibold text-gray-900 mb-4">About {tour.agent_name}</h4>
                 <p className="text-gray-700">
                   {tour.agent_name} is a dedicated real estate professional with extensive experience 
-                  in the Gaborone property market. Specializing in residential properties, Sarah has 
+                  in the Gaborone property market. Specializing in residential properties, they have 
                   helped numerous clients find their perfect homes through personalized service and 
                   deep market knowledge.
                 </p>
@@ -572,7 +689,9 @@ export default function TourDetailPage() {
                   
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Meeting Point</h4>
-                    <p className="text-gray-700">Main entrance, look for {tour.agent_name}</p>
+                    <p className="text-gray-700">
+                      {tour.meeting_point || `Main entrance, look for ${tour.agent_name}`}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -589,7 +708,7 @@ export default function TourDetailPage() {
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <div className="text-2xl mb-2">🚌</div>
                     <div className="font-medium text-gray-900">Public Transport</div>
-                    <div className="text-sm text-gray-600">Bus stop 200m away</div>
+                    <div className="text-sm text-gray-600">Bus stop nearby</div>
                   </div>
                   
                   <div className="text-center p-4 bg-gray-50 rounded-lg">

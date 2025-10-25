@@ -1,4 +1,4 @@
-﻿// src/app/consumer/tours/page.tsx - MOBILE FIRST WITH CLEAN HEADER
+﻿// src/app/consumer/tours/page.tsx - MOBILE OPTIMIZED
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -33,7 +33,12 @@ interface Tour {
   agent_name: string;
   agent_phone: string;
   notes?: string;
+  meeting_point?: string;
+  duration?: number;
   created_at: string;
+  beds?: number;
+  baths?: number;
+  price?: number;
 }
 
 interface Property {
@@ -42,8 +47,8 @@ interface Property {
   location: string;
   images: string[];
   price: number;
-  beds: number;
-  baths: number;
+  bedrooms: number;
+  bathrooms: number;
 }
 
 export default function ToursPage() {
@@ -95,52 +100,52 @@ export default function ToursPage() {
     const fetchData = async () => {
       try {
         const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        // Fetch mock tours
-        const mockTours: Tour[] = [
-          {
-            id: '1',
-            property_id: '1',
-            property_title: 'Modern 3-Bedroom Apartment',
-            property_location: 'Gaborone, Block 9',
-            property_image: '',
-            scheduled_date: '2024-01-15',
-            scheduled_time: '10:00',
-            status: 'confirmed',
-            agent_name: 'Sarah Johnson',
-            agent_phone: '+267 71 123 456',
-            notes: 'Please bring ID for security clearance',
-            created_at: '2024-01-10'
-          },
-          {
-            id: '2',
-            property_id: '2',
-            property_title: 'Luxury Villa with Pool',
-            property_location: 'Phakalane, Gaborone',
-            property_image: '',
-            scheduled_date: '2024-01-20',
-            scheduled_time: '14:30',
-            status: 'scheduled',
-            agent_name: 'David Smith',
-            agent_phone: '+267 72 234 567',
-            notes: 'Pool maintenance scheduled for same day',
-            created_at: '2024-01-12'
-          },
-          {
-            id: '3',
-            property_id: '3',
-            property_title: 'Cozy 2-Bedroom Townhouse',
-            property_location: 'Mogoditshane',
-            property_image: '',
-            scheduled_date: '2024-01-08',
-            scheduled_time: '09:00',
-            status: 'completed',
-            agent_name: 'Anna Brown',
-            agent_phone: '+267 73 345 678',
-            notes: 'Great neighborhood, near schools',
-            created_at: '2024-01-05'
-          }
-        ];
+        if (!session) {
+          setLoading(false);
+          return;
+        }
+
+        // Fetch real tours data from database
+        const { data: toursData, error } = await supabase
+          .from('tours')
+          .select(`
+            *,
+            properties (
+              title,
+              location,
+              images,
+              price,
+              bedrooms,
+              bathrooms
+            )
+          `)
+          .eq('tenant_id', session.user.id)
+          .order('preferred_date', { ascending: false });
+
+        if (error) throw error;
+
+        // Transform the data to match frontend interface
+        const formattedTours: Tour[] = (toursData || []).map(tour => ({
+          id: tour.id,
+          property_id: tour.property_id,
+          property_title: tour.properties?.title || 'Unknown Property',
+          property_location: tour.properties?.location || 'Location not specified',
+          property_image: tour.properties?.images?.[0] || '',
+          scheduled_date: tour.preferred_date.split('T')[0],
+          scheduled_time: tour.viewing_time,
+          status: tour.status,
+          agent_name: 'Agent TBA',
+          agent_phone: '+267 70 000 000',
+          notes: tour.notes,
+          meeting_point: tour.meeting_point,
+          duration: tour.duration,
+          created_at: tour.created_at,
+          beds: tour.properties?.bedrooms || 0,
+          baths: tour.properties?.bathrooms || 0,
+          price: tour.properties?.price || 0
+        }));
 
         // Fetch available properties for scheduling
         const { data: propertiesData } = await supabase
@@ -149,7 +154,7 @@ export default function ToursPage() {
           .eq('status', 'available')
           .limit(10);
 
-        setTours(mockTours);
+        setTours(formattedTours);
         setProperties(propertiesData || []);
         setLoading(false);
       } catch (err) {
@@ -163,30 +168,77 @@ export default function ToursPage() {
 
   const handleScheduleTour = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically make an API call to schedule the tour
-    console.log('Scheduling tour:', newTour);
-    
-    // Mock success - add to tours list
-    const property = properties.find(p => p.id === newTour.property_id);
-    if (property) {
-      const newTourObj: Tour = {
-        id: Date.now().toString(),
-        property_id: newTour.property_id,
-        property_title: property.title,
-        property_location: property.location,
-        property_image: property.images?.[0] || '',
-        scheduled_date: newTour.scheduled_date,
-        scheduled_time: newTour.scheduled_time,
-        status: 'scheduled',
-        agent_name: 'TBA',
-        agent_phone: '+267 70 000 000',
-        notes: newTour.notes,
-        created_at: new Date().toISOString()
-      };
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        alert('Please log in to schedule a tour');
+        return;
+      }
 
-      setTours(prev => [newTourObj, ...prev]);
-      setNewTour({ property_id: '', scheduled_date: '', scheduled_time: '', notes: '' });
-      setShowScheduleForm(false);
+      // Insert into the tours table with correct column names
+      const { data, error } = await supabase
+        .from('tours')
+        .insert([
+          {
+            property_id: newTour.property_id,
+            tenant_id: session.user.id,
+            preferred_date: `${newTour.scheduled_date}T${newTour.scheduled_time}:00+00`,
+            viewing_time: newTour.scheduled_time,
+            notes: newTour.notes,
+            status: 'scheduled',
+            meeting_point: 'Property entrance',
+            duration: 30,
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select(`
+          *,
+          properties (
+            title,
+            location,
+            images,
+            price,
+            bedrooms,
+            bathrooms
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+
+      // Add the new tour to state
+      if (data) {
+        const newTourObj: Tour = {
+          id: data.id,
+          property_id: data.property_id,
+          property_title: data.properties?.title || 'New Tour',
+          property_location: data.properties?.location || 'Location not specified',
+          property_image: data.properties?.images?.[0] || '',
+          scheduled_date: newTour.scheduled_date,
+          scheduled_time: newTour.scheduled_time,
+          status: 'scheduled',
+          agent_name: 'Agent TBA',
+          agent_phone: '+267 70 000 000',
+          notes: data.notes,
+          meeting_point: data.meeting_point,
+          duration: data.duration,
+          created_at: data.created_at,
+          beds: data.properties?.bedrooms || 0,
+          baths: data.properties?.bathrooms || 0,
+          price: data.properties?.price || 0
+        };
+
+        setTours(prev => [newTourObj, ...prev]);
+        setNewTour({ property_id: '', scheduled_date: '', scheduled_time: '', notes: '' });
+        setShowScheduleForm(false);
+        
+        alert('Tour scheduled successfully!');
+      }
+    } catch (err) {
+      console.error('Error scheduling tour:', err);
+      alert('Error scheduling tour. Please try again.');
     }
   };
 
@@ -284,32 +336,35 @@ export default function ToursPage() {
       </div>
 
       <div className="p-4 max-w-6xl mx-auto">
-        {/* IMPROVED PAGE HEADER */}
+        {/* IMPROVED PAGE HEADER - MOBILE FRIENDLY */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Tours</h1>
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <span className="font-medium text-gray-900">
-                  {upcomingToursCount + pastToursCount} total tours
-                </span>
-                <span className="text-gray-300">•</span>
-                <span>{upcomingToursCount} upcoming</span>
-                <span className="text-gray-300">•</span>
-                <span>{pastToursCount} past</span>
-              </div>
+          {/* Title and Stats Stacked */}
+          <div className="mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-3">Property Tours</h1>
+            <div className="flex items-center gap-3 text-sm text-gray-600 flex-wrap">
+              <span className="font-medium text-gray-900 bg-blue-50 px-2 py-1 rounded">
+                {upcomingToursCount + pastToursCount} total
+              </span>
+              <span className="text-gray-300 hidden sm:inline">•</span>
+              <span className="bg-green-50 px-2 py-1 rounded text-green-700">
+                {upcomingToursCount} upcoming
+              </span>
+              <span className="text-gray-300 hidden sm:inline">•</span>
+              <span className="bg-gray-100 px-2 py-1 rounded">
+                {pastToursCount} past
+              </span>
             </div>
-            
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowScheduleForm(true)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium active:scale-95 touch-manipulation"
-            >
-              <PlusIcon className="h-5 w-5" />
-              <span className="hidden sm:inline">Schedule Tour</span>
-              <span className="sm:hidden">New</span>
-            </motion.button>
           </div>
+          
+          {/* Schedule Button Full Width on Mobile */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowScheduleForm(true)}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium active:scale-95 touch-manipulation"
+          >
+            <PlusIcon className="h-5 w-5" />
+            <span>Schedule New Tour</span>
+          </motion.button>
         </div>
 
         {/* TABS - MOBILE OPTIMIZED */}
@@ -392,7 +447,7 @@ export default function ToursPage() {
                       <option value="">Choose a property</option>
                       {properties.map(property => (
                         <option key={property.id} value={property.id}>
-                          {property.title} - {property.location}
+                          {property.title} - {property.location} - P{property.price}
                         </option>
                       ))}
                     </select>
@@ -519,6 +574,14 @@ export default function ToursPage() {
                           <MapPinIcon className="h-4 w-4 mr-1 flex-shrink-0" />
                           <span className="truncate">{tour.property_location}</span>
                         </div>
+                        {/* Property Details */}
+                        <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
+                          <span>{tour.beds} beds</span>
+                          <span>•</span>
+                          <span>{tour.baths} baths</span>
+                          <span>•</span>
+                          <span className="font-semibold text-green-600">P{tour.price}</span>
+                        </div>
                       </div>
                       
                       <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(tour.status)}`}>
@@ -528,7 +591,7 @@ export default function ToursPage() {
                     </div>
 
                     {/* Tour Schedule - Mobile Optimized */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
                       <div className="flex items-center gap-2 text-sm">
                         <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         <span className="text-gray-900 font-medium">
@@ -544,16 +607,13 @@ export default function ToursPage() {
                         <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         <span className="text-gray-900 font-medium">{tour.scheduled_time}</span>
                       </div>
-                      
-                      <div className="flex items-center gap-2 text-sm">
-                        <UserIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-900 font-medium">{tour.agent_name}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-sm">
-                        <PhoneIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-900 font-medium">{tour.agent_phone}</span>
-                      </div>
+
+                      {tour.meeting_point && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <MapPinIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                          <span className="text-gray-900 font-medium truncate">{tour.meeting_point}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Notes */}
